@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
-import psycopg2
+import pg8000 as psycopg2
 import json
 import os
 from datetime import datetime
@@ -614,4 +614,5 @@ if __name__ == '__main__':
     print("=" * 60)
 
     app.run(debug=True, port=5000, host='0.0.0.0')
+
 
