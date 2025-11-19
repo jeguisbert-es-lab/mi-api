@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
-import psycopg2
+import psycopg2-binary
 import json
 import os
 from datetime import datetime
@@ -612,4 +612,5 @@ if __name__ == '__main__':
     print("🗺️ Capas: http://localhost:5000/api/capas/puntos_turisticos")
     print("🔍 Detalles: http://localhost:5000/api/detalle/restaurante/1")
     print("=" * 60)
+
     app.run(debug=True, port=5000, host='0.0.0.0')
