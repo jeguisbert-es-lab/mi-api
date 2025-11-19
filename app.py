@@ -14,6 +14,7 @@ DB_CONFIG = {
     'user': os.environ.get('DB_USER', 'isla_user'),
     'password': os.environ.get('DB_PASSWORD', 'aDmsirPiD5afLzjcNvzPASEknt9e7Kf9'),
     'port': os.environ.get('DB_PORT', '5432')
+    'sslmode': 'require' 
 }
 
 def get_db_connection():
@@ -613,6 +614,7 @@ if __name__ == '__main__':
     print("=" * 60)
 
     app.run(debug=True, port=5000, host='0.0.0.0')
+
 
 
 
