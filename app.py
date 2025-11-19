@@ -8,13 +8,12 @@ from datetime import datetime
 app = Flask(__name__)
 CORS(app)
 
-# CONFIGURACIÓN
 DB_CONFIG = {
-    'host': 'localhost',
-    'database': 'BASE DE DATOS ISLA DEL SOL',
-    'user': 'postgres',
-    'password': 'YATRA777',
-    'port': '5566'
+    'host': os.environ.get('DB_HOST', 'dpg-d4f2cue3jp1c73av19t0-a.oregon-postgres.render.com'),
+    'database': os.environ.get('DB_NAME', 'isla_del_sol'),
+    'user': os.environ.get('DB_USER', 'isla_user'),
+    'password': os.environ.get('DB_PASSWORD', 'aDmsirPiD5afLzjcNvzPASEknt9e7Kf9'),
+    'port': os.environ.get('DB_PORT', '5432')
 }
 
 def get_db_connection():
@@ -614,5 +613,6 @@ if __name__ == '__main__':
     print("=" * 60)
 
     app.run(debug=True, port=5000, host='0.0.0.0')
+
 
 
