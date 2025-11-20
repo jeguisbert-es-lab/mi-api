@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
-import psycopg2
+import pg8000
 import json
 import os
 from datetime import datetime
@@ -17,23 +17,22 @@ def get_db_connection():
         if database_url:
             # Parsear la URL de la base de datos de Render
             result = urlparse(database_url)
-            conn = psycopg2.connect(
+            conn = pg8000.connect(
                 host=result.hostname,
                 database=result.path[1:],  # Remover el '/' inicial
                 user=result.username,
                 password=result.password,
-                port=result.port,
-                sslmode='require'
+                port=result.port
+                # pg8000 maneja SSL automáticamente, no necesita sslmode
             )
         else:
             # Conexión local de respaldo (para desarrollo)
-            conn = psycopg2.connect(
+            conn = pg8000.connect(
                 host=os.environ.get('DB_HOST', 'dpg-d4f2cue3jp1c73av19t0-a.oregon-postgres.render.com'),
                 database=os.environ.get('DB_NAME', 'isla_del_sol'),
                 user=os.environ.get('DB_USER', 'isla_user'),
                 password=os.environ.get('DB_PASSWORD', 'aDmsirPiD5afLzjcNvzPASEknt9e7Kf9'),
-                port=os.environ.get('DB_PORT', '5432'),
-                sslmode='require'
+                port=int(os.environ.get('DB_PORT', '5432'))
             )
         
         print("✅ Conexión a PostgreSQL exitosa")
@@ -641,6 +640,7 @@ if __name__ == '__main__':
     print("=" * 60)
 
     app.run(debug=True, port=5000, host='0.0.0.0')
+
 
 
 
