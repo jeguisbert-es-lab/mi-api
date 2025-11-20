@@ -19,14 +19,13 @@ def get_db_connection():
             result = urlparse(database_url)
             conn = pg8000.connect(
                 host=result.hostname,
-                database=result.path[1:],  # Remover el '/' inicial
+                database=result.path[1:],
                 user=result.username,
                 password=result.password,
                 port=result.port
-                # pg8000 maneja SSL automáticamente, no necesita sslmode
             )
         else:
-            # Conexión local de respaldo (para desarrollo)
+            # Conexión local de respaldo
             conn = pg8000.connect(
                 host=os.environ.get('DB_HOST', 'dpg-d4f2cue3jp1c73av19t0-a.oregon-postgres.render.com'),
                 database=os.environ.get('DB_NAME', 'isla_del_sol'),
@@ -67,12 +66,13 @@ def status():
     return jsonify({
         "status": "online", 
         "message": "API Isla del Sol - CON BASURA COMO PUNTOS",
-        "version": "7.1",
+        "version": "8.0",
         "timestamp": datetime.now().isoformat(),
         "capas_disponibles": [
             "puntos_turisticos", "miradores", "playas", "tiendas_artesania",
             "restaurantes", "hoteles", "rutas", "comunidades", "areas_verdes", 
-            "viviendas", "sembradios", "basura", "puntos_basura", "aguas_contaminadas"
+            "viviendas", "sembradios", "basura", "puntos_basura", "aguas_contaminadas",
+            "sitios_turisticos", "muelles", "ruta_sagrada"
         ]
     })
 
@@ -89,7 +89,7 @@ def get_capa(categoria):
     try:
         print(f"🎯 Cargando capa: {categoria}")
         
-        # CONFIGURACIÓN SIMPLIFICADA DE CAPAS
+        # CONFIGURACIÓN COMPLETA CON TODAS LAS TABLAS EXISTENTES
         mapeo_tablas = {
             'puntos_turisticos': {
                 'consulta': """
@@ -165,6 +165,13 @@ def get_capa(categoria):
                     FROM "RUTA TURISTICA" WHERE geom IS NOT NULL
                 """
             },
+            'ruta_sagrada': {
+                'consulta': """
+                    SELECT 'ruta_sagrada' as id, 'RUTA SAGRADA' as nombre, 'ruta_sagrada' as tipo, '' as comunidad,
+                           ST_AsGeoJSON(geom) as geometry, 'ruta_sagrada' as tipo_cesium
+                    FROM "RUTA SAGRADA (TURISTICA)" WHERE geom IS NOT NULL
+                """
+            },
             'areas_verdes': {
                 'consulta': """
                     SELECT 'area_verde_' || row_number() over () as id, 'ÁREA VERDE' as nombre, 'area_verde' as tipo, '' as comunidad,
@@ -186,7 +193,6 @@ def get_capa(categoria):
                     FROM "SEMBRADIOS" WHERE geom IS NOT NULL
                 """
             },
-            # ✅ CAPA BASURA (PUNTOS) - NUEVA
             'basura': {
                 'consulta': """
                     SELECT 'basura_' || row_number() over () as id, 'BASURA' as nombre, 'basura' as tipo, '' as comunidad,
@@ -194,7 +200,6 @@ def get_capa(categoria):
                     FROM "BASURA" WHERE geom IS NOT NULL
                 """
             },
-            # ✅ MANTENER PUNTOS_DE_BASURA (POLÍGONOS) POR SI ACASO
             'puntos_basura': {
                 'consulta': """
                     SELECT 'basura_poly_' || row_number() over () as id, 'PUNTO DE BASURA' as nombre, 'punto_basura' as tipo, '' as comunidad,
@@ -207,6 +212,20 @@ def get_capa(categoria):
                     SELECT 'agua_contaminada_' || row_number() over () as id, 'AGUA CONTAMINADA' as nombre, 'agua_contaminada' as tipo, '' as comunidad,
                            ST_AsGeoJSON(geom) as geometry, 'agua_contaminada' as tipo_cesium
                     FROM "AGUAS CONTAMINDAS" WHERE geom IS NOT NULL
+                """
+            },
+            'sitios_turisticos': {
+                'consulta': """
+                    SELECT 'sitio_' || row_number() over () as id, 'SITIO TURÍSTICO' as nombre, 'sitio_turistico' as tipo, '' as comunidad,
+                           ST_AsGeoJSON(geom) as geometry, 'sitio_turistico' as tipo_cesium
+                    FROM "SITIOS TURISTICOS" WHERE geom IS NOT NULL
+                """
+            },
+            'muelles': {
+                'consulta': """
+                    SELECT 'muelle_' || row_number() over () as id, 'MUELLE' as nombre, 'muelle' as tipo, '' as comunidad,
+                           ST_AsGeoJSON(geom) as geometry, 'muelle' as tipo_cesium
+                    FROM "MUELLES" WHERE geom IS NOT NULL
                 """
             }
         }
@@ -226,7 +245,7 @@ def get_capa(categoria):
         
         features = []
         for res in resultados:
-            if res[4]:  # Si tiene geometría
+            if len(res) > 4 and res[4]:  # Si tiene geometría
                 try:
                     geometry_data = json.loads(res[4])
                     feature = {
@@ -236,10 +255,10 @@ def get_capa(categoria):
                             "id": res[0],
                             "nombre": res[1],
                             "tipo": res[2],
-                            "comunidad": res[3],
-                            "tipo_cesium": res[5],
+                            "comunidad": res[3] if len(res) > 3 else "",
+                            "tipo_cesium": res[5] if len(res) > 5 else res[2],
                             "layer_name": categoria,
-                            "id_lugar": res[0]  # Para los detalles
+                            "id_lugar": res[0]
                         }
                     }
                     features.append(feature)
@@ -263,6 +282,8 @@ def get_capa(categoria):
         
     except Exception as e:
         print(f"❌ Error en {categoria}: {str(e)}")
+        import traceback
+        print(f"🔍 Traceback completo: {traceback.format_exc()}")
         if conn:
             cur.close()
             conn.close()
@@ -630,17 +651,17 @@ def get_detalle_generico(tipo, id_lugar):
         return jsonify({"error": f"Tipo {tipo} no soportado"}), 400
 
 if __name__ == '__main__':
-    print("🚀 INICIANDO API ISLA DEL SOL - CON BASURA COMO PUNTOS")
+    print("🚀 INICIANDO API ISLA DEL SOL - VERSIÓN COMPLETA 8.0")
     print("=" * 60)
     print("📍 Web: http://localhost:5000")
     print("📊 Status: http://localhost:5000/api/status")
-    print("🗑️ Nueva capa BASURA: http://localhost:5000/api/capas/basura")
+    print("🗑️ Capa BASURA: http://localhost:5000/api/capas/basura")
     print("🗺️ Capas: http://localhost:5000/api/capas/puntos_turisticos")
+    print("🏘️ Comunidades: http://localhost:5000/api/capas/comunidades")
     print("🔍 Detalles: http://localhost:5000/api/detalle/restaurante/1")
     print("=" * 60)
 
     app.run(debug=True, port=5000, host='0.0.0.0')
-
 
 
 
