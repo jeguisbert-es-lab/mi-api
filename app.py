@@ -35,7 +35,18 @@ def serve_index():
 def serve_static(path):
     return send_from_directory('..', path)
 
-# ✅ ENDPOINT STATUS
+# ✅ RUTAS DE COMPATIBILIDAD (SIN /api/) - PARA EL MAPA.JS
+@app.route('/status')
+def status_sin_api():
+    """Ruta de compatibilidad sin /api/ para el mapa"""
+    return status()
+
+@app.route('/capas/<categoria>')
+def capas_sin_api(categoria):
+    """Ruta de compatibilidad sin /api/ para el mapa"""
+    return get_capa(categoria)
+
+# ✅ ENDPOINT STATUS (CON /api/)
 @app.route('/api/status')
 def status():
     return jsonify({
