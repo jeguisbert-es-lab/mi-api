@@ -1,25 +1,41 @@
 from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
-import pg8000 as psycopg2
+import psycopg2
 import json
 import os
 from datetime import datetime
+from urllib.parse import urlparse
 
 app = Flask(__name__)
 CORS(app)
 
-DB_CONFIG = {
-    'host': os.environ.get('DB_HOST', 'dpg-d4f2cue3jp1c73av19t0-a.oregon-postgres.render.com'),
-    'database': os.environ.get('DB_NAME', 'isla_del_sol'),
-    'user': os.environ.get('DB_USER', 'isla_user'),
-    'password': os.environ.get('DB_PASSWORD', 'aDmsirPiD5afLzjcNvzPASEknt9e7Kf9'),
-    'port': os.environ.get('DB_PORT', '5432'),
-    'sslmode': 'require' 
-}
-
 def get_db_connection():
     try:
-        conn = psycopg2.connect(**DB_CONFIG)
+        # USAR DATABASE_URL de Render (si existe)
+        database_url = os.environ.get('DATABASE_URL')
+        
+        if database_url:
+            # Parsear la URL de la base de datos de Render
+            result = urlparse(database_url)
+            conn = psycopg2.connect(
+                host=result.hostname,
+                database=result.path[1:],  # Remover el '/' inicial
+                user=result.username,
+                password=result.password,
+                port=result.port,
+                sslmode='require'
+            )
+        else:
+            # Conexión local de respaldo (para desarrollo)
+            conn = psycopg2.connect(
+                host=os.environ.get('DB_HOST', 'dpg-d4f2cue3jp1c73av19t0-a.oregon-postgres.render.com'),
+                database=os.environ.get('DB_NAME', 'isla_del_sol'),
+                user=os.environ.get('DB_USER', 'isla_user'),
+                password=os.environ.get('DB_PASSWORD', 'aDmsirPiD5afLzjcNvzPASEknt9e7Kf9'),
+                port=os.environ.get('DB_PORT', '5432'),
+                sslmode='require'
+            )
+        
         print("✅ Conexión a PostgreSQL exitosa")
         return conn
     except Exception as e:
@@ -625,7 +641,6 @@ if __name__ == '__main__':
     print("=" * 60)
 
     app.run(debug=True, port=5000, host='0.0.0.0')
-
 
 
 
