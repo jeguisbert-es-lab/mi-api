@@ -6,16 +6,21 @@
   <title>Isla del Sol - Lago Titicaca</title>
   <meta name="theme-color" content="#2563eb" />
   
-  <!-- CSS MODULAR -->
-  <link rel="stylesheet" href="styles/utils/variables.css">
-  <link rel="stylesheet" href="styles/utils/responsive.css">
-  <link rel="stylesheet" href="styles/main.css">
-  <link rel="stylesheet" href="styles/components/navigation.css">
-  <link rel="stylesheet" href="styles/components/hero.css">
-  <link rel="stylesheet" href="styles/components/map.css">
-  <link rel="stylesheet" href="styles/components/gallery.css">
-  <link rel="stylesheet" href="styles/components/info.css">
-  <link rel="stylesheet" href="styles/components/footer.css">
+  <!-- META TAGS PARA PREVENIR CACHE -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  
+  <!-- CSS MODULAR CON VERSIONADO -->
+  <link rel="stylesheet" href="styles/utils/variables.css?v=3.1.4">
+  <link rel="stylesheet" href="styles/utils/responsive.css?v=3.1.4">
+  <link rel="stylesheet" href="styles/main.css?v=3.1.4">
+  <link rel="stylesheet" href="styles/components/navigation.css?v=3.1.4">
+  <link rel="stylesheet" href="styles/components/hero.css?v=3.1.4">
+  <link rel="stylesheet" href="styles/components/map.css?v=3.1.4">
+  <link rel="stylesheet" href="styles/components/gallery.css?v=3.1.4">
+  <link rel="stylesheet" href="styles/components/info.css?v=3.1.4">
+  <link rel="stylesheet" href="styles/components/footer.css?v=3.1.4">
   
   <!-- EXTERNAL CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
@@ -25,7 +30,7 @@
   <!-- CSS DE CESIUM -->
   <link href="https://cesium.com/downloads/cesiumjs/releases/1.95/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
   
-  <!-- CSS SUPREMO PARA CESIUM Y RESPONSIVE -->
+  <!-- CSS SUPREMO PARA CESIUM Y RESPONSIVE CON VERSIONADO -->
   <style>
     /* ===== VARIABLES Y RESET ===== */
     :root {
@@ -1319,7 +1324,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
   <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-  <script src="scripts/modules/animations.js" defer></script>
+  <script src="scripts/modules/animations.js?v=3.1.4" defer></script>
 </head>
 <body>
   <!-- Tu contenido existente se mantiene igual -->
@@ -1831,22 +1836,54 @@
     PROYECTO UNIVERSITARIO/AQUINO-UDABOL - SIG | Isla del Sol © 2025
   </footer>
 
-  <!-- JavaScript -->
+  <!-- JavaScript CON CACHE BUSTING -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <!-- SCRIPT DE CESIUM -->
   <script src="https://cesium.com/downloads/cesiumjs/releases/1.95/Build/Cesium/Cesium.js"></script>
-  <script src="scripts/utils/helpers.js"></script>
-  <script src="scripts/modules/map.js"></script>
-  <script src="scripts/modules/lightbox.js"></script>
+  <script src="scripts/utils/helpers.js?v=3.1.4"></script>
+  <script src="scripts/modules/map.js?v=3.1.4"></script>
+  <script src="scripts/modules/lightbox.js?v=3.1.4"></script>
   <!-- SCRIPT CESIUM 3D MEJORADO -->
-  <script src="scripts/modules/cesium-3d.js"></script>
-  <script src="scripts/main.js"></script>
+  <script src="scripts/modules/cesium-3d.js?v=3.1.4"></script>
+  <script src="scripts/main.js?v=3.1.4"></script>
 
-  <!-- Script de inicialización -->
+  <!-- Script de inicialización CON FORZADO DE CARGA -->
   <script>
+    // FORZAR RECARGA SIN CACHE
+    if (performance.navigation.type === 1) {
+      // La página fue recargada
+      console.log('🔄 Página recargada - limpiando cache forzadamente');
+      localStorage.setItem('forceReload', Date.now());
+    }
+
+    // Verificar si necesitamos forzar recarga
+    const lastLoad = localStorage.getItem('forceReload');
+    const currentTime = Date.now();
+    if (lastLoad && (currentTime - parseInt(lastLoad)) < 5000) {
+      console.log('🔥 Forzando carga de recursos frescos');
+      // Forzar recarga de recursos
+      window.location.reload(true);
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
-      console.log('🚀 Iniciando experiencia suprema...');
+      console.log('🚀 Iniciando experiencia suprema - VERSIÓN 3.1.4...');
       
+      // Limpiar cache de service worker si existe
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for(let registration of registrations) {
+            registration.unregister();
+          }
+        });
+      }
+
+      // Forzar limpieza de cache del navegador
+      caches.keys().then(function(names) {
+        for (let name of names) {
+          caches.delete(name);
+        }
+      });
+
       // Inicializar animaciones
       AOS.init({
         duration: 1000,
@@ -1879,22 +1916,52 @@
         });
       });
       
-      // Inicializar componentes
-      if (typeof InteractiveMap !== 'undefined') {
-        window.interactiveMap = new InteractiveMap();
+      // Inicializar componentes con retry en caso de error
+      function initializeWithRetry(componentName, initFunction, retries = 3) {
+        let attempts = 0;
+        
+        function tryInit() {
+          try {
+            if (typeof initFunction() !== 'undefined') {
+              console.log(`✅ ${componentName} inicializado correctamente`);
+            }
+          } catch (error) {
+            attempts++;
+            console.warn(`⚠️ Error inicializando ${componentName}, intento ${attempts}/${retries}`, error);
+            
+            if (attempts < retries) {
+              setTimeout(tryInit, 1000 * attempts);
+            } else {
+              console.error(`❌ No se pudo inicializar ${componentName} después de ${retries} intentos`);
+            }
+          }
+        }
+        
+        tryInit();
       }
-      
-      if (typeof Lightbox !== 'undefined') {
-        window.lightbox = new Lightbox();
-      }
-      
-      // ✅ INICIALIZAR CESIUM 3D SUPREMO
-      if (typeof Cesium3DMap !== 'undefined') {
-        setTimeout(() => {
-          window.cesium3D = new Cesium3DMap();
-          console.log('🎯 Cesium 3D Supremo inicializado');
-        }, 1000);
-      }
+
+      // Inicializar componentes con retry
+      setTimeout(() => {
+        initializeWithRetry('InteractiveMap', () => {
+          if (typeof InteractiveMap !== 'undefined') {
+            window.interactiveMap = new InteractiveMap();
+          }
+        });
+
+        initializeWithRetry('Lightbox', () => {
+          if (typeof Lightbox !== 'undefined') {
+            window.lightbox = new Lightbox();
+          }
+        });
+
+        // ✅ INICIALIZAR CESIUM 3D SUPREMO CON MÁXIMA PRIORIDAD
+        initializeWithRetry('Cesium3DMap', () => {
+          if (typeof Cesium3DMap !== 'undefined') {
+            window.cesium3D = new Cesium3DMap();
+            console.log('🎯 Cesium 3D Supremo inicializado - VERSIÓN RESPONSIVE 3.1.4');
+          }
+        }, 5); // Más intentos para Cesium
+      }, 500);
 
       // MEJORAS DE USABILIDAD MÓVIL
       function setupMobileEnhancements() {
@@ -1903,6 +1970,7 @@
         
         if (isTouchDevice) {
           document.body.classList.add('touch-device');
+          console.log('📱 Modo táctil activado');
           
           // Mejorar navegación táctil
           const navLinks = document.querySelectorAll('.nav-link');
@@ -1924,9 +1992,11 @@
           if (window.innerHeight > window.innerWidth) {
             document.body.classList.add('portrait');
             document.body.classList.remove('landscape');
+            console.log('📐 Orientación vertical');
           } else {
             document.body.classList.add('landscape');
             document.body.classList.remove('portrait');
+            console.log('📐 Orientación horizontal');
           }
         }
         
@@ -1936,8 +2006,41 @@
       }
       
       setupMobileEnhancements();
+
+      // Botón para forzar recarga manual
+      const forceReloadBtn = document.createElement('button');
+      forceReloadBtn.innerHTML = '🔄 Forzar Recarga';
+      forceReloadBtn.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        z-index: 10000;
+        background: #6366f1;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 12px;
+        opacity: 0.7;
+        transition: opacity 0.3s;
+      `;
+      forceReloadBtn.onclick = () => {
+        localStorage.setItem('forceReload', Date.now());
+        window.location.reload(true);
+      };
+      forceReloadBtn.onmouseover = () => forceReloadBtn.style.opacity = '1';
+      forceReloadBtn.onmouseout = () => forceReloadBtn.style.opacity = '0.7';
+      
+      document.body.appendChild(forceReloadBtn);
     });
+
+    // Prevenir cache en navegación hacia atrás
+    window.onpageshow = function(event) {
+      if (event.persisted) {
+        window.location.reload();
+      }
+    };
   </script>
 </body>
 </html>
-
