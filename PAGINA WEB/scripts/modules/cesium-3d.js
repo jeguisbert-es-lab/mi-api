@@ -1,10 +1,11 @@
-// assets/scripts/modules/cesium-3d-simple.js - VERSIÓN CORREGIDA PARA RENDER
+// assets/scripts/modules/cesium-3d-simple.js - VERSIÓN COMPLETA MEJORADA
 class Cesium3DMap {
     constructor() {
         this.viewer = null;
         this.dataSources = new Map();
         this.capasConfig = new Map();
         this.infoPanel = null;
+        this.isMobile = window.innerWidth <= 768;
         
         // ✅ URL CORREGIDA - IGUAL QUE EN MAP.JS
         this.API_BASE_URL = 'https://mi-api-6jmx.onrender.com/api';
@@ -29,8 +30,8 @@ class Cesium3DMap {
                 animation: false,
                 timeline: false,
                 homeButton: false,
-                sceneModePicker: true,
-                baseLayerPicker: true,
+                sceneModePicker: !this.isMobile,
+                baseLayerPicker: !this.isMobile,
                 geocoder: false,
                 fullscreenButton: true,
                 infoBox: false
@@ -42,16 +43,55 @@ class Cesium3DMap {
             this.setupEventHandlers();
             this.loadAllLayers();
 
+            window.addEventListener('resize', () => this.handleResize());
+
         } catch (error) {
             console.error('❌ Error inicializando Cesium:', error);
             this.showError('Error inicializando mapa 3D');
         }
     }
 
+    handleResize() {
+        const wasMobile = this.isMobile;
+        this.isMobile = window.innerWidth <= 768;
+        
+        if (wasMobile !== this.isMobile) {
+            this.adjustLayoutForScreenSize();
+        }
+    }
+
+    adjustLayoutForScreenSize() {
+        const controlPanel = document.querySelector('.cesium-control-panel');
+        const infoPanel = document.querySelector('.cesium-info-panel');
+        
+        if (this.isMobile) {
+            if (controlPanel) {
+                controlPanel.style.width = '280px';
+                controlPanel.style.top = '10px';
+                controlPanel.style.left = '10px';
+            }
+            if (infoPanel) {
+                infoPanel.style.width = '300px';
+                infoPanel.style.top = '10px';
+                infoPanel.style.right = '10px';
+            }
+        } else {
+            if (controlPanel) {
+                controlPanel.style.width = '320px';
+                controlPanel.style.top = '20px';
+                controlPanel.style.left = '20px';
+            }
+            if (infoPanel) {
+                infoPanel.style.width = '350px';
+                infoPanel.style.top = '20px';
+                infoPanel.style.right = '20px';
+            }
+        }
+    }
+
     setupMap() {
-        // Vista inicial centrada en la Isla del Sol
         this.viewer.camera.setView({
-            destination: Cesium.Cartesian3.fromDegrees(-69.1833, -16.0167, 2800),
+            destination: Cesium.Cartesian3.fromDegrees(-69.1833, -16.0167, this.isMobile ? 3500 : 2800),
             orientation: {
                 heading: 0.0,
                 pitch: -0.9,
@@ -72,56 +112,60 @@ class Cesium3DMap {
         controlPanel.innerHTML = `
             <div class="control-header">
                 <h3>🎯 Control de Capas 3D</h3>
+                <button class="btn-mobile-toggle" id="mobileTogglePanel">☰</button>
                 <div class="control-buttons">
                     <button id="toggleAllLayers" class="btn-control">📁 Todas</button>
                     <button id="clearAllLayers" class="btn-control">🗑️ Limpiar</button>
                 </div>
             </div>
             
-            <div class="layers-list" id="cesiumLayersList">
-                <div class="category-section">
-                    <h4>🏞️ Puntos Turísticos</h4>
-                    ${this.createLayerItem('puntos_turisticos', '📍', 'Puntos Turísticos', '#e53e3e')}
-                    ${this.createLayerItem('miradores', '🔭', 'Miradores', '#3182ce')}
-                    ${this.createLayerItem('playas', '🏖️', 'Playas', '#38b2ac')}
+            <div class="panel-content">
+                <div class="layers-list" id="cesiumLayersList">
+                    <div class="category-section">
+                        <h4>🏞️ Puntos Turísticos</h4>
+                        ${this.createLayerItem('puntos_turisticos', '📍', 'Puntos Turísticos', '#e53e3e')}
+                        ${this.createLayerItem('miradores', '🔭', 'Miradores', '#3182ce')}
+                        ${this.createLayerItem('playas', '🏖️', 'Playas', '#38b2ac')}
+                    </div>
+
+                    <div class="category-section">
+                        <h4>🏘️ Servicios</h4>
+                        ${this.createLayerItem('tiendas_artesania', '🎨', 'Artesanía', '#d69e2e')}
+                        ${this.createLayerItem('restaurantes', '🍽️', 'Restaurantes', '#dd6b20')}
+                        ${this.createLayerItem('hoteles', '🏨', 'Hoteles', '#805ad5')}
+                    </div>
+
+                    <div class="category-section">
+                        <h4>🗺️ Rutas y Comunidades</h4>
+                        ${this.createLayerItem('rutas', '🛣️', 'Rutas Turísticas', '#dd6b20')}
+                        ${this.createLayerItem('comunidades', '🏘️', 'Comunidades', '#4a5568')}
+                    </div>
+
+                    <div class="category-section">
+                        <h4>🌳 Áreas y Viviendas</h4>
+                        ${this.createLayerItem('areas_verdes', '🌳', 'Áreas Verdes', '#38a169')}
+                        ${this.createLayerItem('sembradios', '🌾', 'Sembradíos', '#22543d')}
+                        ${this.createLayerItem('viviendas', '🏠', 'Viviendas', '#2d3748')}
+                    </div>
+
+                    <div class="category-section">
+                        <h4>🗑️ Medio Ambiente</h4>
+                        ${this.createLayerItem('basura', '🗑️', 'Puntos Basura', '#718096')}
+                        ${this.createLayerItem('puntos_basura', '🚯', 'Zonas Basura', '#a0aec0')}
+                        ${this.createLayerItem('aguas_contaminadas', '⚠️', 'Agua Contaminada', '#e53e3e')}
+                    </div>
                 </div>
 
-                <div class="category-section">
-                    <h4>🏘️ Servicios</h4>
-                    ${this.createLayerItem('tiendas_artesania', '🎨', 'Artesanía', '#d69e2e')}
-                    ${this.createLayerItem('restaurantes', '🍽️', 'Restaurantes', '#dd6b20')}
-                    ${this.createLayerItem('hoteles', '🏨', 'Hoteles', '#805ad5')}
-                </div>
-
-                <div class="category-section">
-                    <h4>🗺️ Rutas y Comunidades</h4>
-                    ${this.createLayerItem('rutas', '🛣️', 'Rutas Turísticas', '#dd6b20')}
-                    ${this.createLayerItem('comunidades', '🏘️', 'Comunidades', '#4a5568')}
-                </div>
-
-                <div class="category-section">
-                    <h4>🌳 Áreas y Viviendas</h4>
-                    ${this.createLayerItem('areas_verdes', '🌳', 'Áreas Verdes', '#38a169')}
-                    ${this.createLayerItem('sembradios', '🌾', 'Sembradíos', '#22543d')}
-                    ${this.createLayerItem('viviendas', '🏠', 'Viviendas', '#2d3748')}
-                </div>
-
-                <div class="category-section">
-                    <h4>🗑️ Medio Ambiente</h4>
-                    ${this.createLayerItem('basura', '🗑️', 'Puntos Basura', '#718096')}
-                    ${this.createLayerItem('puntos_basura', '🚯', 'Zonas Basura', '#a0aec0')}
-                    ${this.createLayerItem('aguas_contaminadas', '⚠️', 'Agua Contaminada', '#e53e3e')}
-                </div>
-            </div>
-
-            <div class="panel-footer">
-                <div class="system-stats">
-                    <span id="totalElements">Total: 0 elementos</span>
-                    <span id="activeLayers">Activas: 0 capas</span>
+                <div class="panel-footer">
+                    <div class="system-stats">
+                        <span id="totalElements">Total: 0 elementos</span>
+                        <span id="activeLayers">Activas: 0 capas</span>
+                    </div>
                 </div>
             </div>
         `;
         container.appendChild(controlPanel);
+        this.adjustLayoutForScreenSize();
     }
 
     createLayerItem(layerName, emoji, label, color) {
@@ -145,7 +189,10 @@ class Cesium3DMap {
         this.infoPanel.innerHTML = `
             <div class="info-header">
                 <h3>📊 Información Detallada</h3>
-                <button id="closeInfo" class="btn-close">×</button>
+                <div class="info-header-controls">
+                    <button id="mobileToggleInfo" class="btn-mobile-toggle">📱</button>
+                    <button id="closeInfo" class="btn-close">×</button>
+                </div>
             </div>
             <div class="info-content" id="cesiumInfoContent">
                 <div class="no-selection">
@@ -157,12 +204,10 @@ class Cesium3DMap {
             </div>
         `;
         container.appendChild(this.infoPanel);
-        
-        // Agregar estilos CSS mejorados
-        this.addImprovedStyles();
+        this.addImprovedResponsiveStyles();
     }
 
-    addImprovedStyles() {
+    addImprovedResponsiveStyles() {
         const styles = `
             <style>
                 .cesium-control-panel {
@@ -172,22 +217,45 @@ class Cesium3DMap {
                     width: 320px;
                     background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
                     border-radius: 16px;
-                    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
-                    padding: 20px;
+                    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+                    padding: 0;
                     color: white;
                     border: 1px solid #4a5568;
-                    backdrop-filter: blur(15px);
+                    backdrop-filter: blur(20px);
                     z-index: 1000;
                     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    transition: all 0.3s ease;
+                    overflow: hidden;
+                }
+
+                .cesium-control-panel.mobile-collapsed {
+                    height: 60px;
+                    width: 60px !important;
+                    overflow: hidden;
+                }
+
+                .cesium-control-panel.mobile-collapsed .panel-content {
+                    display: none;
+                }
+
+                .cesium-control-panel.mobile-collapsed .control-header {
+                    padding: 15px;
+                    justify-content: center;
+                }
+
+                .cesium-control-panel.mobile-collapsed .control-header h3,
+                .cesium-control-panel.mobile-collapsed .control-buttons {
+                    display: none;
                 }
 
                 .control-header {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    margin-bottom: 20px;
-                    padding-bottom: 15px;
-                    border-bottom: 2px solid #4a5568;
+                    padding: 20px;
+                    background: rgba(0, 0, 0, 0.3);
+                    border-bottom: 1px solid #4a5568;
+                    position: relative;
                 }
 
                 .control-header h3 {
@@ -195,6 +263,18 @@ class Cesium3DMap {
                     font-size: 18px;
                     font-weight: 600;
                     color: #f7fafc;
+                }
+
+                .btn-mobile-toggle {
+                    display: none;
+                    background: rgba(74, 85, 104, 0.5);
+                    border: 1px solid #4a5568;
+                    color: white;
+                    padding: 10px;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    font-size: 16px;
+                    transition: all 0.3s ease;
                 }
 
                 .control-buttons {
@@ -218,10 +298,17 @@ class Cesium3DMap {
                     transform: translateY(-1px);
                 }
 
+                .panel-content {
+                    max-height: 70vh;
+                    display: flex;
+                    flex-direction: column;
+                }
+
                 .layers-list {
-                    max-height: 400px;
+                    flex: 1;
                     overflow-y: auto;
-                    margin-bottom: 15px;
+                    padding: 0 20px;
+                    max-height: calc(70vh - 120px);
                 }
 
                 .layers-list::-webkit-scrollbar {
@@ -239,16 +326,19 @@ class Cesium3DMap {
                 }
 
                 .category-section {
-                    margin-bottom: 15px;
+                    margin-bottom: 20px;
                 }
 
                 .category-section h4 {
-                    margin: 0 0 10px 0;
+                    margin: 0 0 12px 0;
                     font-size: 14px;
                     font-weight: 600;
                     color: #cbd5e0;
-                    padding-left: 10px;
+                    padding-left: 12px;
                     border-left: 3px solid #4299e1;
+                    background: rgba(66, 153, 225, 0.1);
+                    padding: 8px 12px;
+                    border-radius: 0 8px 8px 0;
                 }
 
                 .layer-item {
@@ -262,9 +352,9 @@ class Cesium3DMap {
                 .layer-label {
                     display: flex;
                     align-items: center;
-                    padding: 10px;
+                    padding: 12px;
                     background: rgba(74, 85, 104, 0.3);
-                    border-radius: 8px;
+                    border-radius: 10px;
                     cursor: pointer;
                     transition: all 0.3s ease;
                     border: 1px solid transparent;
@@ -273,31 +363,34 @@ class Cesium3DMap {
                 .layer-label:hover {
                     background: rgba(74, 85, 104, 0.5);
                     border-color: #4299e1;
+                    transform: translateY(-1px);
                 }
 
                 input[type="checkbox"]:checked + .layer-label {
                     background: rgba(66, 153, 225, 0.2);
                     border-color: #4299e1;
+                    box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
                 }
 
                 .layer-color {
-                    width: 12px;
-                    height: 12px;
+                    width: 14px;
+                    height: 14px;
                     border-radius: 50%;
-                    margin-right: 10px;
+                    margin-right: 12px;
                     border: 2px solid white;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
                 }
 
                 .layer-emoji {
                     font-size: 16px;
-                    margin-right: 8px;
-                    width: 20px;
+                    margin-right: 10px;
+                    width: 24px;
                     text-align: center;
                 }
 
                 .layer-text {
                     flex: 1;
-                    font-size: 13px;
+                    font-size: 14px;
                     font-weight: 500;
                     color: #f7fafc;
                 }
@@ -305,22 +398,25 @@ class Cesium3DMap {
                 .layer-count {
                     background: rgba(26, 32, 44, 0.7);
                     color: #cbd5e0;
-                    padding: 4px 8px;
-                    border-radius: 12px;
+                    padding: 6px 10px;
+                    border-radius: 15px;
                     font-size: 11px;
                     font-weight: bold;
-                    min-width: 25px;
+                    min-width: 30px;
                     text-align: center;
+                    transition: all 0.3s ease;
                 }
 
                 input[type="checkbox"]:checked + .layer-label .layer-count {
                     background: #48bb78;
                     color: white;
+                    box-shadow: 0 2px 8px rgba(72, 187, 120, 0.4);
                 }
 
                 .panel-footer {
                     border-top: 1px solid #4a5568;
-                    padding-top: 15px;
+                    padding: 15px 20px;
+                    background: rgba(0, 0, 0, 0.2);
                 }
 
                 .system-stats {
@@ -337,18 +433,35 @@ class Cesium3DMap {
                     width: 350px;
                     background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
                     border-radius: 16px;
-                    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+                    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
                     color: white;
                     border: 1px solid #4a5568;
-                    backdrop-filter: blur(15px);
+                    backdrop-filter: blur(20px);
                     z-index: 1000;
                     transform: translateX(400px);
                     transition: transform 0.3s ease;
                     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    overflow: hidden;
+                    max-height: 80vh;
+                    display: flex;
+                    flex-direction: column;
                 }
 
                 .cesium-info-panel.visible {
                     transform: translateX(0);
+                }
+
+                .cesium-info-panel.mobile-fullscreen {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    width: 100%;
+                    height: 100%;
+                    max-height: 100%;
+                    border-radius: 0;
+                    z-index: 10000;
                 }
 
                 .info-header {
@@ -356,7 +469,8 @@ class Cesium3DMap {
                     justify-content: space-between;
                     align-items: center;
                     padding: 20px;
-                    border-bottom: 2px solid #4a5568;
+                    border-bottom: 1px solid #4a5568;
+                    background: rgba(0, 0, 0, 0.3);
                 }
 
                 .info-header h3 {
@@ -366,15 +480,21 @@ class Cesium3DMap {
                     color: #f7fafc;
                 }
 
+                .info-header-controls {
+                    display: flex;
+                    gap: 8px;
+                    align-items: center;
+                }
+
                 .btn-close {
-                    background: none;
-                    border: none;
-                    color: #cbd5e0;
-                    font-size: 24px;
+                    background: rgba(239, 68, 68, 0.2);
+                    border: 1px solid rgba(239, 68, 68, 0.3);
+                    color: #feb2b2;
+                    font-size: 18px;
                     cursor: pointer;
                     padding: 0;
-                    width: 30px;
-                    height: 30px;
+                    width: 32px;
+                    height: 32px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -383,81 +503,97 @@ class Cesium3DMap {
                 }
 
                 .btn-close:hover {
-                    background: rgba(229, 62, 62, 0.2);
-                    color: #e53e3e;
+                    background: rgba(239, 68, 68, 0.4);
+                    color: #fed7d7;
+                    transform: scale(1.1);
                 }
 
                 .info-content {
-                    padding: 20px;
-                    max-height: 500px;
+                    flex: 1;
                     overflow-y: auto;
+                    padding: 0;
                 }
 
                 .no-selection {
                     text-align: center;
-                    padding: 40px 20px;
+                    padding: 60px 20px;
                     color: #cbd5e0;
                 }
 
                 .no-selection-icon {
-                    font-size: 48px;
-                    margin-bottom: 15px;
-                    opacity: 0.5;
+                    font-size: 64px;
+                    margin-bottom: 20px;
+                    opacity: 0.3;
                 }
 
                 .no-selection p {
                     margin: 0;
-                    font-size: 14px;
-                    line-height: 1.5;
+                    font-size: 16px;
+                    line-height: 1.6;
+                    color: #a0aec0;
                 }
 
                 .entity-info-detailed {
                     color: #f7fafc;
+                    padding: 0;
                 }
 
                 .info-header-detailed {
                     display: flex;
                     align-items: center;
-                    gap: 12px;
-                    margin-bottom: 20px;
-                    padding-bottom: 15px;
-                    border-bottom: 2px solid #4a5568;
+                    gap: 15px;
+                    margin-bottom: 0;
+                    padding: 25px;
+                    border-bottom: 1px solid #4a5568;
+                    background: rgba(0, 0, 0, 0.2);
                 }
 
                 .info-icon {
-                    font-size: 24px;
+                    font-size: 28px;
+                    width: 50px;
+                    height: 50px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: rgba(255, 255, 255, 0.1);
+                    border-radius: 12px;
                 }
 
                 .info-header-detailed h3 {
                     margin: 0;
-                    font-size: 18px;
+                    font-size: 20px;
                     font-weight: 600;
                     color: #f7fafc;
+                    flex: 1;
+                    word-wrap: break-word;
                 }
 
                 .info-details {
-                    font-size: 13px;
+                    font-size: 14px;
+                    padding: 25px;
                 }
 
                 .info-section {
-                    margin-bottom: 20px;
+                    margin-bottom: 25px;
                 }
 
                 .info-section h4 {
-                    margin: 0 0 12px 0;
-                    font-size: 14px;
+                    margin: 0 0 15px 0;
+                    font-size: 16px;
                     font-weight: 600;
                     color: #cbd5e0;
                     display: flex;
                     align-items: center;
-                    gap: 8px;
+                    gap: 10px;
+                    padding-bottom: 8px;
+                    border-bottom: 2px solid #4a5568;
                 }
 
                 .info-grid {
                     display: grid;
                     grid-template-columns: 1fr 1fr;
-                    gap: 10px;
-                    margin-bottom: 12px;
+                    gap: 12px;
+                    margin-bottom: 15px;
                 }
 
                 .info-item {
@@ -470,88 +606,105 @@ class Cesium3DMap {
                 }
 
                 .info-label {
-                    font-size: 11px;
+                    font-size: 12px;
                     color: #a0aec0;
-                    font-weight: 500;
-                    margin-bottom: 4px;
+                    font-weight: 600;
+                    margin-bottom: 6px;
                     text-transform: uppercase;
                     letter-spacing: 0.5px;
                 }
 
                 .info-value {
-                    font-size: 13px;
+                    font-size: 14px;
                     color: #f7fafc;
                     font-weight: 500;
+                    line-height: 1.4;
+                    word-wrap: break-word;
                 }
 
                 .services-list, .menu-list, .rooms-list, .products-list {
                     display: flex;
                     flex-direction: column;
-                    gap: 6px;
+                    gap: 8px;
                 }
 
                 .service-tag {
                     background: rgba(66, 153, 225, 0.2);
                     color: #90cdf4;
-                    padding: 6px 10px;
-                    border-radius: 6px;
-                    font-size: 11px;
+                    padding: 8px 12px;
+                    border-radius: 8px;
+                    font-size: 12px;
                     border: 1px solid rgba(66, 153, 225, 0.3);
+                    text-align: center;
                 }
 
                 .menu-item, .room-item, .product-item {
                     display: flex;
                     justify-content: space-between;
-                    padding: 8px;
+                    align-items: center;
+                    padding: 12px;
                     background: rgba(74, 85, 104, 0.3);
-                    border-radius: 6px;
+                    border-radius: 8px;
                     border: 1px solid #4a5568;
+                    transition: all 0.3s ease;
+                }
+
+                .menu-item:hover, .room-item:hover, .product-item:hover {
+                    background: rgba(74, 85, 104, 0.5);
+                    transform: translateX(4px);
                 }
 
                 .dish-name, .room-type, .product-name {
                     color: #f7fafc;
                     font-weight: 500;
+                    flex: 1;
                 }
 
                 .dish-price, .room-capacity, .product-price {
                     color: #48bb78;
                     font-weight: bold;
+                    font-size: 14px;
                 }
 
                 .menu-more {
                     text-align: center;
-                    padding: 8px;
+                    padding: 12px;
                     color: #a0aec0;
                     font-style: italic;
-                    font-size: 11px;
+                    font-size: 12px;
+                    background: rgba(74, 85, 104, 0.2);
+                    border-radius: 8px;
                 }
 
                 .category-section h5 {
-                    margin: 10px 0 8px 0;
-                    font-size: 12px;
+                    margin: 15px 0 10px 0;
+                    font-size: 14px;
                     color: #e53e3e;
                     font-weight: 600;
+                    padding-left: 8px;
+                    border-left: 3px solid #e53e3e;
                 }
 
                 .info-note {
                     display: flex;
                     align-items: center;
-                    gap: 8px;
-                    padding: 12px;
+                    gap: 12px;
+                    padding: 15px;
                     background: rgba(237, 137, 54, 0.1);
-                    border-radius: 6px;
+                    border-radius: 8px;
                     border: 1px solid rgba(237, 137, 54, 0.3);
                     color: #fbd38d;
-                    font-size: 12px;
+                    font-size: 13px;
+                    margin-top: 20px;
                 }
 
                 .entity-info-loading {
                     text-align: center;
-                    padding: 30px 20px;
+                    padding: 60px 20px;
                 }
 
                 .loading-details {
-                    margin-top: 20px;
+                    margin-top: 30px;
                 }
 
                 .loading-spinner {
@@ -559,14 +712,205 @@ class Cesium3DMap {
                 }
 
                 .loading-spinner i {
-                    font-size: 24px;
-                    margin-bottom: 10px;
+                    font-size: 32px;
+                    margin-bottom: 15px;
                 }
 
                 .loading-spinner p {
                     margin: 0;
-                    font-size: 13px;
+                    font-size: 14px;
                     color: #cbd5e0;
+                }
+
+                @media (max-width: 768px) {
+                    .cesium-control-panel {
+                        width: 280px !important;
+                        top: 10px !important;
+                        left: 10px !important;
+                    }
+
+                    .cesium-info-panel {
+                        width: 300px !important;
+                        top: 10px !important;
+                        right: 10px !important;
+                        max-height: 70vh;
+                    }
+
+                    .cesium-info-panel.mobile-fullscreen {
+                        width: 100% !important;
+                        height: 100%;
+                        top: 0;
+                        right: 0;
+                        border-radius: 0;
+                    }
+
+                    .btn-mobile-toggle {
+                        display: block;
+                    }
+
+                    .control-header h3 {
+                        font-size: 16px;
+                    }
+
+                    .info-header h3 {
+                        font-size: 16px;
+                    }
+
+                    .layers-list {
+                        max-height: 50vh;
+                        padding: 0 15px;
+                    }
+
+                    .info-grid {
+                        grid-template-columns: 1fr;
+                        gap: 10px;
+                    }
+
+                    .info-header-detailed {
+                        padding: 20px;
+                        flex-direction: column;
+                        text-align: center;
+                        gap: 12px;
+                    }
+
+                    .info-header-detailed h3 {
+                        font-size: 18px;
+                        text-align: center;
+                    }
+
+                    .info-details {
+                        padding: 20px;
+                    }
+
+                    .info-section {
+                        margin-bottom: 20px;
+                    }
+                    
+                    .info-section h4 {
+                        font-size: 15px;
+                    }
+
+                    .layer-label {
+                        padding: 10px;
+                    }
+
+                    .layer-text {
+                        font-size: 13px;
+                    }
+
+                    .layer-emoji {
+                        font-size: 14px;
+                        margin-right: 8px;
+                    }
+
+                    .no-selection {
+                        padding: 40px 20px;
+                    }
+
+                    .no-selection-icon {
+                        font-size: 48px;
+                    }
+
+                    .no-selection p {
+                        font-size: 14px;
+                    }
+                }
+
+                @media (max-width: 480px) {
+                    .cesium-control-panel {
+                        width: calc(100vw - 20px) !important;
+                        left: 10px !important;
+                        right: 10px !important;
+                    }
+
+                    .cesium-control-panel.mobile-collapsed {
+                        width: 60px !important;
+                    }
+
+                    .cesium-info-panel {
+                        width: calc(100vw - 20px) !important;
+                        right: 10px !important;
+                    }
+
+                    .control-buttons {
+                        flex-direction: column;
+                        gap: 4px;
+                    }
+
+                    .btn-control {
+                        padding: 6px 10px;
+                        font-size: 11px;
+                    }
+
+                    .category-section h4 {
+                        font-size: 13px;
+                        padding: 6px 10px;
+                    }
+
+                    .info-header-detailed {
+                        padding: 15px;
+                    }
+
+                    .info-details {
+                        padding: 15px;
+                    }
+
+                    .menu-item, .room-item, .product-item {
+                        padding: 10px;
+                        flex-direction: column;
+                        align-items: flex-start;
+                        gap: 4px;
+                    }
+
+                    .dish-price, .room-capacity, .product-price {
+                        align-self: flex-end;
+                    }
+                }
+
+                .info-content::-webkit-scrollbar {
+                    width: 4px;
+                }
+
+                .info-content::-webkit-scrollbar-track {
+                    background: rgba(255, 255, 255, 0.1);
+                }
+
+                .info-content::-webkit-scrollbar-thumb {
+                    background: #4299e1;
+                    border-radius: 2px;
+                }
+
+                .cesium-control-panel,
+                .cesium-info-panel {
+                    animation: slideInUp 0.3s ease-out;
+                }
+
+                @keyframes slideInUp {
+                    from {
+                        opacity: 0;
+                        transform: translateY(20px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+
+                .layer-label,
+                .btn-control,
+                .btn-close,
+                .menu-item,
+                .room-item,
+                .product-item {
+                    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                }
+
+                .info-value {
+                    line-height: 1.5;
+                }
+
+                .service-tag {
+                    line-height: 1.3;
                 }
             </style>
         `;
@@ -587,12 +931,32 @@ class Cesium3DMap {
         document.getElementById('clearAllLayers').addEventListener('click', () => this.clearAllLayers());
         document.getElementById('closeInfo').addEventListener('click', () => this.hideInfoPanel());
 
+        const mobileTogglePanel = document.getElementById('mobileTogglePanel');
+        const mobileToggleInfo = document.getElementById('mobileToggleInfo');
+        
+        if (mobileTogglePanel) {
+            mobileTogglePanel.addEventListener('click', () => this.toggleMobilePanel());
+        }
+        
+        if (mobileToggleInfo) {
+            mobileToggleInfo.addEventListener('click', () => this.toggleMobileInfoPanel());
+        }
+
         this.viewer.screenSpaceEventHandler.setInputAction(async (click) => {
             const pickedObject = this.viewer.scene.pick(click.position);
             if (Cesium.defined(pickedObject) && pickedObject.id) {
                 await this.showEntityInfo(pickedObject.id);
             }
         }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+    }
+
+    toggleMobilePanel() {
+        const controlPanel = document.querySelector('.cesium-control-panel');
+        controlPanel.classList.toggle('mobile-collapsed');
+    }
+
+    toggleMobileInfoPanel() {
+        this.infoPanel.classList.toggle('mobile-fullscreen');
     }
 
     async loadAllLayers() {
@@ -605,7 +969,6 @@ class Cesium3DMap {
             return;
         }
 
-        // ✅ MISMAS CAPAS QUE EN MAP.JS
         const todasLasCapas = [
             'puntos_turisticos', 'miradores', 'playas', 'tiendas_artesania',
             'restaurantes', 'hoteles', 'rutas', 'comunidades', 'viviendas',
@@ -637,7 +1000,6 @@ class Cesium3DMap {
         try {
             console.log(`🔄 Cargando capa 3D: ${layerName}`);
             
-            // ✅ URL CORREGIDA - IGUAL QUE EN MAP.JS
             const response = await fetch(`${this.API_BASE_URL}/capas/${layerName}`);
             
             if (!response.ok) {
@@ -740,10 +1102,8 @@ class Cesium3DMap {
                 const tipo = entity.properties.tipo?.getValue?.() || '';
                 const idLugar = entity.properties.id_lugar?.getValue?.() || entity.properties.id?.getValue?.() || '';
                 
-                // ✅ EXTRACCIÓN DE ID_LUGAR MEJORADA - IGUAL QUE EN MAP.JS
                 const idLugarFinal = this.extractIdLugar(idLugar);
                 
-                // Solo crear marcadores para puntos (no para polígonos/líneas)
                 if (!layerName.includes('ruta') && 
                     !layerName.includes('comunidad') && 
                     !layerName.includes('area_verde') &&
@@ -784,11 +1144,8 @@ class Cesium3DMap {
         });
     }
 
-    // ✅ MÉTODO PARA EXTRAER ID_LUGAR - IGUAL QUE EN MAP.JS
     extractIdLugar(idString) {
         if (!idString) return null;
-        
-        // Extraer número del ID (ej: "rest_1" -> 1, "hotel_21" -> 21)
         const match = idString.match(/\d+/);
         return match ? parseInt(match[0]) : null;
     }
@@ -820,12 +1177,15 @@ class Cesium3DMap {
         return canvas.toDataURL();
     }
 
-    // ✅ MÉTODO MEJORADO CON INTERFAZ VISUAL MEJORADA
     async showEntityInfo(entity) {
         const infoContent = document.getElementById('cesiumInfoContent');
         
         infoContent.innerHTML = this.createLoadingInfo(entity);
         this.infoPanel.classList.add('visible');
+
+        if (this.isMobile) {
+            this.infoPanel.classList.add('mobile-fullscreen');
+        }
 
         try {
             const detailedInfo = await this.loadDetailedInfo(entity.layerType, entity.entityId);
@@ -1237,7 +1597,6 @@ class Cesium3DMap {
                     return null;
             }
 
-            // ✅ URL CORREGIDA - IGUAL QUE EN MAP.JS
             const response = await fetch(`${this.API_BASE_URL}/${endpoint}`);
             
             if (!response.ok) {
@@ -1312,6 +1671,7 @@ class Cesium3DMap {
 
     hideInfoPanel() {
         this.infoPanel.classList.remove('visible');
+        this.infoPanel.classList.remove('mobile-fullscreen');
     }
 
     hideLoading() {
@@ -1326,7 +1686,6 @@ class Cesium3DMap {
 
     async checkAPIStatus() {
         try {
-            // ✅ URL CORREGIDA - IGUAL QUE EN MAP.JS
             const response = await fetch(`${this.API_BASE_URL}/status`);
             return response.ok;
         } catch (error) {
@@ -1373,7 +1732,6 @@ class Cesium3DMap {
     }
 }
 
-// Inicialización
 function initCesium3D() {
     if (typeof Cesium === 'undefined') {
         setTimeout(initCesium3D, 500);
