@@ -10,6 +10,29 @@ import ssl
 app = Flask(__name__)
 CORS(app)
 
+# ✅ ENDPOINT RAÍZ AGREGADO - SOLUCIÓN AL ERROR "Not Found"
+@app.route('/')
+def home():
+    return jsonify({
+        "message": "🚀 API Isla del Sol - Flask funcionando correctamente en Render",
+        "status": "active", 
+        "version": "8.1",
+        "timestamp": datetime.now().isoformat(),
+        "endpoints": {
+            "status": "/api/status",
+            "capas": "/api/capas/{categoria}",
+            "detalles": "/api/detalle/{tipo}/{id}",
+            "capas_disponibles": [
+                "puntos_turisticos", "miradores", "playas", "tiendas_artesania",
+                "restaurantes", "hoteles", "rutas", "comunidades", "areas_verdes", 
+                "viviendas", "sembradios", "basura", "puntos_basura", "aguas_contaminadas",
+                "sitios_turisticos", "muelles", "ruta_sagrada"
+            ]
+        },
+        "database": "Render PostgreSQL con SSL",
+        "documentacion": "Visita /api/status para más detalles"
+    })
+
 def get_db_connection():
     try:
         # USAR DATABASE_URL de Render (si existe)
@@ -50,11 +73,11 @@ def get_db_connection():
         return None
 
 # Servir archivos estáticos
-@app.route('/')
+@app.route('/web')
 def serve_index():
     return send_from_directory('..', 'index.html')
 
-@app.route('/<path:path>')
+@app.route('/static/<path:path>')
 def serve_static(path):
     return send_from_directory('..', path)
 
@@ -666,6 +689,7 @@ if __name__ == '__main__':
     print("=" * 60)
     print("📍 Con SSL activado para Render PostgreSQL")
     print("📊 Endpoints disponibles:")
+    print(f"   • Home: /")
     print(f"   • Status: /api/status")
     print(f"   • Capas: /api/capas/[nombre_capa]")
     print(f"   • Detalles: /api/detalle/[tipo]/[id]")
