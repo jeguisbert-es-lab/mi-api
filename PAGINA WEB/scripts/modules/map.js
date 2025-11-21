@@ -6,8 +6,8 @@ class InteractiveMap {
         this.marcadoresAgrupados = null;
         this.contadorTotal = 0;
         
-        // ✅ URL DE TU API EN RENDER - ACTUALIZADA
-        this.API_BASE_URL = 'https://mi-api-6jmx.onrender.com';
+        // ✅ URL CORREGIDA - CON /api/ INCLUIDO
+        this.API_BASE_URL = 'https://mi-api-6jmx.onrender.com/api';
         
         this.init();
     }
@@ -663,7 +663,7 @@ class InteractiveMap {
         console.log('🔄 Cargando TODAS las capas del mapa 2D desde Render...');
         
         try {
-            // ✅ PRIMERO VERIFICAR QUE LA API ESTÉ FUNCIONANDO
+            // ✅ CORREGIDO: URL correcta para status
             const statusResponse = await fetch(`${this.API_BASE_URL}/status`);
             if (!statusResponse.ok) {
                 throw new Error('API no responde');
@@ -713,7 +713,7 @@ class InteractiveMap {
         try {
             console.log(`🔄 Cargando capa: ${nombreCapa}`);
             
-            // ✅ URL CORRECTA CON /api/ INCLUIDO
+            // ✅ CORREGIDO: URL correcta para capas
             const response = await fetch(`${this.API_BASE_URL}/capas/${nombreCapa}`);
             
             if (!response.ok) {
@@ -1060,7 +1060,7 @@ class InteractiveMap {
                     return;
             }
             
-            // ✅ URL CORRECTA CON /api/ INCLUIDO
+            // ✅ CORREGIDO: URL correcta para detalles
             const response = await fetch(`${this.API_BASE_URL}/${endpoint}`);
             
             if (!response.ok) {
