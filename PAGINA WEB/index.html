@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Isla del Sol - Lago Titicaca</title>
-  <meta name="theme-color" content="#2563eb" />
+  <meta name="theme-color" content="#0a5c36" />
   
   <!-- CSS MODULAR -->
   <link rel="stylesheet" href="styles/utils/variables.css">
@@ -20,95 +20,156 @@
   <!-- EXTERNAL CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
   <!-- CSS DE CESIUM -->
   <link href="https://cesium.com/downloads/cesiumjs/releases/1.95/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
   
-  <!-- CSS SUPREMO PARA CESIUM -->
+  <!-- CSS SUPREMO PREMIUM PARA CESIUM -->
   <style>
-    /* ===== VARIABLES Y RESET ===== */
+    /* ===== VARIABLES PREMIUM VERDE/DORADO/NEGRO ===== */
     :root {
-      --primary-cesium: #6366f1;
-      --secondary-cesium: #8b5cf6;
-      --accent-cesium: #06b6d4;
-      --success-cesium: #10b981;
-      --warning-cesium: #f59e0b;
-      --danger-cesium: #ef4444;
-      --dark-cesium: #0f172a;
-      --darker-cesium: #020617;
-      --light-cesium: #f8fafc;
-      --glass-bg: rgba(255, 255, 255, 0.08);
-      --glass-border: rgba(255, 255, 255, 0.12);
-      --glass-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+      --primary-emerald: #0a5c36;
+      --primary-emerald-light: #0f7a4a;
+      --primary-emerald-dark: #064028;
+      --gold-primary: #d4af37;
+      --gold-light: #f4e4a6;
+      --gold-dark: #b8941f;
+      --black-premium: #0a0a0a;
+      --black-dark: #000000;
+      --black-light: #1a1a1a;
+      --silver-accent: #c0c0c0;
+      --white-premium: #f8f9fa;
+      
+      --glass-bg: rgba(10, 92, 54, 0.15);
+      --glass-border: rgba(212, 175, 55, 0.25);
+      --glass-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
       --blur-effect: blur(25px);
-      --neon-glow: 0 0 20px rgba(99, 102, 241, 0.5);
+      --neon-glow: 0 0 30px rgba(10, 92, 54, 0.6);
+      --gold-glow: 0 0 25px rgba(212, 175, 55, 0.4);
     }
 
-    /* ===== CONTENEDOR PRINCIPAL CESIUM ===== */
+    /* ===== RESET Y BASE PREMIUM ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, var(--black-premium) 0%, var(--black-light) 100%);
+      color: var(--white-premium);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* ===== CONTENEDOR PRINCIPAL CESIUM PREMIUM ===== */
     .cesium-container {
       position: relative;
-      border-radius: 20px;
+      border-radius: 25px;
       overflow: hidden;
-      box-shadow: var(--glass-shadow);
-      margin: 30px 0;
+      box-shadow: 
+        var(--glass-shadow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        0 0 0 1px rgba(212, 175, 55, 0.1);
+      margin: 40px 0;
       border: 1px solid var(--glass-border);
-      background: linear-gradient(145deg, #0f172a, #1e293b);
+      background: linear-gradient(145deg, var(--black-dark) 0%, var(--black-premium) 50%, var(--black-dark) 100%);
+      position: relative;
+    }
+
+    .cesium-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 80%, rgba(10, 92, 54, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(212, 175, 55, 0.05) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 1;
     }
 
     .cesium-frame {
       width: 100%;
-      height: 750px;
+      height: 800px;
       position: relative;
-      background: linear-gradient(135deg, var(--darker-cesium) 0%, var(--dark-cesium) 100%);
+      background: linear-gradient(135deg, var(--black-dark) 0%, var(--black-premium) 100%);
+      border-radius: 24px;
     }
 
-    /* ===== LOADING SCREEN ANIMADO ===== */
+    /* ===== LOADING SCREEN ANIMADO PREMIUM ===== */
     .cesium-loading {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
       text-align: center;
-      color: var(--light-cesium);
+      color: var(--white-premium);
       z-index: 1000;
-      background: rgba(15, 23, 42, 0.95);
+      background: rgba(10, 10, 10, 0.95);
       backdrop-filter: var(--blur-effect);
-      padding: 40px;
-      border-radius: 20px;
+      padding: 50px 40px;
+      border-radius: 25px;
       border: 1px solid var(--glass-border);
-      box-shadow: var(--glass-shadow);
-      min-width: 300px;
+      box-shadow: var(--glass-shadow), var(--gold-glow);
+      min-width: 320px;
     }
 
     .cesium-loading i {
-      font-size: 4rem;
-      margin-bottom: 20px;
+      font-size: 4.5rem;
+      margin-bottom: 25px;
       display: block;
-      background: linear-gradient(135deg, var(--accent-cesium), var(--primary-cesium));
+      background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
       animation: pulse 2s infinite;
+      filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.3));
     }
 
     .cesium-loading p {
-      margin: 0 0 25px 0;
-      font-size: 1.2em;
+      margin: 0 0 30px 0;
+      font-size: 1.3em;
       font-weight: 500;
+      color: var(--gold-light);
     }
 
     .loading-spinner {
-      border: 3px solid rgba(255, 255, 255, 0.1);
-      border-top: 3px solid var(--accent-cesium);
-      border-right: 3px solid var(--primary-cesium);
-      border-bottom: 3px solid var(--secondary-cesium);
+      border: 3px solid rgba(212, 175, 55, 0.1);
+      border-top: 3px solid var(--gold-primary);
+      border-right: 3px solid var(--primary-emerald);
+      border-bottom: 3px solid var(--gold-light);
       border-radius: 50%;
-      width: 50px;
-      height: 50px;
+      width: 60px;
+      height: 60px;
       animation: spin 1.5s linear infinite;
       margin: 0 auto;
-      box-shadow: var(--neon-glow);
+      box-shadow: var(--neon-glow), var(--gold-glow);
+      position: relative;
+    }
+
+    .loading-spinner::after {
+      content: '';
+      position: absolute;
+      top: -5px;
+      left: -5px;
+      right: -5px;
+      bottom: -5px;
+      border-radius: 50%;
+      background: conic-gradient(transparent, var(--gold-primary), transparent);
+      animation: rotate 3s linear infinite;
+      z-index: -1;
     }
 
     @keyframes spin {
@@ -116,38 +177,54 @@
       100% { transform: rotate(360deg); }
     }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.8; transform: scale(1.05); }
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
-    /* ===== PANEL DE CONTROL SUPREMO ===== */
+    @keyframes pulse {
+      0%, 100% { 
+        opacity: 1; 
+        transform: scale(1) rotate(0deg);
+        filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.3));
+      }
+      50% { 
+        opacity: 0.8; 
+        transform: scale(1.1) rotate(5deg);
+        filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.6));
+      }
+    }
+
+    /* ===== PANEL DE CONTROL SUPREMO PREMIUM ===== */
     .cesium-control-panel {
       position: absolute;
-      top: 25px;
-      left: 25px;
-      width: 350px;
+      top: 30px;
+      left: 30px;
+      width: 380px;
       background: var(--glass-bg);
       backdrop-filter: var(--blur-effect);
       border: 1px solid var(--glass-border);
-      border-radius: 25px;
-      box-shadow: var(--glass-shadow);
+      border-radius: 30px;
+      box-shadow: var(--glass-shadow), var(--gold-glow);
       z-index: 1000;
       overflow: hidden;
       transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(212, 175, 55, 0.2);
     }
 
     .cesium-control-panel:hover {
       transform: translateY(-5px) scale(1.02);
-      box-shadow: 0 35px 60px rgba(0, 0, 0, 0.6);
+      box-shadow: 
+        0 35px 60px rgba(0, 0, 0, 0.7),
+        0 0 40px rgba(10, 92, 54, 0.3),
+        var(--gold-glow);
     }
 
-    /* Header del Panel */
+    /* Header del Panel Premium */
     .control-header {
-      background: linear-gradient(135deg, var(--primary-cesium), var(--secondary-cesium));
-      padding: 25px;
-      color: white;
+      background: linear-gradient(135deg, var(--primary-emerald), var(--primary-emerald-light));
+      padding: 30px;
+      color: var(--white-premium);
       position: relative;
       overflow: hidden;
     }
@@ -159,9 +236,9 @@
       left: -50%;
       width: 200%;
       height: 200%;
-      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+      background: linear-gradient(45deg, transparent, rgba(212, 175, 55, 0.1), transparent);
       transform: rotate(45deg);
-      animation: shimmer 6s infinite linear;
+      animation: shimmer 8s infinite linear;
     }
 
     @keyframes shimmer {
@@ -171,39 +248,46 @@
 
     .control-header h3 {
       margin: 0;
-      font-size: 1.5em;
-      font-weight: 700;
-      text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      font-size: 1.6em;
+      font-weight: 800;
+      text-shadow: 0 4px 12px rgba(0,0,0,0.5);
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 15px;
       position: relative;
       z-index: 2;
+      letter-spacing: 0.5px;
+    }
+
+    .control-header h3 i {
+      color: var(--gold-primary);
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
     }
 
     .control-buttons {
       display: flex;
-      gap: 12px;
-      margin-top: 15px;
+      gap: 15px;
+      margin-top: 20px;
       position: relative;
       z-index: 2;
     }
 
     .btn-control {
       flex: 1;
-      padding: 12px 18px;
+      padding: 14px 20px;
       border: none;
-      border-radius: 15px;
-      background: rgba(255, 255, 255, 0.15);
-      color: white;
-      font-weight: 600;
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(10, 92, 54, 0.2));
+      color: var(--white-premium);
+      font-weight: 700;
       cursor: pointer;
-      transition: all 0.3s ease;
-      backdrop-filter: blur(15px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      font-size: 0.9em;
+      transition: all 0.4s ease;
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      font-size: 0.95em;
       position: relative;
       overflow: hidden;
+      letter-spacing: 0.5px;
     }
 
     .btn-control::before {
@@ -213,8 +297,8 @@
       left: -100%;
       width: 100%;
       height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      transition: left 0.5s;
+      background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.2), transparent);
+      transition: left 0.6s;
     }
 
     .btn-control:hover::before {
@@ -222,71 +306,90 @@
     }
 
     .btn-control:hover {
-      background: rgba(255, 255, 255, 0.25);
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.3), rgba(10, 92, 54, 0.3));
       transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      box-shadow: 
+        0 8px 25px rgba(0,0,0,0.4),
+        0 0 15px rgba(212, 175, 55, 0.3);
+      border-color: rgba(212, 175, 55, 0.5);
     }
 
-    /* Lista de Capas */
+    /* Lista de Capas Premium */
     .layers-list {
       max-height: 65vh;
       overflow-y: auto;
-      padding: 20px;
-      background: rgba(15, 23, 42, 0.7);
+      padding: 25px;
+      background: linear-gradient(135deg, rgba(10, 10, 10, 0.8), rgba(26, 26, 26, 0.9));
     }
 
     .layers-list::-webkit-scrollbar {
-      width: 8px;
+      width: 10px;
     }
 
     .layers-list::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 4px;
+      background: rgba(212, 175, 55, 0.1);
+      border-radius: 8px;
     }
 
     .layers-list::-webkit-scrollbar-thumb {
-      background: linear-gradient(var(--primary-cesium), var(--secondary-cesium));
-      border-radius: 4px;
+      background: linear-gradient(var(--primary-emerald), var(--gold-primary));
+      border-radius: 8px;
+      border: 2px solid rgba(10, 10, 10, 0.8);
     }
 
     .layers-list::-webkit-scrollbar-thumb:hover {
-      background: linear-gradient(var(--accent-cesium), var(--primary-cesium));
+      background: linear-gradient(var(--gold-primary), var(--primary-emerald-light));
     }
 
-    /* Secciones de Categoría */
+    /* Secciones de Categoría Premium */
     .category-section {
-      margin-bottom: 25px;
+      margin-bottom: 30px;
+      position: relative;
     }
 
     .category-section:last-child {
       margin-bottom: 0;
     }
 
-    .category-section h4 {
-      color: var(--light-cesium);
-      margin: 0 0 15px 0;
-      padding: 12px 16px;
-      background: rgba(255, 255, 255, 0.08);
-      border-radius: 12px;
-      font-size: 0.95em;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      border-left: 4px solid var(--accent-cesium);
-      display: flex;
-      align-items: center;
-      gap: 10px;
+    .category-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -10px;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(to bottom, var(--gold-primary), var(--primary-emerald));
+      border-radius: 4px;
+      opacity: 0.7;
     }
 
-    /* Items de Capa Mejorados */
+    .category-section h4 {
+      color: var(--gold-light);
+      margin: 0 0 18px 0;
+      padding: 15px 20px;
+      background: linear-gradient(135deg, rgba(10, 92, 54, 0.2), rgba(212, 175, 55, 0.1));
+      border-radius: 15px;
+      font-size: 1em;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-left: 4px solid var(--gold-primary);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(212, 175, 55, 0.2);
+    }
+
+    /* Items de Capa Premium */
     .layer-item {
       display: flex;
       align-items: center;
-      padding: 14px;
-      margin: 8px 0;
-      background: rgba(255, 255, 255, 0.03);
-      border-radius: 15px;
-      transition: all 0.3s ease;
+      padding: 16px;
+      margin: 10px 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+      border-radius: 18px;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       border: 1px solid transparent;
       position: relative;
       overflow: hidden;
@@ -299,8 +402,8 @@
       left: -100%;
       width: 100%;
       height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
-      transition: left 0.6s;
+      background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.1), transparent);
+      transition: left 0.8s;
     }
 
     .layer-item:hover::before {
@@ -308,10 +411,12 @@
     }
 
     .layer-item:hover {
-      background: rgba(255, 255, 255, 0.08);
-      border-color: var(--glass-border);
-      transform: translateX(8px) scale(1.02);
-      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(10, 92, 54, 0.1));
+      border-color: rgba(212, 175, 55, 0.3);
+      transform: translateX(12px) scale(1.03);
+      box-shadow: 
+        0 10px 30px rgba(0,0,0,0.3),
+        0 0 20px rgba(10, 92, 54, 0.2);
     }
 
     .layer-item input[type="checkbox"] {
@@ -323,153 +428,181 @@
       align-items: center;
       width: 100%;
       cursor: pointer;
-      gap: 15px;
-      font-weight: 500;
-      color: var(--light-cesium);
+      gap: 18px;
+      font-weight: 600;
+      color: var(--white-premium);
       position: relative;
       z-index: 2;
     }
 
-    /* Indicador de Color Mejorado */
+    /* Indicador de Color Premium */
     .layer-color {
-      width: 18px;
-      height: 18px;
+      width: 20px;
+      height: 20px;
       border-radius: 50%;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      transition: all 0.4s ease;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 
+        0 4px 15px rgba(0,0,0,0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
       position: relative;
     }
 
     .layer-color::after {
       content: '';
       position: absolute;
-      top: -4px;
-      left: -4px;
-      right: -4px;
-      bottom: -4px;
+      top: -6px;
+      left: -6px;
+      right: -6px;
+      bottom: -6px;
       border-radius: 50%;
       background: inherit;
-      opacity: 0.3;
-      filter: blur(8px);
+      opacity: 0.4;
+      filter: blur(12px);
       z-index: -1;
     }
 
     .layer-item:hover .layer-color {
-      transform: scale(1.3) rotate(15deg);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+      transform: scale(1.4) rotate(15deg);
+      box-shadow: 
+        0 6px 25px rgba(0,0,0,0.5),
+        0 0 15px currentColor;
     }
 
-    /* Emoji Estilizado */
+    /* Emoji Estilizado Premium */
     .layer-emoji {
-      font-size: 1.3em;
-      filter: drop-shadow(0 3px 6px rgba(0,0,0,0.3));
-      transition: transform 0.3s ease;
+      font-size: 1.4em;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+      transition: all 0.4s ease;
     }
 
     .layer-item:hover .layer-emoji {
-      transform: scale(1.2) rotate(-5deg);
+      transform: scale(1.3) rotate(-8deg);
+      filter: drop-shadow(0 6px 12px rgba(0,0,0,0.5));
     }
 
-    /* Texto */
+    /* Texto Premium */
     .layer-text {
       flex: 1;
-      font-size: 1em;
-      transition: all 0.3s ease;
+      font-size: 1.05em;
+      transition: all 0.4s ease;
+      font-weight: 500;
     }
 
-    /* Contador Mejorado */
+    /* Contador Premium */
     .layer-count {
-      background: rgba(30, 41, 59, 0.8);
-      color: var(--light-cesium);
-      padding: 6px 12px;
-      border-radius: 12px;
-      font-size: 0.85em;
-      font-weight: 700;
-      min-width: 32px;
+      background: linear-gradient(135deg, rgba(26, 26, 26, 0.9), rgba(10, 10, 10, 0.9));
+      color: var(--gold-light);
+      padding: 8px 14px;
+      border-radius: 15px;
+      font-size: 0.9em;
+      font-weight: 800;
+      min-width: 36px;
       text-align: center;
-      border: 1px solid var(--glass-border);
-      transition: all 0.3s ease;
-      backdrop-filter: blur(10px);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      transition: all 0.4s ease;
+      backdrop-filter: blur(15px);
+      letter-spacing: 0.5px;
     }
 
     .layer-item:hover .layer-count {
-      background: var(--primary-cesium);
-      transform: scale(1.15);
-      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+      background: linear-gradient(135deg, var(--primary-emerald), var(--primary-emerald-light));
+      color: var(--white-premium);
+      transform: scale(1.2);
+      box-shadow: 
+        0 4px 20px rgba(10, 92, 54, 0.5),
+        var(--gold-glow);
     }
 
-    /* Estado Checked Mejorado */
+    /* Estado Checked Premium */
     .layer-item input[type="checkbox"]:checked + .layer-label .layer-color {
       border-color: rgba(255, 255, 255, 0.9);
-      box-shadow: 0 0 0 3px currentColor, 0 6px 20px currentColor;
+      box-shadow: 
+        0 0 0 4px currentColor,
+        0 6px 25px currentColor,
+        var(--gold-glow);
       animation: pulse-glow 2s infinite;
     }
 
     @keyframes pulse-glow {
-      0%, 100% { box-shadow: 0 0 0 3px currentColor, 0 6px 20px currentColor; }
-      50% { box-shadow: 0 0 0 4px currentColor, 0 8px 25px currentColor; }
+      0%, 100% { 
+        box-shadow: 
+          0 0 0 4px currentColor,
+          0 6px 25px currentColor,
+          var(--gold-glow);
+      }
+      50% { 
+        box-shadow: 
+          0 0 0 6px currentColor,
+          0 8px 30px currentColor,
+          0 0 40px currentColor;
+      }
     }
 
     .layer-item input[type="checkbox"]:checked + .layer-label .layer-text {
-      color: white;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.4);
-      font-weight: 600;
+      color: var(--gold-light);
+      text-shadow: 0 2px 12px rgba(212, 175, 55, 0.4);
+      font-weight: 700;
     }
 
     .layer-item input[type="checkbox"]:checked + .layer-label .layer-count {
-      background: var(--success-cesium);
-      color: white;
+      background: linear-gradient(135deg, var(--gold-primary), var(--gold-dark));
+      color: var(--black-premium);
+      font-weight: 900;
     }
 
-    /* Footer del Panel */
+    /* Footer del Panel Premium */
     .panel-footer {
-      padding: 20px;
-      background: rgba(15, 23, 42, 0.9);
-      border-top: 1px solid var(--glass-border);
-      backdrop-filter: blur(15px);
+      padding: 25px;
+      background: linear-gradient(135deg, rgba(10, 10, 10, 0.95), rgba(26, 26, 26, 0.9));
+      border-top: 1px solid rgba(212, 175, 55, 0.2);
+      backdrop-filter: blur(20px);
     }
 
     .system-stats {
       display: flex;
       justify-content: space-between;
-      font-size: 0.9em;
-      color: var(--light-cesium);
-      gap: 10px;
+      font-size: 0.95em;
+      color: var(--gold-light);
+      gap: 12px;
     }
 
     .system-stats span {
-      background: rgba(255, 255, 255, 0.08);
-      padding: 8px 14px;
-      border-radius: 10px;
-      font-weight: 600;
+      background: linear-gradient(135deg, rgba(10, 92, 54, 0.2), rgba(212, 175, 55, 0.1));
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-weight: 700;
       flex: 1;
       text-align: center;
-      border: 1px solid var(--glass-border);
-      transition: all 0.3s ease;
+      border: 1px solid rgba(212, 175, 55, 0.2);
+      transition: all 0.4s ease;
+      backdrop-filter: blur(15px);
     }
 
     .system-stats span:hover {
-      background: rgba(255, 255, 255, 0.12);
-      transform: translateY(-2px);
+      background: linear-gradient(135deg, rgba(10, 92, 54, 0.3), rgba(212, 175, 55, 0.2));
+      transform: translateY(-3px);
+      box-shadow: 
+        0 5px 20px rgba(0,0,0,0.3),
+        var(--gold-glow);
     }
 
-    /* ===== PANEL DE INFORMACIÓN SUPREMO ===== */
+    /* ===== PANEL DE INFORMACIÓN SUPREMO PREMIUM ===== */
     .cesium-info-panel {
       position: absolute;
-      top: 25px;
-      right: 25px;
-      width: 380px;
+      top: 30px;
+      right: 30px;
+      width: 420px;
       background: var(--glass-bg);
       backdrop-filter: var(--blur-effect);
       border: 1px solid var(--glass-border);
-      border-radius: 25px;
-      box-shadow: var(--glass-shadow);
+      border-radius: 30px;
+      box-shadow: var(--glass-shadow), var(--gold-glow);
       z-index: 1000;
-      transform: translateX(450px);
+      transform: translateX(480px);
       opacity: 0;
-      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-      border: 1px solid rgba(255, 255, 255, 0.15);
+      transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid rgba(212, 175, 55, 0.25);
       max-height: 85vh;
       overflow: hidden;
     }
@@ -479,12 +612,12 @@
       opacity: 1;
     }
 
-    /* Header del Info Panel */
+    /* Header del Info Panel Premium */
     .info-header {
-      background: linear-gradient(135deg, var(--accent-cesium), var(--primary-cesium));
-      padding: 25px;
-      color: white;
-      border-radius: 25px 25px 0 0;
+      background: linear-gradient(135deg, var(--primary-emerald), var(--gold-primary));
+      padding: 30px;
+      color: var(--white-premium);
+      border-radius: 30px 30px 0 0;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -499,8 +632,8 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
-      animation: shine 3s infinite linear;
+      background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.15) 50%, transparent 70%);
+      animation: shine 4s infinite linear;
     }
 
     @keyframes shine {
@@ -510,130 +643,141 @@
 
     .info-header h3 {
       margin: 0;
-      font-size: 1.4em;
-      font-weight: 700;
+      font-size: 1.5em;
+      font-weight: 800;
       flex: 1;
       position: relative;
       z-index: 2;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 15px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.4);
     }
 
     .btn-close {
-      background: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.25);
       border: none;
-      color: white;
-      width: 36px;
-      height: 36px;
+      color: var(--white-premium);
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       cursor: pointer;
-      font-size: 1.3em;
+      font-size: 1.4em;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.3s ease;
+      transition: all 0.4s ease;
       position: relative;
       z-index: 2;
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
     }
 
     .btn-close:hover {
-      background: rgba(255, 255, 255, 0.3);
-      transform: rotate(90deg) scale(1.1);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      background: rgba(255, 255, 255, 0.4);
+      transform: rotate(90deg) scale(1.15);
+      box-shadow: 
+        0 4px 20px rgba(0,0,0,0.4),
+        var(--gold-glow);
     }
 
-    /* Contenido del Info Panel */
+    /* Contenido del Info Panel Premium */
     .info-content {
-      padding: 25px;
-      background: rgba(15, 23, 42, 0.85);
-      max-height: calc(85vh - 100px);
+      padding: 30px;
+      background: linear-gradient(135deg, rgba(10, 10, 10, 0.9), rgba(26, 26, 26, 0.95));
+      max-height: calc(85vh - 120px);
       overflow-y: auto;
     }
 
     .info-content::-webkit-scrollbar {
-      width: 6px;
+      width: 8px;
     }
 
     .info-content::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 3px;
+      background: rgba(212, 175, 55, 0.1);
+      border-radius: 6px;
     }
 
     .info-content::-webkit-scrollbar-thumb {
-      background: var(--accent-cesium);
-      border-radius: 3px;
+      background: linear-gradient(var(--gold-primary), var(--primary-emerald));
+      border-radius: 6px;
+      border: 2px solid rgba(10, 10, 10, 0.9);
     }
 
-    /* Estado sin selección */
+    /* Estado sin selección Premium */
     .no-selection {
       text-align: center;
-      color: var(--light-cesium);
-      padding: 50px 25px;
+      color: var(--gold-light);
+      padding: 60px 30px;
     }
 
     .no-selection i {
-      font-size: 4rem;
-      margin-bottom: 20px;
+      font-size: 5rem;
+      margin-bottom: 25px;
       display: block;
-      opacity: 0.6;
-      background: linear-gradient(135deg, var(--accent-cesium), var(--primary-cesium));
+      opacity: 0.8;
+      background: linear-gradient(135deg, var(--gold-primary), var(--primary-emerald));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
     }
 
     .no-selection p {
       margin: 0;
-      font-size: 1.1em;
-      line-height: 1.6;
-      opacity: 0.8;
+      font-size: 1.2em;
+      line-height: 1.7;
+      opacity: 0.9;
+      font-weight: 500;
     }
 
-    /* Información de Entidad Mejorada */
+    /* Información de Entidad Premium */
     .entity-info {
-      color: var(--light-cesium);
+      color: var(--white-premium);
     }
 
     .info-header .info-icon {
-      font-size: 1.8em;
-      margin-right: 12px;
-      filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4));
+      font-size: 2em;
+      margin-right: 15px;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
     }
 
     .entity-info h3 {
-      margin: 0 0 20px 0;
-      font-size: 1.5em;
-      color: white;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.4);
-      background: linear-gradient(135deg, #fff, #e2e8f0);
+      margin: 0 0 25px 0;
+      font-size: 1.6em;
+      color: var(--gold-light);
+      text-shadow: 0 2px 12px rgba(212, 175, 55, 0.4);
+      background: linear-gradient(135deg, var(--gold-light), var(--gold-primary));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+      font-weight: 800;
     }
 
     .info-details {
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 15px;
-      padding: 20px;
-      border: 1px solid var(--glass-border);
-      backdrop-filter: blur(10px);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04));
+      border-radius: 20px;
+      padding: 25px;
+      border: 1px solid rgba(212, 175, 55, 0.2);
+      backdrop-filter: blur(15px);
+      box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        0 5px 20px rgba(0,0,0,0.2);
     }
 
     .info-row {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 16px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      transition: all 0.3s ease;
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+      transition: all 0.4s ease;
     }
 
     .info-row:hover {
-      border-bottom-color: var(--accent-cesium);
-      transform: translateX(5px);
+      border-bottom-color: var(--gold-primary);
+      transform: translateX(8px);
     }
 
     .info-row:last-child {
@@ -643,58 +787,59 @@
     }
 
     .info-label {
-      font-weight: 600;
-      color: var(--accent-cesium);
+      font-weight: 700;
+      color: var(--gold-primary);
       flex: 1;
-      font-size: 0.95em;
+      font-size: 1em;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.8px;
     }
 
     .info-value {
       flex: 2;
       text-align: right;
-      color: white;
-      font-weight: 500;
-      font-size: 1em;
-      line-height: 1.4;
+      color: var(--white-premium);
+      font-weight: 600;
+      font-size: 1.05em;
+      line-height: 1.5;
     }
 
-    /* ===== CONTROLES INFERIORES ===== */
+    /* ===== CONTROLES INFERIORES PREMIUM ===== */
     .cesium-controls {
       position: absolute;
-      bottom: 25px;
+      bottom: 30px;
       left: 50%;
       transform: translateX(-50%);
       display: flex;
-      gap: 12px;
+      gap: 15px;
       z-index: 1000;
       background: var(--glass-bg);
       backdrop-filter: var(--blur-effect);
-      padding: 15px;
-      border-radius: 20px;
+      padding: 20px;
+      border-radius: 25px;
       border: 1px solid var(--glass-border);
-      box-shadow: var(--glass-shadow);
+      box-shadow: var(--glass-shadow), var(--gold-glow);
     }
 
     .btn-cesium {
-      background: rgba(255, 255, 255, 0.1);
-      color: white;
-      border: 1px solid var(--glass-border);
-      padding: 12px 20px;
-      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(10, 92, 54, 0.15));
+      color: var(--white-premium);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      padding: 14px 24px;
+      border-radius: 15px;
       cursor: pointer;
-      backdrop-filter: blur(15px);
-      transition: all 0.3s ease;
-      font-weight: 600;
-      font-size: 0.9em;
+      backdrop-filter: blur(20px);
+      transition: all 0.4s ease;
+      font-weight: 700;
+      font-size: 0.95em;
       display: flex;
       align-items: center;
-      gap: 8px;
-      min-width: 120px;
+      gap: 10px;
+      min-width: 140px;
       justify-content: center;
       position: relative;
       overflow: hidden;
+      letter-spacing: 0.5px;
     }
 
     .btn-cesium::before {
@@ -704,8 +849,8 @@
       left: -100%;
       width: 100%;
       height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-      transition: left 0.5s;
+      background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.2), transparent);
+      transition: left 0.6s;
     }
 
     .btn-cesium:hover::before {
@@ -713,39 +858,42 @@
     }
 
     .btn-cesium:hover {
-      background: rgba(255, 255, 255, 0.2);
-      transform: translateY(-3px);
-      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-      border-color: rgba(255, 255, 255, 0.3);
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(10, 92, 54, 0.25));
+      transform: translateY(-4px);
+      box-shadow: 
+        0 8px 30px rgba(0,0,0,0.4),
+        0 0 20px rgba(212, 175, 55, 0.3);
+      border-color: rgba(212, 175, 55, 0.5);
     }
 
     .btn-cesium i {
-      font-size: 1.1em;
+      font-size: 1.2em;
     }
 
-    /* ===== LEYENDA MEJORADA ===== */
+    /* ===== LEYENDA PREMIUM ===== */
     .cesium-legend {
       position: absolute;
-      bottom: 25px;
-      right: 25px;
+      bottom: 30px;
+      right: 30px;
       background: var(--glass-bg);
       backdrop-filter: var(--blur-effect);
-      color: white;
-      padding: 20px;
-      border-radius: 15px;
+      color: var(--white-premium);
+      padding: 25px;
+      border-radius: 20px;
       border: 1px solid var(--glass-border);
-      box-shadow: var(--glass-shadow);
-      min-width: 200px;
+      box-shadow: var(--glass-shadow), var(--gold-glow);
+      min-width: 220px;
     }
 
     .cesium-legend h4 {
-      margin: 0 0 15px 0;
-      font-size: 1.1em;
-      font-weight: 600;
-      color: var(--light-cesium);
+      margin: 0 0 18px 0;
+      font-size: 1.15em;
+      font-weight: 700;
+      color: var(--gold-light);
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
 
     .cesium-legend ul {
@@ -757,62 +905,217 @@
     .cesium-legend li {
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
-      padding: 6px 0;
-      font-size: 0.9em;
+      gap: 12px;
+      margin-bottom: 12px;
+      padding: 8px 0;
+      font-size: 0.95em;
       transition: all 0.3s ease;
+      font-weight: 500;
     }
 
     .cesium-legend li:hover {
-      transform: translateX(5px);
-      color: var(--accent-cesium);
+      transform: translateX(8px);
+      color: var(--gold-primary);
     }
 
     .cesium-legend li:last-child {
       margin-bottom: 0;
     }
 
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 768px) {
+    .legend-color {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+
+    /* ===== RESPONSIVE COMPLETO ===== */
+    @media (max-width: 1200px) {
+      .cesium-frame {
+        height: 700px;
+      }
+      
       .cesium-control-panel {
-        width: 300px;
-        left: 15px;
-        top: 15px;
+        width: 350px;
       }
       
       .cesium-info-panel {
+        width: 380px;
+      }
+    }
+
+    @media (max-width: 992px) {
+      .cesium-frame {
+        height: 600px;
+      }
+      
+      .cesium-control-panel {
         width: 320px;
-        right: 15px;
+        left: 20px;
+        top: 20px;
+      }
+      
+      .cesium-info-panel {
+        width: 340px;
+        right: 20px;
       }
       
       .cesium-controls {
         flex-wrap: wrap;
         justify-content: center;
         max-width: 90%;
+        padding: 15px;
       }
       
       .btn-cesium {
-        min-width: 100px;
-        font-size: 0.8em;
-        padding: 10px 15px;
+        min-width: 120px;
+        font-size: 0.9em;
+        padding: 12px 18px;
       }
     }
 
-    @media (max-width: 480px) {
+    @media (max-width: 768px) {
+      .cesium-container {
+        margin: 30px 0;
+        border-radius: 20px;
+      }
+      
+      .cesium-frame {
+        height: 500px;
+        border-radius: 18px;
+      }
+      
+      .cesium-control-panel {
+        width: 300px;
+        left: 15px;
+        top: 15px;
+        border-radius: 25px;
+      }
+      
+      .cesium-info-panel {
+        width: 300px;
+        right: 15px;
+        border-radius: 25px;
+      }
+      
+      .control-header,
+      .info-header {
+        padding: 20px;
+      }
+      
+      .layers-list,
+      .info-content {
+        padding: 20px;
+      }
+      
+      .cesium-controls {
+        bottom: 20px;
+        padding: 12px;
+        border-radius: 20px;
+      }
+      
+      .btn-cesium {
+        min-width: 110px;
+        padding: 10px 15px;
+        font-size: 0.85em;
+      }
+      
+      .cesium-legend {
+        bottom: 20px;
+        right: 20px;
+        padding: 20px;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .cesium-frame {
+        height: 400px;
+      }
+      
       .cesium-control-panel,
       .cesium-info-panel {
         width: calc(100% - 30px);
         left: 15px;
         right: 15px;
+        position: relative;
+        margin-bottom: 15px;
       }
       
-      .cesium-frame {
-        height: 600px;
+      .cesium-control-panel {
+        top: 15px;
+      }
+      
+      .cesium-info-panel {
+        top: 15px;
+        transform: none;
+        opacity: 1;
+        position: relative;
+      }
+      
+      .cesium-controls {
+        position: relative;
+        bottom: auto;
+        left: auto;
+        transform: none;
+        margin: 20px auto;
+        width: calc(100% - 30px);
+      }
+      
+      .cesium-legend {
+        position: relative;
+        bottom: auto;
+        right: auto;
+        margin: 20px auto;
+        width: calc(100% - 30px);
+      }
+      
+      .control-buttons {
+        flex-direction: column;
+      }
+      
+      .btn-control {
+        width: 100%;
       }
     }
 
-    /* ===== EFECTOS DE PARTÍCULAS ===== */
+    @media (max-width: 480px) {
+      .cesium-frame {
+        height: 350px;
+      }
+      
+      .cesium-loading {
+        min-width: 280px;
+        padding: 30px 25px;
+      }
+      
+      .cesium-loading i {
+        font-size: 3.5rem;
+      }
+      
+      .cesium-loading p {
+        font-size: 1.1em;
+      }
+      
+      .loading-spinner {
+        width: 50px;
+        height: 50px;
+      }
+      
+      .layer-item {
+        padding: 12px;
+      }
+      
+      .layer-label {
+        gap: 12px;
+      }
+      
+      .layer-text {
+        font-size: 0.95em;
+      }
+    }
+
+    /* ===== EFECTOS DE PARTÍCULAS PREMIUM ===== */
     .cesium-particles {
       position: absolute;
       top: 0;
@@ -825,32 +1128,41 @@
 
     .particle {
       position: absolute;
-      background: var(--accent-cesium);
       border-radius: 50%;
-      opacity: 0.4;
-      animation: float 8s infinite ease-in-out;
+      opacity: 0.6;
+      animation: float 10s infinite ease-in-out;
+    }
+
+    .particle:nth-child(odd) {
+      background: var(--gold-primary);
+      box-shadow: 0 0 20px var(--gold-primary);
+    }
+
+    .particle:nth-child(even) {
+      background: var(--primary-emerald);
+      box-shadow: 0 0 20px var(--primary-emerald);
     }
 
     @keyframes float {
       0%, 100% { 
         transform: translateY(0px) rotate(0deg) scale(1); 
-        opacity: 0.3;
+        opacity: 0.4;
       }
       33% { 
-        transform: translateY(-20px) rotate(120deg) scale(1.1);
-        opacity: 0.6;
+        transform: translateY(-30px) rotate(120deg) scale(1.2);
+        opacity: 0.8;
       }
       66% { 
-        transform: translateY(10px) rotate(240deg) scale(0.9);
-        opacity: 0.4;
+        transform: translateY(15px) rotate(240deg) scale(0.8);
+        opacity: 0.6;
       }
     }
 
-    /* ===== ANIMACIONES ESPECIALES ===== */
+    /* ===== ANIMACIONES ESPECIALES PREMIUM ===== */
     @keyframes fadeInUp {
       from {
         opacity: 0;
-        transform: translateY(40px);
+        transform: translateY(50px);
       }
       to {
         opacity: 1;
@@ -859,12 +1171,21 @@
     }
 
     @keyframes glow {
-      0%, 100% { box-shadow: 0 0 5px currentColor; }
-      50% { box-shadow: 0 0 20px currentColor, 0 0 30px currentColor; }
+      0%, 100% { 
+        box-shadow: 
+          0 0 10px currentColor,
+          var(--gold-glow);
+      }
+      50% { 
+        box-shadow: 
+          0 0 25px currentColor,
+          0 0 40px currentColor,
+          var(--neon-glow);
+      }
     }
 
     .glow {
-      animation: glow 2s ease-in-out infinite;
+      animation: glow 3s ease-in-out infinite;
     }
 
     /* ===== MEJORAS PARA LOS CONTROLES NATIVOS DE CESIUM ===== */
@@ -872,37 +1193,272 @@
       background: var(--glass-bg) !important;
       backdrop-filter: var(--blur-effect) !important;
       border: 1px solid var(--glass-border) !important;
-      border-radius: 15px !important;
-      box-shadow: var(--glass-shadow) !important;
+      border-radius: 20px !important;
+      box-shadow: var(--glass-shadow), var(--gold-glow) !important;
     }
 
     .cesium-button {
-      background: rgba(255, 255, 255, 0.1) !important;
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(10, 92, 54, 0.1)) !important;
       border: 1px solid var(--glass-border) !important;
-      border-radius: 10px !important;
-      transition: all 0.3s ease !important;
-      color: white !important;
+      border-radius: 12px !important;
+      transition: all 0.4s ease !important;
+      color: var(--white-premium) !important;
     }
 
     .cesium-button:hover {
-      background: rgba(255, 255, 255, 0.2) !important;
-      transform: translateY(-2px) !important;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.3) !important;
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(10, 92, 54, 0.2)) !important;
+      transform: translateY(-3px) !important;
+      box-shadow: 
+        0 6px 25px rgba(0,0,0,0.4),
+        var(--gold-glow) !important;
+    }
+
+    /* ===== SECCIONES GENERALES RESPONSIVE ===== */
+    .section-title {
+      font-size: 3em;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, var(--gold-primary), var(--primary-emerald-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    .section-description {
+      font-size: 1.2em;
+      text-align: center;
+      margin-bottom: 40px;
+      color: var(--gold-light);
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 768px) {
+      .section-title {
+        font-size: 2.5em;
+      }
+      
+      .section-description {
+        font-size: 1.1em;
+        padding: 0 20px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .section-title {
+        font-size: 2em;
+      }
+      
+      .section-description {
+        font-size: 1em;
+      }
+    }
+
+    /* ===== NAVEGACIÓN RESPONSIVE ===== */
+    .navbar {
+      background: rgba(10, 10, 10, 0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--glass-border);
+      padding: 15px 0;
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 10000;
+    }
+
+    .nav-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .nav-logo {
+      font-size: 1.8em;
+      font-weight: 800;
+      color: var(--gold-primary);
+      text-decoration: none;
+    }
+
+    .nav-menu {
+      display: flex;
+      list-style: none;
+      gap: 30px;
+    }
+
+    .nav-link {
+      color: var(--white-premium);
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      padding: 8px 16px;
+      border-radius: 10px;
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+      background: linear-gradient(135deg, var(--primary-emerald), var(--gold-primary));
+      color: var(--black-premium);
+    }
+
+    .nav-toggle {
+      display: none;
+      font-size: 1.5em;
+      color: var(--gold-primary);
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .nav-menu {
+        position: fixed;
+        top: 70px;
+        left: -100%;
+        width: 100%;
+        background: rgba(10, 10, 10, 0.98);
+        backdrop-filter: blur(30px);
+        flex-direction: column;
+        align-items: center;
+        padding: 40px 0;
+        transition: left 0.3s ease;
+        border-top: 1px solid var(--glass-border);
+      }
+      
+      .nav-menu.active {
+        left: 0;
+      }
+      
+      .nav-toggle {
+        display: block;
+      }
+      
+      .nav-link {
+        padding: 15px 30px;
+        font-size: 1.1em;
+      }
+    }
+
+    /* ===== HERO SECTION RESPONSIVE ===== */
+    .hero {
+      height: 100vh;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      margin-top: 70px;
+    }
+
+    .hero-video-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -2;
+    }
+
+    .hero-video-bg video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .hero-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(10, 10, 10, 0.7), rgba(10, 92, 54, 0.3));
+      z-index: -1;
+    }
+
+    .hero-content {
+      text-align: center;
+      color: var(--white-premium);
+      z-index: 1;
+      padding: 0 20px;
+    }
+
+    .hero-title {
+      font-size: 4.5em;
+      font-weight: 900;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, var(--gold-primary), var(--white-premium));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 4px 8px rgba(0,0,0,0.5);
+    }
+
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 3em;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero-title {
+        font-size: 2.5em;
+      }
+    }
+
+    /* ===== FOOTER RESPONSIVE ===== */
+    footer {
+      background: linear-gradient(135deg, var(--black-premium), var(--black-dark));
+      color: var(--gold-light);
+      text-align: center;
+      padding: 40px 20px;
+      border-top: 1px solid var(--glass-border);
+      margin-top: 60px;
+      font-weight: 600;
+    }
+
+    /* ===== BOTÓN BACK TO TOP ===== */
+    #backToTop {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: linear-gradient(135deg, var(--primary-emerald), var(--gold-primary));
+      color: var(--black-premium);
+      border: none;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.5em;
+      font-weight: 800;
+      box-shadow: var(--glass-shadow), var(--gold-glow);
+      transition: all 0.4s ease;
+      z-index: 1000;
+      display: none;
+    }
+
+    #backToTop:hover {
+      transform: translateY(-5px) scale(1.1);
+      box-shadow: 
+        0 10px 30px rgba(0,0,0,0.5),
+        0 0 30px rgba(212, 175, 55, 0.6);
+    }
+
+    @media (max-width: 768px) {
+      #backToTop {
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        font-size: 1.3em;
+      }
     }
   </style>
-
-  <!-- SCRIPTS -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-  <script src="scripts/modules/animations.js" defer></script>
 </head>
 <body>
-  <!-- Tu contenido existente se mantiene igual -->
-  <a class="skip-link" href="#inicio">Saltar al contenido</a>
-  
   <!-- Navigation -->
   <nav class="navbar">
     <div class="nav-container">
@@ -931,9 +1487,8 @@
     </div>
     <div class="hero-overlay"></div>
     <div class="hero-content">
-      <h1 class="hero-title" aria-label="Isla del Sol">
-        <span class="hero-title-line" aria-hidden="true"></span>
-      </h1>
+      <h1 class="hero-title">Isla del Sol</h1>
+      <p class="hero-subtitle">Lago Titicaca - Bolivia</p>
     </div>
     <div class="hero-scroll-indicator">
       <div class="scroll-icon">
@@ -945,465 +1500,289 @@
 
   <button id="backToTop" title="Volver arriba">↑</button>
 
- <!-- 2. MAPA INTERACTIVO MEJORADO -->
-<section id="mapSection" class="map-section fade-in">
+  <!-- 2. MAPA INTERACTIVO MEJORADO -->
+  <section id="mapSection" class="map-section fade-in">
     <div class="container">
-        <h2 class="section-title">Mapa Turístico Interactivo</h2>
-        <p class="section-description">
-            Explora todos los puntos de interés, rutas y servicios de la Isla del Sol en nuestro mapa 2D interactivo
-        </p>
-        
-        <div class="map-container">
-            <div id="map" class="map-frame">
-                <div class="map-loading">
-                    <i class="fas fa-map-marked-alt"></i>
-                    <p>Inicializando mapa interactivo...</p>
-                    <div class="loading-spinner"></div>
-                </div>
-            </div>
-            
-            <!-- Contenedor para controles unificados -->
-            <div class="map-controls-container">
-                <!-- Los controles se generan automáticamente por JavaScript -->
-            </div>
+      <h2 class="section-title">Mapa Turístico Interactivo</h2>
+      <p class="section-description">
+        Explora todos los puntos de interés, rutas y servicios de la Isla del Sol en nuestro mapa 2D interactivo
+      </p>
+      
+      <div class="map-container">
+        <div id="map" class="map-frame">
+          <div class="map-loading">
+            <i class="fas fa-map-marked-alt"></i>
+            <p>Inicializando mapa interactivo...</p>
+            <div class="loading-spinner"></div>
+          </div>
         </div>
-    </div>
-</section>
-
-  <!-- 3. ✅ MAPA 3D SUPREMO CON CESIUM -->
-  <section id="map3dSection" class="map3d-section" data-aos="fade-up">
-    <div class="container">
-        <h2 class="section-title">Isla del Sol - Vista 3D </h2>
-        <p class="section-description">
-            Explora la isla en una experiencia 3D inmersiva con terreno real, efectos visuales avanzados y controles intuitivos
-        </p>
-        
-        <div class="cesium-container">
-            <div id="cesiumContainer" class="cesium-frame">
-                <div class="cesium-loading">
-                    <i class="fas fa-globe-americas"></i>
-                    <p>Inicializando mundo 3D...</p>
-                    <div class="loading-spinner"></div>
-                </div>
-            </div>
-            
-            <!-- Los controles se generan automáticamente por JavaScript -->
-        </div>
+      </div>
     </div>
   </section>
 
- <!-- GALERÍA MEJORADA -->
-<section id="gallery" class="gallery-section">
-    <div class="section-background-overlay"></div>
+  <!-- 3. ✅ MAPA 3D SUPREMO CON CESIUM PREMIUM -->
+  <section id="map3dSection" class="map3d-section">
     <div class="container">
-        <h2 class="section-title" data-aos="fade-up">Galería de la Isla del Sol</h2>
-        <p class="section-description" data-aos="fade-up" data-aos-delay="200">
-            Descubre la belleza, cultura y paisajes únicos de este lugar sagrado a través de nuestra colección fotográfica
-        </p>
-        
-        <!-- Filtros de Categoría -->
-        <div class="gallery-filters" data-aos="fade-up" data-aos-delay="300">
-            <button class="filter-btn active" data-filter="all">
-                <i class="fas fa-th-large"></i> Todas
-            </button>
-            <button class="filter-btn" data-filter="paisajes">
-                <i class="fas fa-mountain"></i> Paisajes
-            </button>
-            <button class="filter-btn" data-filter="cultura">
-                <i class="fas fa-landmark"></i> Cultura
-            </button>
-            <button class="filter-btn" data-filter="arquitectura">
-                <i class="fas fa-archway"></i> Arquitectura
-            </button>
-            <button class="filter-btn" data-filter="gente">
-                <i class="fas fa-users"></i> Comunidad
-            </button>
-            <button class="filter-btn" data-filter="flora-fauna">
-                <i class="fas fa-leaf"></i> Flora & Fauna
-            </button>
-        </div>
-        
-        <!-- Contador de elementos -->
-        <div class="gallery-counter" data-aos="fade-up" data-aos-delay="350">
-            <span id="gallery-count">12</span> imágenes encontradas
-        </div>
-        
-        <!-- Grid de Galería Mejorado -->
-        <div class="gallery-grid" data-aos="fade-up" data-aos-delay="400">
-            <!-- Paisajes -->
-            <div class="gallery-item" data-category="paisajes" data-image="assets/images/paisaje1.jpg" data-caption="Amanecer en la Isla del Sol">
-                <div class="gallery-item-inner">
-                    <div class="gallery-image-container">
-                        <img src="assets/images/paisaje1.jpg" alt="Amanecer en la Isla del Sol" loading="lazy">
-                        <div class="gallery-badge">
-                            <i class="fas fa-mountain"></i>
-                        </div>
-                    </div>
-                    <div class="gallery-overlay">
-                        <div class="gallery-content">
-                            <h3>Amanecer en la Isla</h3>
-                            <p>Primeros rayos del sol iluminando el Lago Titicaca</p>
-                            <div class="gallery-actions">
-                                <button class="gallery-zoom" title="Ampliar imagen">
-                                    <i class="fas fa-search-plus"></i>
-                                </button>
-                                <button class="gallery-info" title="Más información">
-                                    <i class="fas fa-info-circle"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+      <h2 class="section-title">Isla del Sol - Vista 3D Premium</h2>
+      <p class="section-description">
+        Explora la isla en una experiencia 3D inmersiva con terreno real, efectos visuales avanzados y controles intuitivos
+      </p>
+      
+      <div class="cesium-container">
+        <div id="cesiumContainer" class="cesium-frame">
+          <div class="cesium-loading">
+            <i class="fas fa-globe-americas"></i>
+            <p>Inicializando mundo 3D premium...</p>
+            <div class="loading-spinner"></div>
+          </div>
+          
+          <!-- Panel de Control Premium -->
+          <div class="cesium-control-panel">
+            <div class="control-header">
+              <h3><i class="fas fa-layer-group"></i> Capas de Visualización</h3>
+              <div class="control-buttons">
+                <button class="btn-control" id="btn-all-layers">
+                  <i class="fas fa-eye"></i> Todas
+                </button>
+                <button class="btn-control" id="btn-none-layers">
+                  <i class="fas fa-eye-slash"></i> Ninguna
+                </button>
+              </div>
             </div>
             
-            <div class="gallery-item" data-category="paisajes" data-image="assets/images/paisaje2.jpg" data-caption="Atardecer desde Palla Khasa">
-                <div class="gallery-item-inner">
-                    <div class="gallery-image-container">
-                        <img src="assets/images/paisaje2.jpg" alt="Atardecer desde Palla Khasa" loading="lazy">
-                        <div class="gallery-badge">
-                            <i class="fas fa-mountain"></i>
-                        </div>
-                    </div>
-                    <div class="gallery-overlay">
-                        <div class="gallery-content">
-                            <h3>Atardecer Místico</h3>
-                            <p>Vista panorámica desde el mirador Palla Khasa</p>
-                            <div class="gallery-actions">
-                                <button class="gallery-zoom" title="Ampliar imagen">
-                                    <i class="fas fa-search-plus"></i>
-                                </button>
-                                <button class="gallery-info" title="Más información">
-                                    <i class="fas fa-info-circle"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+            <div class="layers-list">
+              <!-- Categoría: Infraestructura -->
+              <div class="category-section">
+                <h4><i class="fas fa-road"></i> Infraestructura</h4>
+                
+                <div class="layer-item">
+                  <input type="checkbox" id="layer-roads" checked>
+                  <label for="layer-roads" class="layer-label">
+                    <span class="layer-color" style="background: #d4af37;"></span>
+                    <span class="layer-emoji">🛣️</span>
+                    <span class="layer-text">Carreteras Principales</span>
+                    <span class="layer-count">12</span>
+                  </label>
                 </div>
+                
+                <div class="layer-item">
+                  <input type="checkbox" id="layer-trails" checked>
+                  <label for="layer-trails" class="layer-label">
+                    <span class="layer-color" style="background: #0a5c36;"></span>
+                    <span class="layer-emoji">🥾</span>
+                    <span class="layer-text">Senderos Turísticos</span>
+                    <span class="layer-count">8</span>
+                  </label>
+                </div>
+                
+                <div class="layer-item">
+                  <input type="checkbox" id="layer-ports">
+                  <label for="layer-ports" class="layer-label">
+                    <span class="layer-color" style="background: #0f7a4a;"></span>
+                    <span class="layer-emoji">⚓</span>
+                    <span class="layer-text">Puertos y Embarcaderos</span>
+                    <span class="layer-count">4</span>
+                  </label>
+                </div>
+              </div>
+              
+              <!-- Categoría: Sitios Arqueológicos -->
+              <div class="category-section">
+                <h4><i class="fas fa-landmark"></i> Sitios Arqueológicos</h4>
+                
+                <div class="layer-item">
+                  <input type="checkbox" id="layer-ruins" checked>
+                  <label for="layer-ruins" class="layer-label">
+                    <span class="layer-color" style="background: #b8941f;"></span>
+                    <span class="layer-emoji">🏛️</span>
+                    <span class="layer-text">Ruinas Incas</span>
+                    <span class="layer-count">15</span>
+                  </label>
+                </div>
+                
+                <div class="layer-item">
+                  <input type="checkbox" id="layer-temples">
+                  <label for="layer-temples" class="layer-label">
+                    <span class="layer-color" style="background: #064028;"></span>
+                    <span class="layer-emoji">⛰️</span>
+                    <span class="layer-text">Templos Sagrados</span>
+                    <span class="layer-count">7</span>
+                  </label>
+                </div>
+              </div>
+              
+              <!-- Categoría: Servicios Turísticos -->
+              <div class="category-section">
+                <h4><i class="fas fa-concierge-bell"></i> Servicios Turísticos</h4>
+                
+                <div class="layer-item">
+                  <input type="checkbox" id="layer-hotels">
+                  <label for="layer-hotels" class="layer-label">
+                    <span class="layer-color" style="background: #f4e4a6;"></span>
+                    <span class="layer-emoji">🏨</span>
+                    <span class="layer-text">Alojamientos</span>
+                    <span class="layer-count">23</span>
+                  </label>
+                </div>
+                
+                <div class="layer-item">
+                  <input type="checkbox" id="layer-restaurants">
+                  <label for="layer-restaurants" class="layer-label">
+                    <span class="layer-color" style="background: #c0c0c0;"></span>
+                    <span class="layer-emoji">🍽️</span>
+                    <span class="layer-text">Restaurantes</span>
+                    <span class="layer-count">18</span>
+                  </label>
+                </div>
+              </div>
+              
+              <!-- Categoría: Natural -->
+              <div class="category-section">
+                <h4><i class="fas fa-mountain"></i> Recursos Naturales</h4>
+                
+                <div class="layer-item">
+                  <input type="checkbox" id="layer-water">
+                  <label for="layer-water" class="layer-label">
+                    <span class="layer-color" style="background: #06b6d4;"></span>
+                    <span class="layer-emoji">💧</span>
+                    <span class="layer-text">Fuentes de Agua</span>
+                    <span class="layer-count">9</span>
+                  </label>
+                </div>
+                
+                <div class="layer-item">
+                  <input type="checkbox" id="layer-views">
+                  <label for="layer-views" class="layer-label">
+                    <span class="layer-color" style="background: #10b981;"></span>
+                    <span class="layer-emoji">👁️</span>
+                    <span class="layer-text">Miradores Naturales</span>
+                    <span class="layer-count">6</span>
+                  </label>
+                </div>
+              </div>
             </div>
             
-            <!-- Cultura -->
-            <div class="gallery-item" data-category="cultura" data-image="assets/images/cultura1.jpg" data-caption="Ceremonia tradicional Aymara">
-                <div class="gallery-item-inner">
-                    <div class="gallery-image-container">
-                        <img src="assets/images/cultura1.jpg" alt="Ceremonia tradicional Aymara" loading="lazy">
-                        <div class="gallery-badge">
-                            <i class="fas fa-landmark"></i>
-                        </div>
-                    </div>
-                    <div class="gallery-overlay">
-                        <div class="gallery-content">
-                            <h3>Ceremonia Aymara</h3>
-                            <p>Ritual ancestral en honor a la Pachamama</p>
-                            <div class="gallery-actions">
-                                <button class="gallery-zoom" title="Ampliar imagen">
-                                    <i class="fas fa-search-plus"></i>
-                                </button>
-                                <button class="gallery-info" title="Más información">
-                                    <i class="fas fa-info-circle"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="panel-footer">
+              <div class="system-stats">
+                <span><i class="fas fa-layer-group"></i> 8 Capas</span>
+                <span><i class="fas fa-database"></i> 2.4MB</span>
+                <span><i class="fas fa-memory"></i> 64%</span>
+              </div>
             </div>
-            
-            <div class="gallery-item" data-category="cultura" data-image="assets/images/cultura2.jpg" data-caption="Tejedora local mostrando su arte">
-                <div class="gallery-item-inner">
-                    <div class="gallery-image-container">
-                        <img src="assets/images/cultura2.jpg" alt="Tejedora local mostrando su arte" loading="lazy">
-                        <div class="gallery-badge">
-                            <i class="fas fa-landmark"></i>
-                        </div>
-                    </div>
-                    <div class="gallery-overlay">
-                        <div class="gallery-content">
-                            <h3>Arte Textil</h3>
-                            <p>Tejedora local preservando técnicas ancestrales</p>
-                            <div class="gallery-actions">
-                                <button class="gallery-zoom" title="Ampliar imagen">
-                                    <i class="fas fa-search-plus"></i>
-                                </button>
-                                <button class="gallery-info" title="Más información">
-                                    <i class="fas fa-info-circle"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Arquitectura -->
-            <div class="gallery-item" data-category="arquitectura" data-image="assets/images/arquitectura1.jpg" data-caption="Ruinas del Templo del Sol">
-                <div class="gallery-item-inner">
-                    <div class="gallery-image-container">
-                        <img src="assets/images/arquitectura1.jpg" alt="Ruinas del Templo del Sol" loading="lazy">
-                        <div class="gallery-badge">
-                            <i class="fas fa-archway"></i>
-                        </div>
-                    </div>
-                    <div class="gallery-overlay">
-                        <div class="gallery-content">
-                            <h3>Templo del Sol</h3>
-                            <p>Ruinas incaicas con vista al lago sagrado</p>
-                            <div class="gallery-actions">
-                                <button class="gallery-zoom" title="Ampliar imagen">
-                                    <i class="fas fa-search-plus"></i>
-                                </button>
-                                <button class="gallery-info" title="Más información">
-                                    <i class="fas fa-info-circle"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="gallery-item" data-category="arquitectura" data-image="assets/images/arquitectura2.jpg" data-caption="Gradas ancestrales de Yumani">
-                <div class="gallery-item-inner">
-                    <div class="gallery-image-container">
-                        <img src="assets/images/arquitectura2.jpg" alt="Gradas ancestrales de Yumani" loading="lazy">
-                        <div class="gallery-badge">
-                            <i class="fas fa-archway"></i>
-                        </div>
-                    </div>
-                    <div class="gallery-overlay">
-                        <div class="gallery-content">
-                            <h3>Gradas de Yumani</h3>
-                            <p>Escalinata precolombina hacia el puerto</p>
-                            <div class="gallery-actions">
-                                <button class="gallery-zoom" title="Ampliar imagen">
-                                    <i class="fas fa-search-plus"></i>
-                                </button>
-                                <button class="gallery-info" title="Más información">
-                                    <i class="fas fa-info-circle"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Gente -->
-            <div class="gallery-item" data-category="gente" data-image="assets/images/gente1.jpg" data-caption="Familia local en su hogar">
-                <div class="gallery-item-inner">
-                    <div class="gallery-image-container">
-                        <img src="assets/images/gente1.jpg" alt="Familia local en su hogar" loading="lazy">
-                        <div class="gallery-badge">
-                            <i class="fas fa-users"></i>
-                        </div>
-                    </div>
-                    <div class="gallery-overlay">
-                        <div class="gallery-content">
-                            <h3>Familia Isleña</h3>
-                            <p>Vida cotidiana en la comunidad local</p>
-                            <div class="gallery-actions">
-                                <button class="gallery-zoom" title="Ampliar imagen">
-                                    <i class="fas fa-search-plus"></i>
-                                </button>
-                                <button class="gallery-info" title="Más información">
-                                    <i class="fas fa-info-circle"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="gallery-item" data-category="gente" data-image="assets/images/gente2.jpg" data-caption="Niños jugando en la orilla">
-                <div class="gallery-item-inner">
-                    <div class="gallery-image-container">
-                        <img src="assets/images/gente2.jpg" alt="Niños jugando en la orilla" loading="lazy">
-                        <div class="gallery-badge">
-                            <i class="fas fa-users"></i>
-                        </div>
-                    </div>
-                    <div class="gallery-overlay">
-                        <div class="gallery-content">
-                            <h3>Infancia Isleña</h3>
-                            <p>Juegos tradicionales junto al lago</p>
-                            <div class="gallery-actions">
-                                <button class="gallery-zoom" title="Ampliar imagen">
-                                    <i class="fas fa-search-plus"></i>
-                                </button>
-                                <button class="gallery-info" title="Más información">
-                                    <i class="fas fa-info-circle"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Flora & Fauna -->
-            <div class="gallery-item" data-category="flora-fauna" data-image="assets/images/flora1.jpg" data-caption="Totora, planta sagrada del Titicaca">
-                <div class="gallery-item-inner">
-                    <div class="gallery-image-container">
-                        <img src="assets/images/flora1.jpg" alt="Totora, planta sagrada del Titicaca" loading="lazy">
-                        <div class="gallery-badge">
-                            <i class="fas fa-leaf"></i>
-                        </div>
-                    </div>
-                    <div class="gallery-overlay">
-                        <div class="gallery-content">
-                            <h3>Totora Sagrada</h3>
-                            <p>Planta utilizada para construir balsas tradicionales</p>
-                            <div class="gallery-actions">
-                                <button class="gallery-zoom" title="Ampliar imagen">
-                                    <i class="fas fa-search-plus"></i>
-                                </button>
-                                <button class="gallery-info" title="Más información">
-                                    <i class="fas fa-info-circle"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="gallery-item" data-category="flora-fauna" data-image="assets/images/fauna1.jpg" data-caption="Aves endémicas del Lago Titicaca">
-                <div class="gallery-item-inner">
-                    <div class="gallery-image-container">
-                        <img src="assets/images/fauna1.jpg" alt="Aves endémicas del Lago Titicaca" loading="lazy">
-                        <div class="gallery-badge">
-                            <i class="fas fa-leaf"></i>
-                        </div>
-                    </div>
-                    <div class="gallery-overlay">
-                        <div class="gallery-content">
-                            <h3>Aves del Titicaca</h3>
-                            <p>Especies únicas que habitan el lago navegable más alto</p>
-                            <div class="gallery-actions">
-                                <button class="gallery-zoom" title="Ampliar imagen">
-                                    <i class="fas fa-search-plus"></i>
-                                </button>
-                                <button class="gallery-info" title="Más información">
-                                    <i class="fas fa-info-circle"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Más imágenes de ejemplo -->
-            <div class="gallery-item" data-category="paisajes" data-image="assets/images/paisaje3.jpg" data-caption="Vista aérea de la Isla del Sol">
-                <div class="gallery-item-inner">
-                    <div class="gallery-image-container">
-                        <img src="assets/images/paisaje3.jpg" alt="Vista aérea de la Isla del Sol" loading="lazy">
-                        <div class="gallery-badge">
-                            <i class="fas fa-mountain"></i>
-                        </div>
-                    </div>
-                    <div class="gallery-overlay">
-                        <div class="gallery-content">
-                            <h3>Vista Aérea</h3>
-                            <p>Perspectiva única desde las alturas</p>
-                            <div class="gallery-actions">
-                                <button class="gallery-zoom" title="Ampliar imagen">
-                                    <i class="fas fa-search-plus"></i>
-                                </button>
-                                <button class="gallery-info" title="Más información">
-                                    <i class="fas fa-info-circle"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="gallery-item" data-category="cultura" data-image="assets/images/cultura3.jpg" data-caption="Músicos tradicionales">
-                <div class="gallery-item-inner">
-                    <div class="gallery-image-container">
-                        <img src="assets/images/cultura3.jpg" alt="Músicos tradicionales" loading="lazy">
-                        <div class="gallery-badge">
-                            <i class="fas fa-landmark"></i>
-                        </div>
-                    </div>
-                    <div class="gallery-overlay">
-                        <div class="gallery-content">
-                            <h3>Música Andina</h3>
-                            <p>Sonidos ancestrales que perduran</p>
-                            <div class="gallery-actions">
-                                <button class="gallery-zoom" title="Ampliar imagen">
-                                    <i class="fas fa-search-plus"></i>
-                                </button>
-                                <button class="gallery-info" title="Más información">
-                                    <i class="fas fa-info-circle"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Controles de Galería -->
-        <div class="gallery-controls" data-aos="fade-up" data-aos-delay="500">
-            <button class="btn btn-gallery" id="load-more">
-                <i class="fas fa-plus-circle"></i>
-                Cargar más imágenes
-            </button>
-            <button class="btn btn-gallery-outline" id="view-all">
-                <i class="fas fa-th"></i>
-                Ver galería completa
-            </button>
-        </div>
-    </div>
-</section>
-
-<!-- MODAL DE INFORMACIÓN MEJORADO -->
-<div id="gallery-modal" class="gallery-modal">
-    <div class="modal-container">
-        <div class="modal-header">
-            <h3 id="modal-title">Título de la imagen</h3>
-            <button class="modal-close" id="modal-close">
+          </div>
+          
+          <!-- Panel de Información Premium -->
+          <div class="cesium-info-panel">
+            <div class="info-header">
+              <h3><i class="fas fa-info-circle"></i> Información del Punto</h3>
+              <button class="btn-close" id="info-close">
                 <i class="fas fa-times"></i>
+              </button>
+            </div>
+            <div class="info-content">
+              <div class="no-selection">
+                <i class="fas fa-mouse-pointer"></i>
+                <p>Selecciona un punto en el mapa para ver información detallada</p>
+              </div>
+              <div class="entity-info" style="display: none;">
+                <h3>Templo del Sol Inca</h3>
+                <div class="info-details">
+                  <div class="info-row">
+                    <span class="info-label">Tipo:</span>
+                    <span class="info-value">Sitio Arqueológico</span>
+                  </div>
+                  <div class="info-row">
+                    <span class="info-label">Altitud:</span>
+                    <span class="info-value">3,812 msnm</span>
+                  </div>
+                  <div class="info-row">
+                    <span class="info-label">Época:</span>
+                    <span class="info-value">Periodo Incaico (1438-1533)</span>
+                  </div>
+                  <div class="info-row">
+                    <span class="info-label">Estado:</span>
+                    <span class="info-value">Buen estado de conservación</span>
+                  </div>
+                  <div class="info-row">
+                    <span class="info-label">Descripción:</span>
+                    <span class="info-value">Templo ceremonial dedicado al dios Inti, construido con piedra labrada y orientado hacia el amanecer.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Controles Inferiores Premium -->
+          <div class="cesium-controls">
+            <button class="btn-cesium" id="btn-reset-view">
+              <i class="fas fa-crosshairs"></i> Vista Inicial
             </button>
+            <button class="btn-cesium" id="btn-day-night">
+              <i class="fas fa-moon"></i> Modo Noche
+            </button>
+            <button class="btn-cesium" id="btn-terrain">
+              <i class="fas fa-mountain"></i> Terreno 3D
+            </button>
+            <button class="btn-cesium" id="btn-screenshot">
+              <i class="fas fa-camera"></i> Capturar
+            </button>
+          </div>
+          
+          <!-- Leyenda Premium -->
+          <div class="cesium-legend">
+            <h4><i class="fas fa-map"></i> Leyenda</h4>
+            <ul>
+              <li>
+                <span class="legend-color" style="background: #d4af37;"></span>
+                <span>Infraestructura</span>
+              </li>
+              <li>
+                <span class="legend-color" style="background: #b8941f;"></span>
+                <span>Arqueología</span>
+              </li>
+              <li>
+                <span class="legend-color" style="background: #0a5c36;"></span>
+                <span>Natural</span>
+              </li>
+              <li>
+                <span class="legend-color" style="background: #f4e4a6;"></span>
+                <span>Servicios</span>
+              </li>
+            </ul>
+          </div>
         </div>
-        <div class="modal-content">
-            <div class="modal-image-container">
-                <img id="modal-image" src="" alt="">
-                <div class="modal-navigation">
-                    <button class="nav-btn" id="prev-image">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <button class="nav-btn" id="next-image">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="modal-info">
-                <div class="modal-description">
-                    <p id="modal-description">Descripción de la imagen</p>
-                </div>
-                <div class="modal-meta">
-                    <div class="meta-item">
-                        <i class="fas fa-calendar"></i>
-                        <span>Fecha: <strong id="modal-date">DD/MM/AAAA</strong></span>
-                    </div>
-                    <div class="meta-item">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span>Ubicación: <strong id="modal-location">Isla del Sol</strong></span>
-                    </div>
-                    <div class="meta-item">
-                        <i class="fas fa-tags"></i>
-                        <span>Categoría: <strong id="modal-category">Paisajes</strong></span>
-                    </div>
-                </div>
-                <div class="modal-actions">
-                    <button class="btn btn-download">
-                        <i class="fas fa-download"></i>
-                        Descargar
-                    </button>
-                    <button class="btn btn-share">
-                        <i class="fas fa-share-alt"></i>
-                        Compartir
-                    </button>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
-</div>
+  </section>
+
+  <!-- GALERÍA MEJORADA -->
+  <section id="gallery" class="gallery-section">
+    <div class="container">
+      <h2 class="section-title">Galería de la Isla del Sol</h2>
+      <p class="section-description">
+        Descubre la belleza, cultura y paisajes únicos de este lugar sagrado a través de nuestra colección fotográfica
+      </p>
+      
+      <!-- Grid de Galería simplificado para el ejemplo -->
+      <div class="gallery-grid">
+        <div class="gallery-item">
+          <img src="assets/images/paisaje1.jpg" alt="Amanecer en la Isla del Sol">
+          <div class="gallery-overlay">
+            <h3>Amanecer en la Isla</h3>
+            <p>Primeros rayos del sol iluminando el Lago Titicaca</p>
+          </div>
+        </div>
+        
+        <div class="gallery-item">
+          <img src="assets/images/paisaje2.jpg" alt="Atardecer desde Palla Khasa">
+          <div class="gallery-overlay">
+            <h3>Atardecer Místico</h3>
+            <p>Vista panorámica desde el mirador Palla Khasa</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
   <footer>
     PROYECTO UNIVERSITARIO/AQUINO-UDABOL - SIG | Isla del Sol © 2025
@@ -1413,21 +1792,19 @@
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <!-- SCRIPT DE CESIUM -->
   <script src="https://cesium.com/downloads/cesiumjs/releases/1.95/Build/Cesium/Cesium.js"></script>
-  <script src="scripts/utils/helpers.js"></script>
-  <script src="scripts/modules/map.js"></script>
-  <script src="scripts/modules/lightbox.js"></script>
-  <!-- SCRIPT CESIUM 3D MEJORADO -->
-  <script src="scripts/modules/cesium-3d.js"></script>
-  <script src="scripts/main.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 
-  <!-- Script de inicialización -->
+  <!-- Script de inicialización premium -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      console.log('🚀 Iniciando experiencia suprema...');
+      console.log('🚀 Iniciando experiencia premium...');
       
       // Inicializar animaciones
       AOS.init({
-        duration: 1000,
+        duration: 1200,
         once: true,
         offset: 100
       });
@@ -1437,9 +1814,17 @@
       
       // Animaciones del hero
       gsap.from('.hero-title', {
-        duration: 1.5,
+        duration: 1.8,
         y: 100,
         opacity: 0,
+        ease: 'power4.out'
+      });
+      
+      gsap.from('.hero-subtitle', {
+        duration: 1.8,
+        y: 50,
+        opacity: 0,
+        delay: 0.5,
         ease: 'power4.out'
       });
       
@@ -1450,31 +1835,122 @@
             trigger: title,
             start: 'top 80%'
           },
-          duration: 1,
-          y: 50,
+          duration: 1.2,
+          y: 60,
           opacity: 0,
           ease: 'power3.out'
         });
       });
       
-      // Inicializar componentes
-      if (typeof InteractiveMap !== 'undefined') {
-        window.interactiveMap = new InteractiveMap();
+      // Navegación móvil
+      const navToggle = document.getElementById('navToggle');
+      const navMenu = document.querySelector('.nav-menu');
+      
+      if (navToggle) {
+        navToggle.addEventListener('click', () => {
+          navMenu.classList.toggle('active');
+        });
       }
       
-      if (typeof Lightbox !== 'undefined') {
-        window.lightbox = new Lightbox();
+      // Botón back to top
+      const backToTop = document.getElementById('backToTop');
+      
+      window.addEventListener('scroll', () => {
+        if (window.pageYOffset > 300) {
+          backToTop.style.display = 'block';
+          gsap.to(backToTop, { opacity: 1, duration: 0.3 });
+        } else {
+          gsap.to(backToTop, { 
+            opacity: 0, 
+            duration: 0.3,
+            onComplete: () => backToTop.style.display = 'none'
+          });
+        }
+      });
+      
+      backToTop.addEventListener('click', () => {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      });
+      
+      // Interactividad del panel Cesium
+      const infoPanel = document.querySelector('.cesium-info-panel');
+      const infoClose = document.getElementById('info-close');
+      const layerItems = document.querySelectorAll('.layer-item input[type="checkbox"]');
+      
+      if (infoClose) {
+        infoClose.addEventListener('click', () => {
+          infoPanel.classList.remove('visible');
+        });
       }
       
-      // ✅ INICIALIZAR CESIUM 3D SUPREMO
-      if (typeof Cesium3DMap !== 'undefined') {
+      // Simular selección de entidad
+      setTimeout(() => {
+        // Esto simularía la selección de una entidad en el mapa
+        // En una implementación real, esto se conectaría con Cesium
+        const entityInfo = document.querySelector('.entity-info');
+        const noSelection = document.querySelector('.no-selection');
+        
+        if (entityInfo && noSelection) {
+          // Simular click en un layer para mostrar info
+          layerItems.forEach(item => {
+            item.addEventListener('change', function() {
+              if (this.checked) {
+                noSelection.style.display = 'none';
+                entityInfo.style.display = 'block';
+                infoPanel.classList.add('visible');
+              }
+            });
+          });
+        }
+      }, 2000);
+      
+      // Efectos de partículas para Cesium container
+      function createParticles() {
+        const container = document.querySelector('.cesium-container');
+        if (!container) return;
+        
+        for (let i = 0; i < 15; i++) {
+          const particle = document.createElement('div');
+          particle.className = 'particle';
+          
+          // Posición aleatoria
+          const size = Math.random() * 8 + 4;
+          const posX = Math.random() * 100;
+          const posY = Math.random() * 100;
+          const delay = Math.random() * 10;
+          const duration = Math.random() * 10 + 10;
+          
+          particle.style.width = `${size}px`;
+          particle.style.height = `${size}px`;
+          particle.style.left = `${posX}%`;
+          particle.style.top = `${posY}%`;
+          particle.style.animationDelay = `${delay}s`;
+          particle.style.animationDuration = `${duration}s`;
+          
+          container.appendChild(particle);
+        }
+      }
+      
+      createParticles();
+      
+      console.log('🎯 Experiencia premium inicializada correctamente');
+    });
+    
+    // Simular carga de Cesium
+    window.addEventListener('load', function() {
+      const cesiumLoading = document.querySelector('.cesium-loading');
+      if (cesiumLoading) {
         setTimeout(() => {
-          window.cesium3D = new Cesium3DMap();
-          console.log('🎯 Cesium 3D Supremo inicializado');
-        }, 1000);
+          cesiumLoading.style.opacity = '0';
+          setTimeout(() => {
+            cesiumLoading.style.display = 'none';
+          }, 500);
+        }, 3000);
       }
     });
   </script>
 </body>
-
 </html>
