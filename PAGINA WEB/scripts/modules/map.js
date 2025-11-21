@@ -1,4 +1,5 @@
-// scripts/modules/map.js - VERSIÓN CORREGIDA PARA TÁCTIL
+// scripts/modules/map.js - VERSIÓN COMPLETA CORREGIDA PARA DESPLAZAMIENTO TÁCTIL
+
 class InteractiveMap {
     constructor() {
         this.map = null;
@@ -8,18 +9,21 @@ class InteractiveMap {
         this.contadorTotal = 0;
         this.API_BASE_URL = 'https://mi-api-6jmx.onrender.com/api';
         this.isMobile = window.innerWidth <= 768;
-        this.isPanelOpen = false;
         
+        // Configuración específica para móviles
+        this.configurarTouch();
         this.init();
     }
 
-    init() {
-        console.log('🗺️ Inicializando mapa interactivo para celular...');
-        this.inicializarMapa();
-        this.crearInterfazMovil();
-        this.configurarEventosInterfaz();
-        this.inicializarCluster();
-        this.cargarTodasLasCapas();
+    configurarTouch() {
+        // Habilitar eventos táctiles
+        if (this.isMobile) {
+            L.Map.addInitHook(function () {
+                this.options.tap = true;
+                this.options.tapTolerance = 10;
+                this.options.dragging = true;
+            });
+        }
     }
 
     inicializarMapa() {
@@ -31,29 +35,82 @@ class InteractiveMap {
 
         this.ocultarLoading();
 
-        // Configurar mapa para mejor experiencia táctil
+        // CONFIGURACIÓN MEJORADA PARA MÓVIL
         this.map = L.map('map', {
             center: [-16.0167, -69.1833],
             zoom: 13,
             zoomControl: false,
             attributionControl: true,
-            tap: true, // Habilitar tap táctil
-            touchZoom: true, // Habilitar zoom táctil
-            dragging: true, // Habilitar arrastre
-            tapTolerance: 15, // Tolerancia para taps
-            preferCanvas: true // Mejor rendimiento en móvil
+            // CONFIGURACIÓN CRÍTICA PARA TÁCTIL
+            dragging: true,
+            tap: true,
+            touchZoom: true,
+            scrollWheelZoom: false,
+            boxZoom: false,
+            keyboard: false,
+            doubleClickZoom: true,
+            zoomSnap: 0.5,
+            zoomDelta: 0.5,
+            trackResize: true,
+            worldCopyJump: false,
+            maxBoundsViscosity: 1.0
         });
 
+        // TileLayer con mejor compatibilidad móvil
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors',
-            maxZoom: 18
+            maxZoom: 18,
+            minZoom: 10,
+            subdomains: ['a', 'b', 'c']
         }).addTo(this.map);
 
+        // Control de zoom optimizado para móvil
         L.control.zoom({
             position: this.isMobile ? 'bottomright' : 'topright'
         }).addTo(this.map);
 
+        // HABILITAR GESTOS TÁCTILES ADICIONALES
+        this.habilitarGestosTactiles();
+
         console.log('✅ Mapa base inicializado con soporte táctil');
+    }
+
+    habilitarGestosTactiles() {
+        // Asegurar que el contenedor del mapa permita gestos táctiles
+        const mapContainer = document.getElementById('map');
+        if (mapContainer) {
+            mapContainer.style.touchAction = 'pan-x pan-y';
+            mapContainer.style.webkitUserSelect = 'none';
+            mapContainer.style.userSelect = 'none';
+            mapContainer.style.webkitTapHighlightColor = 'transparent';
+        }
+
+        // Prevenir comportamientos por defecto que interfieran
+        this.map.getContainer().addEventListener('touchstart', (e) => {
+            if (e.touches.length > 1) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        this.map.getContainer().addEventListener('touchmove', (e) => {
+            if (e.touches.length > 1) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // Mejorar la respuesta táctil
+        this.map.whenReady(() => {
+            const container = this.map.getContainer();
+            container.style.cursor = 'grab';
+            
+            container.addEventListener('touchstart', () => {
+                container.style.cursor = 'grabbing';
+            });
+            
+            container.addEventListener('touchend', () => {
+                container.style.cursor = 'grab';
+            });
+        });
     }
 
     crearInterfazMovil() {
@@ -141,7 +198,7 @@ class InteractiveMap {
                 </button>
             </div>
 
-            <!-- OVERLAY PARA CERRAR PANEL -->
+            <!-- OVERLAY -->
             <div class="mobile-overlay" id="mobileOverlay"></div>
         `;
 
@@ -152,14 +209,7 @@ class InteractiveMap {
     agregarEstilosMovil() {
         const styles = `
             <style>
-                /* ESTILOS MEJORADOS PARA TÁCTIL */
-                * {
-                    -webkit-tap-highlight-color: transparent;
-                    -webkit-touch-callout: none;
-                    -webkit-user-select: none;
-                    user-select: none;
-                }
-
+                /* ESTILOS PREVIOS MANTENIDOS... */
                 .mobile-main-control {
                     position: absolute;
                     top: 15px;
@@ -182,11 +232,13 @@ class InteractiveMap {
                     justify-content: center;
                     transition: all 0.3s ease;
                     position: relative;
+                    -webkit-tap-highlight-color: transparent;
                     touch-action: manipulation;
                 }
 
-                .mobile-menu-btn:active {
-                    transform: scale(0.95);
+                .mobile-menu-btn:hover {
+                    transform: scale(1.1);
+                    box-shadow: 0 12px 30px rgba(0,0,0,0.4);
                 }
 
                 .badge-mobile {
@@ -207,7 +259,6 @@ class InteractiveMap {
                     animation: pulse 2s infinite;
                 }
 
-                /* PANEL MEJORADO PARA TÁCTIL */
                 .mobile-panel {
                     position: fixed;
                     top: 0;
@@ -215,14 +266,13 @@ class InteractiveMap {
                     width: 85%;
                     max-width: 400px;
                     height: 100vh;
-                    background: rgba(15, 23, 42, 0.98);
+                    background: rgba(15, 23, 42, 0.95);
                     backdrop-filter: blur(20px);
                     z-index: 2000;
-                    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    transition: left 0.3s ease;
                     overflow-y: auto;
                     border-right: 1px solid rgba(255,255,255,0.1);
-                    -webkit-overflow-scrolling: touch; /* Scroll suave en iOS */
-                    touch-action: pan-y; /* Permitir scroll vertical */
+                    -webkit-overflow-scrolling: touch;
                 }
 
                 .mobile-panel.active {
@@ -236,7 +286,6 @@ class InteractiveMap {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    touch-action: none; /* Evitar scroll en el header */
                 }
 
                 .mobile-panel-header h3 {
@@ -249,20 +298,20 @@ class InteractiveMap {
                     background: rgba(255,255,255,0.2);
                     border: none;
                     color: white;
-                    width: 44px;
-                    height: 44px;
+                    width: 40px;
+                    height: 40px;
                     border-radius: 50%;
                     cursor: pointer;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     transition: all 0.3s ease;
-                    touch-action: manipulation;
+                    -webkit-tap-highlight-color: transparent;
                 }
 
-                .mobile-close-btn:active {
+                .mobile-close-btn:hover {
                     background: rgba(255,255,255,0.3);
-                    transform: scale(0.9);
+                    transform: rotate(90deg);
                 }
 
                 .mobile-stats {
@@ -271,7 +320,6 @@ class InteractiveMap {
                     background: rgba(255,255,255,0.05);
                     border-bottom: 1px solid rgba(255,255,255,0.1);
                     gap: 15px;
-                    touch-action: none;
                 }
 
                 .stat-item {
@@ -294,7 +342,6 @@ class InteractiveMap {
                     grid-template-columns: 1fr 1fr;
                     gap: 10px;
                     border-bottom: 1px solid rgba(255,255,255,0.1);
-                    touch-action: none;
                 }
 
                 .quick-btn {
@@ -311,13 +358,13 @@ class InteractiveMap {
                     align-items: center;
                     gap: 5px;
                     transition: all 0.3s ease;
+                    -webkit-tap-highlight-color: transparent;
                     touch-action: manipulation;
-                    min-height: 44px;
                 }
 
-                .quick-btn:active {
+                .quick-btn:hover {
                     background: rgba(255,255,255,0.2);
-                    transform: scale(0.95);
+                    transform: translateY(-2px);
                 }
 
                 .quick-btn i {
@@ -328,7 +375,7 @@ class InteractiveMap {
                     padding: 15px 20px;
                     max-height: 50vh;
                     overflow-y: auto;
-                    -webkit-overflow-scrolling: touch; /* Scroll suave iOS */
+                    -webkit-overflow-scrolling: touch;
                 }
 
                 .mobile-layers-grid {
@@ -345,18 +392,18 @@ class InteractiveMap {
                     cursor: pointer;
                     transition: all 0.3s ease;
                     position: relative;
+                    -webkit-tap-highlight-color: transparent;
                     touch-action: manipulation;
-                    min-height: 44px;
-                }
-
-                .mobile-layer-item:active {
-                    background: rgba(255,255,255,0.1);
-                    transform: scale(0.98);
                 }
 
                 .mobile-layer-item.active {
                     background: rgba(99, 102, 241, 0.2);
                     border-color: #6366f1;
+                }
+
+                .mobile-layer-item:hover {
+                    background: rgba(255,255,255,0.1);
+                    transform: translateY(-2px);
                 }
 
                 .mobile-layer-content {
@@ -399,7 +446,6 @@ class InteractiveMap {
                     padding: 15px 20px;
                     border-top: 1px solid rgba(255,255,255,0.1);
                     background: rgba(255,255,255,0.03);
-                    touch-action: none;
                 }
 
                 .mobile-legend h4 {
@@ -451,12 +497,13 @@ class InteractiveMap {
                     gap: 8px;
                     box-shadow: 0 8px 25px rgba(6, 182, 212, 0.4);
                     transition: all 0.3s ease;
+                    -webkit-tap-highlight-color: transparent;
                     touch-action: manipulation;
-                    min-height: 44px;
                 }
 
-                .btn-3d-mobile:active {
-                    transform: scale(0.95);
+                .btn-3d-mobile:hover {
+                    transform: translateY(-3px);
+                    box-shadow: 0 12px 30px rgba(6, 182, 212, 0.6);
                 }
 
                 .mobile-overlay {
@@ -471,7 +518,6 @@ class InteractiveMap {
                     opacity: 0;
                     visibility: hidden;
                     transition: all 0.3s ease;
-                    touch-action: pan-y; /* Permitir scroll a través del overlay */
                 }
 
                 .mobile-overlay.active {
@@ -479,41 +525,42 @@ class InteractiveMap {
                     visibility: visible;
                 }
 
-                /* MEJORAS PARA SCROLL TÁCTIL */
-                .mobile-layers-container {
-                    scrollbar-width: none; /* Firefox */
-                    -ms-overflow-style: none; /* IE/Edge */
+                /* ESTILOS CRÍTICOS PARA EL MAPA TÁCTIL */
+                #map {
+                    touch-action: pan-x pan-y;
+                    -webkit-user-select: none;
+                    user-select: none;
+                    -webkit-tap-highlight-color: transparent;
+                    cursor: grab;
                 }
 
-                .mobile-layers-container::-webkit-scrollbar {
-                    display: none; /* Chrome/Safari */
+                #map:active {
+                    cursor: grabbing;
                 }
 
-                /* ANIMACIONES MEJORADAS */
+                .leaflet-container {
+                    background: #a4b0be;
+                    touch-action: pan-x pan-y;
+                    -webkit-tap-highlight-color: transparent;
+                }
+
+                .leaflet-marker-icon {
+                    touch-action: pan-x pan-y;
+                }
+
+                .leaflet-popup {
+                    touch-action: pan-x pan-y;
+                }
+
+                .leaflet-control-container {
+                    touch-action: pan-x pan-y;
+                }
+
                 @keyframes pulse {
                     0%, 100% { transform: scale(1); }
                     50% { transform: scale(1.1); }
                 }
 
-                @keyframes slideInFromLeft {
-                    from {
-                        transform: translateX(-100%);
-                    }
-                    to {
-                        transform: translateX(0);
-                    }
-                }
-
-                @keyframes slideOutToLeft {
-                    from {
-                        transform: translateX(0);
-                    }
-                    to {
-                        transform: translateX(-100%);
-                    }
-                }
-
-                /* RESPONSIVE MEJORADO */
                 @media (max-width: 480px) {
                     .mobile-panel {
                         width: 90%;
@@ -544,51 +591,49 @@ class InteractiveMap {
                     }
                     .mobile-layer-emoji {
                         font-size: 16px;
-                    width: 20px;
-                        height: 20px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
                     }
                     .mobile-layer-text {
                         font-size: 11px;
                     }
                 }
 
-                /* GESTOS TÁCTILES ESPECÍFICOS */
-                .mobile-panel {
-                    /* Permitir scroll pero no gestos horizontales */
-                    touch-action: pan-y;
+                /* MEJORAS ESPECÍFICAS PARA DISPOSITIVOS TÁCTILES */
+                @media (hover: none) and (pointer: coarse) {
+                    .mobile-menu-btn,
+                    .quick-btn,
+                    .mobile-layer-item,
+                    .btn-3d-mobile {
+                        min-height: 44px;
+                    }
+                    .mobile-layer-item {
+                        padding: 15px 12px;
+                    }
+                    
+                    /* Mejorar respuesta táctil en marcadores */
+                    .leaflet-marker-icon {
+                        min-width: 44px;
+                        min-height: 44px;
+                    }
+                    
+                    /* Prevenir zoom en botones */
+                    .mobile-menu-btn:active,
+                    .quick-btn:active,
+                    .mobile-layer-item:active,
+                    .btn-3d-mobile:active {
+                        transform: scale(0.95);
+                    }
                 }
 
-                .mobile-panel-header,
-                .mobile-stats,
-                .mobile-quick-controls,
-                .mobile-legend {
-                    /* Elementos que no deben scrollear */
-                    touch-action: none;
+                .mobile-layers-container::-webkit-scrollbar {
+                    width: 4px;
                 }
-
-                /* MEJORA DE RENDIMIENTO PARA MÓVIL */
-                .mobile-layer-item {
-                    will-change: transform;
-                    backface-visibility: hidden;
+                .mobile-layers-container::-webkit-scrollbar-track {
+                    background: rgba(255,255,255,0.05);
+                    border-radius: 2px;
                 }
-
-                /* ESTADO DE CARGANDO MEJORADO */
-                .map-loading {
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    background: rgba(15, 23, 42, 0.95);
-                    padding: 30px;
-                    border-radius: 15px;
-                    text-align: center;
-                    color: white;
-                    z-index: 1000;
-                    backdrop-filter: blur(10px);
-                    border: 1px solid rgba(255,255,255,0.1);
+                .mobile-layers-container::-webkit-scrollbar-thumb {
+                    background: #6366f1;
+                    border-radius: 2px;
                 }
             </style>
         `;
@@ -597,207 +642,87 @@ class InteractiveMap {
     }
 
     configurarEventosInterfaz() {
-        // Botón menú móvil - evento táctil mejorado
-        const menuBtn = document.getElementById('mobileMenuBtn');
-        if (menuBtn) {
-            menuBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                this.abrirPanelMovil();
-            });
+        document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
+            this.abrirPanelMovil();
+        });
 
-            // Soporte para touchstart para mejor respuesta
-            menuBtn.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                menuBtn.style.transform = 'scale(0.95)';
-            });
+        document.getElementById('mobileCloseBtn')?.addEventListener('click', () => {
+            this.cerrarPanelMovil();
+        });
 
-            menuBtn.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                menuBtn.style.transform = '';
-                this.abrirPanelMovil();
-            });
-        }
+        document.getElementById('mobileOverlay')?.addEventListener('click', () => {
+            this.cerrarPanelMovil();
+        });
 
-        // Botón cerrar panel
-        const closeBtn = document.getElementById('mobileCloseBtn');
-        if (closeBtn) {
-            closeBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                this.cerrarPanelMovil();
-            });
+        document.getElementById('btnAllOn')?.addEventListener('click', () => {
+            this.activarTodasLasCapas();
+            this.mostrarMensajeMovil('Todas las capas activadas ✅', 'success');
+        });
 
-            closeBtn.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                closeBtn.style.transform = 'scale(0.9)';
-            });
+        document.getElementById('btnAllOff')?.addEventListener('click', () => {
+            this.desactivarTodasLasCapas();
+            this.mostrarMensajeMovil('Todas las capas desactivadas ⚡', 'info');
+        });
 
-            closeBtn.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                closeBtn.style.transform = '';
-                this.cerrarPanelMovil();
-            });
-        }
+        document.getElementById('btnMyLocation')?.addEventListener('click', () => {
+            this.buscarMiUbicacion();
+        });
 
-        // Overlay para cerrar panel
-        const overlay = document.getElementById('mobileOverlay');
-        if (overlay) {
-            overlay.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.cerrarPanelMovil();
-            });
+        document.getElementById('btn3DMobile')?.addEventListener('click', () => {
+            this.irAVista3D();
+        });
 
-            overlay.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                this.cerrarPanelMovil();
-            });
-        }
-
-        // Controles rápidos con soporte táctil mejorado
-        this.configurarBotonesTactiles();
-
-        // Botón 3D
-        const btn3D = document.getElementById('btn3DMobile');
-        if (btn3D) {
-            btn3D.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.irAVista3D();
-            });
-
-            btn3D.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                btn3D.style.transform = 'scale(0.95)';
-            });
-
-            btn3D.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                btn3D.style.transform = '';
-                this.irAVista3D();
-            });
-        }
-
-        // Cerrar panel al hacer clic/tocar fuera
         document.addEventListener('click', (e) => {
-            if (this.isPanelOpen) {
-                const panel = document.getElementById('mobilePanel');
-                const menuBtn = document.getElementById('mobileMenuBtn');
-                
-                if (panel && !panel.contains(e.target) && menuBtn && !menuBtn.contains(e.target)) {
-                    this.cerrarPanelMovil();
-                }
+            const panel = document.getElementById('mobilePanel');
+            const menuBtn = document.getElementById('mobileMenuBtn');
+            
+            if (panel?.classList.contains('active') && 
+                !panel.contains(e.target) && 
+                !menuBtn?.contains(e.target)) {
+                this.cerrarPanelMovil();
             }
         });
 
-        // Soporte táctil para cerrar panel
-        document.addEventListener('touchstart', (e) => {
-            if (this.isPanelOpen) {
-                const panel = document.getElementById('mobilePanel');
-                const menuBtn = document.getElementById('mobileMenuBtn');
-                
-                if (panel && !panel.contains(e.target) && menuBtn && !menuBtn.contains(e.target)) {
-                    this.cerrarPanelMovil();
-                }
-            }
-        });
-
-        // Configurar gestos de deslizar para cerrar
         this.configurarGestosTactiles();
     }
 
-    configurarBotonesTactiles() {
-        const botones = [
-            { id: 'btnAllOn', accion: () => { this.activarTodasLasCapas(); this.mostrarMensajeMovil('Todas las capas activadas ✅', 'success'); } },
-            { id: 'btnAllOff', accion: () => { this.desactivarTodasLasCapas(); this.mostrarMensajeMovil('Todas las capas desactivadas ⚡', 'info'); } },
-            { id: 'btnMyLocation', accion: () => { this.buscarMiUbicacion(); } }
-        ];
-
-        botones.forEach(boton => {
-            const elemento = document.getElementById(boton.id);
-            if (elemento) {
-                // Evento click normal
-                elemento.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    boton.accion();
-                });
-
-                // Eventos táctiles mejorados
-                elemento.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    elemento.style.transform = 'scale(0.95)';
-                    elemento.style.background = 'rgba(255,255,255,0.2)';
-                });
-
-                elemento.addEventListener('touchend', (e) => {
-                    e.preventDefault();
-                    elemento.style.transform = '';
-                    elemento.style.background = '';
-                    boton.accion();
-                });
-
-                elemento.addEventListener('touchcancel', (e) => {
-                    e.preventDefault();
-                    elemento.style.transform = '';
-                    elemento.style.background = '';
-                });
-            }
-        });
-    }
-
     configurarGestosTactiles() {
-        const panel = document.getElementById('mobilePanel');
-        if (!panel) return;
-
         let startX = 0;
-        let currentX = 0;
-        let isSwiping = false;
-
-        panel.addEventListener('touchstart', (e) => {
-            if (!this.isPanelOpen) return;
-            
+        const panel = document.getElementById('mobilePanel');
+        
+        panel?.addEventListener('touchstart', (e) => {
             startX = e.touches[0].clientX;
-            currentX = startX;
-            isSwiping = true;
-            
-            // Prevenir scroll mientras se desliza
-            panel.style.overflowX = 'hidden';
-        });
+            e.preventDefault();
+        }, { passive: false });
 
-        panel.addEventListener('touchmove', (e) => {
-            if (!isSwiping || !this.isPanelOpen) return;
+        panel?.addEventListener('touchmove', (e) => {
+            if (!startX) return;
             
-            currentX = e.touches[0].clientX;
+            const currentX = e.touches[0].clientX;
             const diff = startX - currentX;
             
-            // Solo permitir deslizar hacia la izquierda para cerrar
-            if (diff > 0) {
-                e.preventDefault();
-                // Mover el panel mientras se desliza
-                panel.style.transform = `translateX(-${diff}px)`;
-            }
-        });
-
-        panel.addEventListener('touchend', (e) => {
-            if (!isSwiping || !this.isPanelOpen) return;
-            
-            isSwiping = false;
-            const diff = startX - currentX;
-            const swipeThreshold = 50; // Mínimo de píxeles para cerrar
-            
-            // Restaurar transformación
-            panel.style.transform = '';
-            panel.style.overflowX = '';
-            
-            // Cerrar si se deslizó lo suficiente
-            if (diff > swipeThreshold) {
+            if (diff > 50) {
                 this.cerrarPanelMovil();
+                startX = 0;
             }
         });
 
-        panel.addEventListener('touchcancel', (e) => {
-            isSwiping = false;
-            panel.style.transform = '';
-            panel.style.overflowX = '';
+        // Gesto de deslizar para cerrar en el overlay
+        const overlay = document.getElementById('mobileOverlay');
+        overlay?.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+        });
+
+        overlay?.addEventListener('touchmove', (e) => {
+            if (!startX) return;
+            
+            const currentX = e.touches[0].clientX;
+            const diff = startX - currentX;
+            
+            if (diff > 30) {
+                this.cerrarPanelMovil();
+                startX = 0;
+            }
         });
     }
 
@@ -805,31 +730,25 @@ class InteractiveMap {
         const panel = document.getElementById('mobilePanel');
         const overlay = document.getElementById('mobileOverlay');
         
-        if (panel && overlay) {
-            panel.classList.add('active');
-            overlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            this.isPanelOpen = true;
-            
-            console.log('📱 Panel móvil abierto');
-        }
+        panel?.classList.add('active');
+        overlay?.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        
+        // Deshabilitar temporalmente el mapa para evitar interferencias
+        this.map.dragging.disable();
     }
 
     cerrarPanelMovil() {
         const panel = document.getElementById('mobilePanel');
         const overlay = document.getElementById('mobileOverlay');
         
-        if (panel && overlay) {
-            panel.classList.remove('active');
-            overlay.classList.remove('active');
-            document.body.style.overflow = '';
-            this.isPanelOpen = false;
-            
-            console.log('📱 Panel móvil cerrado');
-        }
+        panel?.classList.remove('active');
+        overlay?.classList.remove('active');
+        document.body.style.overflow = '';
+        
+        // Rehabilitar el mapa
+        this.map.dragging.enable();
     }
-
-    // ... (el resto de los métodos se mantienen igual, solo mejorados los eventos táctiles)
 
     generarListaCapasMovil() {
         const listaCapas = document.getElementById('mobileLayersList');
@@ -862,30 +781,20 @@ class InteractiveMap {
             </div>
         `).join('');
 
-        // Configurar eventos táctiles para las capas
         configCapas.forEach(capa => {
             const elemento = document.querySelector(`[data-capa="${capa.id}"]`);
             if (elemento) {
-                // Evento click
-                elemento.addEventListener('click', (e) => {
-                    e.preventDefault();
+                elemento.addEventListener('click', () => {
                     this.toggleCapaMovil(capa.id, elemento);
                 });
-
-                // Eventos táctiles
+                
+                // Soporte táctil mejorado
                 elemento.addEventListener('touchstart', (e) => {
                     e.preventDefault();
-                    elemento.style.transform = 'scale(0.98)';
-                });
+                    elemento.style.transform = 'scale(0.95)';
+                }, { passive: false });
 
-                elemento.addEventListener('touchend', (e) => {
-                    e.preventDefault();
-                    elemento.style.transform = '';
-                    this.toggleCapaMovil(capa.id, elemento);
-                });
-
-                elemento.addEventListener('touchcancel', (e) => {
-                    e.preventDefault();
+                elemento.addEventListener('touchend', () => {
                     elemento.style.transform = '';
                 });
             }
@@ -906,15 +815,43 @@ class InteractiveMap {
         this.actualizarEstadisticasMovil();
     }
 
-    // ... (los demás métodos se mantienen igual)
+    actualizarEstadisticasMovil() {
+        const totalElementos = this.contadorTotal;
+        const capasActivas = this.capasActivas.size;
+        
+        const badge = document.getElementById('mobileBadge');
+        if (badge) {
+            badge.textContent = capasActivas;
+            badge.style.background = capasActivas > 0 ? '#10b981' : '#ef4444';
+        }
+        
+        const totalElement = document.getElementById('mobileTotal');
+        const activeElement = document.getElementById('mobileActive');
+        
+        if (totalElement) totalElement.textContent = `${totalElementos} elementos`;
+        if (activeElement) activeElement.textContent = `${capasActivas} activas`;
+    }
+
+    actualizarContadorCapaMovil(nombreCapa, cantidad) {
+        const contador = document.getElementById(`mobile-count-${nombreCapa}`);
+        if (contador) {
+            contador.textContent = cantidad;
+            
+            const elemento = document.querySelector(`[data-capa="${nombreCapa}"]`);
+            if (elemento && cantidad > 0) {
+                contador.style.background = '#10b981';
+            } else {
+                contador.style.background = '#4a5568';
+            }
+        }
+    }
 
     mostrarMensajeMovil(mensaje, tipo = 'info') {
-        // Crear notificación optimizada para táctil
         const notificacion = document.createElement('div');
         notificacion.className = `mobile-notification ${tipo}`;
         notificacion.innerHTML = `
             <div class="notification-content">
-                <i class="fas fa-${tipo === 'success' ? 'check' : tipo === 'error' ? 'exclamation-triangle' : 'info'}-circle"></i>
+                <i class="fas fa-${tipo === 'success' ? 'check' : 'info'}-circle"></i>
                 <span>${mensaje}</span>
             </div>
         `;
@@ -926,8 +863,8 @@ class InteractiveMap {
             transform: translateX(-50%);
             background: ${tipo === 'success' ? '#10b981' : tipo === 'error' ? '#ef4444' : '#6366f1'};
             color: white;
-            padding: 16px 24px;
-            border-radius: 12px;
+            padding: 12px 20px;
+            border-radius: 10px;
             z-index: 3000;
             box-shadow: 0 8px 25px rgba(0,0,0,0.3);
             animation: slideInDown 0.3s ease;
@@ -940,7 +877,6 @@ class InteractiveMap {
 
         document.body.appendChild(notificacion);
         
-        // Auto-remover después de 3 segundos
         setTimeout(() => {
             notificacion.style.animation = 'slideOutUp 0.3s ease';
             setTimeout(() => {
@@ -951,10 +887,875 @@ class InteractiveMap {
         }, 3000);
     }
 
-    // ... (el resto de métodos igual)
+    irAVista3D() {
+        this.mostrarMensajeMovil('Redirigiendo a vista 3D...', 'info');
+        
+        const seccion3D = document.getElementById('map3dSection');
+        if (seccion3D) {
+            seccion3D.scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
+            });
+        } else {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        this.cerrarPanelMovil();
+    }
+
+    // MÉTODOS EXISTENTES DEL MAPA (MANTENIDOS)
+    ocultarLoading() {
+        const loading = document.querySelector('.map-loading');
+        if (loading) {
+            loading.style.opacity = '0';
+            setTimeout(() => {
+                loading.style.display = 'none';
+            }, 500);
+        }
+    }
+
+    inicializarCluster() {
+        this.marcadoresAgrupados = L.layerGroup().addTo(this.map);
+    }
+
+    async cargarTodasLasCapas() {
+        console.log('🔄 Cargando TODAS las capas desde Render (Móvil)...');
+        
+        try {
+            const timestamp = new Date().getTime();
+            const statusResponse = await fetch(`${this.API_BASE_URL}/status?t=${timestamp}`);
+            
+            if (!statusResponse.ok) {
+                throw new Error('API no responde');
+            }
+            
+            const todasLasCapas = [
+                'puntos_turisticos', 'miradores', 'playas', 'tiendas_artesania',
+                'restaurantes', 'hoteles', 'rutas', 'comunidades', 'viviendas',
+                'areas_verdes', 'sembradios', 'basura', 'puntos_basura', 'aguas_contaminadas'
+            ];
+            
+            this.generarListaCapasMovil();
+            
+            for (const capa of todasLasCapas) {
+                await this.cargarCapa(capa);
+                
+                const capasPrincipales = ['puntos_turisticos', 'comunidades', 'rutas'];
+                if (capasPrincipales.includes(capa)) {
+                    this.activarCapa(capa);
+                    const elemento = document.querySelector(`[data-capa="${capa}"]`);
+                    if (elemento) elemento.classList.add('active');
+                }
+            }
+            
+            console.log('✅ Todas las capas cargadas (Móvil)');
+            this.actualizarEstadisticasMovil();
+            this.mostrarMensajeMovil('Mapa cargado correctamente 🗺️', 'success');
+            
+        } catch (error) {
+            console.error('❌ Error cargando capas (Móvil):', error);
+            this.mostrarMensajeMovil('Error al cargar el mapa ❌', 'error');
+        }
+    }
+
+    async cargarCapa(nombreCapa) {
+        if (this.capas[nombreCapa]) {
+            return;
+        }
+
+        try {
+            console.log(`🔄 Cargando capa: ${nombreCapa}`);
+            
+            const timestamp = new Date().getTime();
+            const response = await fetch(`${this.API_BASE_URL}/capas/${nombreCapa}?t=${timestamp}`);
+            
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data.features && data.features.length > 0) {
+                this.agregarCapaAlMapa(nombreCapa, data);
+                
+                setTimeout(() => {
+                    this.limpiarDuplicadosCapa(nombreCapa);
+                }, 100);
+                
+                this.actualizarContadorCapa(nombreCapa, data.features.length);
+                console.log(`✅ ${nombreCapa}: ${data.features.length} elementos`);
+            } else {
+                console.warn(`⚠️ ${nombreCapa}: Sin datos disponibles`);
+                this.actualizarContadorCapa(nombreCapa, 0);
+            }
+        } catch (error) {
+            console.error(`❌ Error cargando ${nombreCapa}:`, error);
+            this.actualizarContadorCapa(nombreCapa, 0);
+        }
+    }
+
+    agregarCapaAlMapa(nombreCapa, geojsonData) {
+        if (this.capas[nombreCapa]) {
+            console.log(`⚠️ Capa ${nombreCapa} ya existe, omitiendo...`);
+            return;
+        }
+
+        const estilo = this.obtenerEstilo(nombreCapa);
+        
+        const capaGeoJSON = L.geoJSON(geojsonData, {
+            style: estilo,
+            pointToLayer: (feature, latlng) => {
+                if (feature.geometry.type === 'Point') {
+                    const icono = this.crearIconoPersonalizado(nombreCapa);
+                    const marker = L.marker(latlng, { 
+                        icon: icono,
+                        // Mejorar interactividad táctil en marcadores
+                        keyboard: false
+                    });
+                    
+                    // Optimizar para touch
+                    marker.on('click', (e) => {
+                        L.DomEvent.stopPropagation(e);
+                    });
+                    
+                    return marker;
+                } else if (estilo.radius) {
+                    return L.circleMarker(latlng, estilo);
+                }
+                return L.marker(latlng);
+            },
+            onEachFeature: (feature, layer) => {
+                this.agregarPopup(feature, layer, nombreCapa);
+                
+                // Mejorar respuesta táctil
+                layer.on('touchstart', (e) => {
+                    L.DomEvent.stopPropagation(e);
+                });
+            }
+        });
+
+        this.capas[nombreCapa] = capaGeoJSON;
+        console.log(`✅ Capa ${nombreCapa} creada con ${geojsonData.features?.length || 0} elementos`);
+    }
+
+    crearIconoPersonalizado(tipoCapa) {
+        const iconosConfig = {
+            'puntos_turisticos': { emoji: '📍', color: '#e53e3e' },
+            'miradores': { emoji: '🔭', color: '#3182ce' },
+            'playas': { emoji: '🏖️', color: '#38b2ac' },
+            'tiendas_artesania': { emoji: '🎨', color: '#d69e2e' },
+            'restaurantes': { emoji: '🍽️', color: '#dd6b20' },
+            'hoteles': { emoji: '🏨', color: '#805ad5' },
+            'comunidades': { emoji: '🏘️', color: '#4a5568' },
+            'viviendas': { emoji: '🏠', color: '#2d3748' },
+            'areas_verdes': { emoji: '🌳', color: '#38a169' },
+            'sembradios': { emoji: '🌾', color: '#22543d' },
+            'basura': { emoji: '🗑️', color: '#718096' },
+            'puntos_basura': { emoji: '🚯', color: '#a0aec0' },
+            'aguas_contaminadas': { emoji: '⚠️', color: '#e53e3e' }
+        };
+
+        const config = iconosConfig[tipoCapa] || { emoji: '📌', color: '#718096' };
+        return L.divIcon({
+            html: `
+                <div style="
+                    background: ${config.color};
+                    width: 44px;
+                    height: 44px;
+                    border-radius: 50%;
+                    border: 3px solid white;
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 18px;
+                    color: white;
+                    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                    transition: all 0.3s ease;
+                    cursor: pointer;
+                    touch-action: manipulation;
+                ">${config.emoji}</div>
+            `,
+            className: 'custom-marker',
+            iconSize: [44, 44],
+            iconAnchor: [22, 22]
+        });
+    }
+
+    activarCapa(nombreCapa) {
+        if (this.capas[nombreCapa] && !this.capasActivas.has(nombreCapa)) {
+            this.capas[nombreCapa].addTo(this.map);
+            this.capasActivas.add(nombreCapa);
+            console.log(`✅ Capa activada: ${nombreCapa}`);
+        } else if (!this.capas[nombreCapa]) {
+            this.cargarCapa(nombreCapa).then(() => {
+                this.activarCapa(nombreCapa);
+            });
+        }
+    }
+
+    desactivarCapa(nombreCapa) {
+        if (this.capas[nombreCapa] && this.capasActivas.has(nombreCapa)) {
+            this.map.removeLayer(this.capas[nombreCapa]);
+            this.capasActivas.delete(nombreCapa);
+            console.log(`❌ Capa desactivada: ${nombreCapa}`);
+        }
+    }
+
+    activarTodasLasCapas() {
+        Object.keys(this.capas).forEach(capaId => {
+            this.activarCapa(capaId);
+            const elemento = document.querySelector(`[data-capa="${capaId}"]`);
+            if (elemento) elemento.classList.add('active');
+        });
+        this.actualizarContadores();
+    }
+
+    desactivarTodasLasCapas() {
+        Object.keys(this.capas).forEach(capaId => {
+            this.desactivarCapa(capaId);
+            const elemento = document.querySelector(`[data-capa="${capaId}"]`);
+            if (elemento) elemento.classList.remove('active');
+        });
+        this.actualizarContadores();
+    }
+
+    obtenerEstilo(tipoCapa) {
+        const estilos = {
+            puntos_turisticos: { 
+                color: '#e53e3e', 
+                radius: 8, 
+                fillColor: '#fc8181',
+                fillOpacity: 0.9,
+                weight: 3
+            },
+            comunidades: { 
+                color: '#3182ce', 
+                fillColor: '#90cdf4', 
+                fillOpacity: 0.4, 
+                weight: 3 
+            },
+            rutas: { 
+                color: '#dd6b20', 
+                weight: 5, 
+                opacity: 0.9,
+                dashArray: '8, 8'
+            },
+            areas_verdes: { 
+                color: '#38a169', 
+                fillColor: '#9ae6b4', 
+                fillOpacity: 0.6,
+                weight: 2
+            },
+            sembradios: {
+                color: '#22543d',
+                fillColor: '#68d391',
+                fillOpacity: 0.5,
+                weight: 1
+            },
+            miradores: {
+                color: '#3182ce',
+                radius: 6,
+                fillColor: '#90cdf4',
+                fillOpacity: 0.8,
+                weight: 2
+            },
+            playas: {
+                color: '#38b2ac',
+                radius: 6,
+                fillColor: '#81e6d9',
+                fillOpacity: 0.8,
+                weight: 2
+            },
+            tiendas_artesania: {
+                color: '#d69e2e',
+                radius: 5,
+                fillColor: '#faf089',
+                fillOpacity: 0.8,
+                weight: 2
+            },
+            restaurantes: {
+                color: '#dd6b20',
+                radius: 5,
+                fillColor: '#fbd38d',
+                fillOpacity: 0.8,
+                weight: 2
+            },
+            hoteles: {
+                color: '#805ad5',
+                radius: 5,
+                fillColor: '#d6bcfa',
+                fillOpacity: 0.8,
+                weight: 2
+            },
+            viviendas: {
+                color: '#2d3748',
+                radius: 4,
+                fillColor: '#a0aec0',
+                fillOpacity: 0.7,
+                weight: 1
+            },
+            basura: {
+                color: '#718096',
+                radius: 6,
+                fillColor: '#b82924ff',
+                fillOpacity: 0.8,
+                weight: 2
+            },
+            puntos_basura: {
+                color: '#a0aec0',
+                radius: 6,
+                fillColor: '#cbd5e0',
+                fillOpacity: 0.7,
+                weight: 2
+            },
+            aguas_contaminadas: {
+                color: '#e53e3e',
+                radius: 7,
+                fillColor: '#fc8181',
+                fillOpacity: 0.7,
+                weight: 3
+            }
+        };
+        
+        return estilos[tipoCapa] || { color: '#718096', radius: 6, fillOpacity: 0.8 };
+    }
+
+    async agregarPopup(feature, layer, tipoCapa) {
+        if (feature.properties) {
+            let contenido = `<div class="popup-isla-sol">`;
+            
+            const iconos = {
+                'puntos_turisticos': '📍', 'miradores': '🔭', 'playas': '🏖️', 
+                'tiendas_artesania': '🎨', 'restaurantes': '🍽️', 'hoteles': '🏨', 
+                'comunidades': '🏘️', 'viviendas': '🏠', 'rutas': '🛣️',
+                'areas_verdes': '🌳', 'sembradios': '🌾',
+                'basura': '🗑️', 'puntos_basura': '🚯', 'aguas_contaminadas': '⚠️'
+            };
+            
+            const icono = iconos[tipoCapa] || '📌';
+            const nombre = feature.properties.nombre || this.obtenerNombrePorTipo(tipoCapa);
+            const idLugar = feature.properties.id_lugar || this.extraerIdLugar(feature.properties.id);
+            
+            contenido += `
+                <div style="border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 12px;">
+                    <h3>${icono} ${nombre}</h3>
+                    <span style="color: #718096; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500;">
+                        ${this.obtenerCategoria(tipoCapa)}
+                    </span>
+                </div>
+                
+                <div id="loading-${idLugar}" style="text-align: center; padding: 20px;">
+                    <div style="color: #3182ce; font-size: 14px;">
+                        <i class="fas fa-spinner fa-spin"></i> Cargando información detallada...
+                    </div>
+                </div>
+                
+                <div id="detalles-${idLugar}" style="display: none;"></div>
+            `;
+            
+            contenido += `</div>`;
+            
+            layer.bindPopup(contenido, {
+                // Optimizar popups para móvil
+                maxWidth: 300,
+                className: 'mobile-popup',
+                closeOnEscapeKey: false,
+                autoPan: true,
+                autoPanPadding: [50, 50]
+            });
+            
+            layer.on('popupopen', async () => {
+                await this.cargarInformacionDetallada(tipoCapa, idLugar, nombre);
+            });
+        }
+    }
+
+    async cargarInformacionDetallada(tipoCapa, idLugar, nombre) {
+        const loadingElement = document.getElementById(`loading-${idLugar}`);
+        const detallesElement = document.getElementById(`detalles-${idLugar}`);
+        
+        if (!loadingElement || !detallesElement) return;
+        
+        try {
+            let endpoint = '';
+            let tipoDetalle = '';
+            
+            switch(tipoCapa) {
+                case 'restaurantes':
+                    endpoint = `detalle/restaurante/${idLugar}`;
+                    tipoDetalle = 'restaurante';
+                    break;
+                case 'hoteles':
+                    endpoint = `detalle/hotel/${idLugar}`;
+                    tipoDetalle = 'hotel';
+                    break;
+                case 'tiendas_artesania':
+                    endpoint = `detalle/tienda_artesania/${idLugar}`;
+                    tipoDetalle = 'tienda_artesania';
+                    break;
+                case 'puntos_turisticos':
+                    endpoint = `detalle/lugar_turistico/${idLugar}`;
+                    tipoDetalle = 'lugar_turistico';
+                    break;
+                case 'miradores':
+                    endpoint = `detalle/mirador/${idLugar}`;
+                    tipoDetalle = 'mirador';
+                    break;
+                case 'playas':
+                    endpoint = `detalle/playa/${idLugar}`;
+                    tipoDetalle = 'playa';
+                    break;
+                default:
+                    detallesElement.innerHTML = this.generarContenidoBasico(tipoCapa, nombre);
+                    loadingElement.style.display = 'none';
+                    detallesElement.style.display = 'block';
+                    return;
+            }
+            
+            const timestamp = new Date().getTime();
+            const response = await fetch(`${this.API_BASE_URL}/${endpoint}?t=${timestamp}`);
+            
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            let contenidoDetallado = '';
+            switch(tipoDetalle) {
+                case 'restaurante':
+                    contenidoDetallado = this.generarContenidoRestaurante(data);
+                    break;
+                case 'hotel':
+                    contenidoDetallado = this.generarContenidoHotel(data);
+                    break;
+                case 'tienda_artesania':
+                    contenidoDetallado = this.generarContenidoTiendaArtesania(data);
+                    break;
+                case 'lugar_turistico':
+                    contenidoDetallado = this.generarContenidoLugarTuristico(data);
+                    break;
+                case 'mirador':
+                    contenidoDetallado = this.generarContenidoMirador(data);
+                    break;
+                case 'playa':
+                    contenidoDetallado = this.generarContenidoPlaya(data);
+                    break;
+            }
+            
+            loadingElement.style.display = 'none';
+            detallesElement.innerHTML = contenidoDetallado;
+            detallesElement.style.display = 'block';
+            
+        } catch (error) {
+            console.error(`❌ Error cargando detalles para ${tipoCapa}:`, error);
+            loadingElement.innerHTML = `
+                <div style="color: #e53e3e; text-align: center; padding: 10px;">
+                    <i class="fas fa-exclamation-triangle"></i> Error cargando información
+                </div>
+            `;
+        }
+    }
+
+    generarContenidoRestaurante(data) {
+        const restaurante = data.restaurante;
+        const servicios = data.servicios;
+        const menu = data.menu;
+        
+        let contenido = `
+            <div style="margin-bottom: 15px;">
+                <h4>🍽️ Información del Restaurante</h4>
+                <div style="background: #f7fafc; padding: 12px; border-radius: 6px; font-size: 13px;">
+                    <p style="margin: 4px 0;"><strong>🏷️ Tipo:</strong> ${restaurante.tipo || 'No especificado'}</p>
+                    <p style="margin: 4px 0;"><strong>👥 Capacidad:</strong> ${restaurante.capacidad || 'N/A'} personas</p>
+                    <p style="margin: 4px 0;"><strong>🕒 Horario:</strong> ${restaurante.horario || 'No especificado'}</p>
+                    <p style="margin: 4px 0;"><strong>🎨 Estilo:</strong> ${restaurante.estilo || 'No especificado'}</p>
+                    <p style="margin: 4px 0;"><strong>✅ Estado:</strong> ${restaurante.estado || 'No especificado'}</p>
+                    <p style="margin: 4px 0;"><strong>🏘️ Comunidad:</strong> ${restaurante.comunidad || 'No especificada'}</p>
+                </div>
+            </div>
+        `;
+        
+        if (servicios && servicios.length > 0) {
+            contenido += `
+                <div style="margin-bottom: 15px;">
+                    <h4>⚡ Servicios</h4>
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                        ${servicios.map(servicio => 
+                            `<span style="background: #edf2f7; padding: 4px 8px; border-radius: 12px; font-size: 11px; color: #4a5568;">${servicio}</span>`
+                        ).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        if (menu && menu.length > 0) {
+            const platosMostrar = menu.slice(0, 5);
+            contenido += `
+                <div style="margin-bottom: 10px;">
+                    <h4>📋 Menú (${data.total_platos} platos)</h4>
+                    <div style="max-height: 150px; overflow-y: auto; font-size: 12px;">
+                        ${platosMostrar.map(plato => `
+                            <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #e2e8f0;">
+                                <span>${plato.plato}</span>
+                                <span style="color: #38a169; font-weight: bold;">Bs. ${plato.precio}</span>
+                            </div>
+                        `).join('')}
+                        ${menu.length > 10 ? `<div style="text-align: center; padding: 8px; color: #718096; font-style: italic;">... y ${menu.length - 10} platos más</div>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+        
+        return contenido;
+    }
+
+    generarContenidoHotel(data) {
+        const hotel = data.hotel;
+        const servicios = data.servicios;
+        const habitaciones = data.habitaciones;
+        
+        let contenido = `
+            <div style="margin-bottom: 15px;">
+                <h4>🏨 Información del Hotel</h4>
+                <div style="background: #f7fafc; padding: 12px; border-radius: 6px; font-size: 13px;">
+                    <p style="margin: 4px 0;"><strong>👥 Capacidad:</strong> ${hotel.capacidad_personas || 'N/A'} personas</p>
+                    <p style="margin: 4px 0;"><strong>🛏️ Habitaciones:</strong> ${hotel.numero_habitaciones || 'N/A'}</p>
+                    <p style="margin: 4px 0;"><strong>✅ Estado:</strong> ${hotel.estado || 'No especificado'}</p>
+                    <p style="margin: 4px 0;"><strong>🏠 Tipo:</strong> ${hotel.tipo_hotel || 'No especificado'}</p>
+                    <p style="margin: 4px 0;"><strong>🏘️ Comunidad:</strong> ${hotel.comunidad || 'No especificada'}</p>
+                </div>
+            </div>
+        `;
+        
+        if (servicios && servicios.length > 0) {
+            contenido += `
+                <div style="margin-bottom: 15px;">
+                    <h4>⚡ Servicios</h4>
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                        ${servicios.map(servicio => 
+                            `<span style="background: #edf2f7; padding: 4px 8px; border-radius: 12px; font-size: 11px; color: #4a5568;">${servicio}</span>`
+                        ).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        if (habitaciones && habitaciones.length > 0) {
+            contenido += `
+                <div style="margin-bottom: 10px;">
+                    <h4>🛏️ Tipos de Habitación</h4>
+                    <div style="font-size: 12px;">
+                        ${habitaciones.map(hab => `
+                            <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #e2e8f0;">
+                                <span>${hab.tipo}</span>
+                                <span style="color: #3182ce;">Capacidad: ${hab.capacidad}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        return contenido;
+    }
+
+    generarContenidoTiendaArtesania(data) {
+        const tienda = data.tienda;
+        const productosPorCategoria = data.productos_por_categoria;
+        
+        let contenido = `
+            <div style="margin-bottom: 15px;">
+                <h4>🎨 Tienda de Artesanía</h4>
+                <div style="background: #f7fafc; padding: 12px; border-radius: 6px; font-size: 13px;">
+                    <p style="margin: 4px 0;"><strong>🏪 Nombre:</strong> ${tienda.nombre || 'Tienda de Artesanía'}</p>
+                    <p style="margin: 4px 0;"><strong>✅ Estado:</strong> ${tienda.estado || 'No especificado'}</p>
+                    <p style="margin: 4px 0;"><strong>🏘️ Comunidad:</strong> ${tienda.comunidad || 'No especificada'}</p>
+                    <p style="margin: 4px 0;"><strong>📦 Total productos:</strong> ${data.total_productos} disponibles</p>
+                </div>
+            </div>
+        `;
+        
+        if (productosPorCategoria && Object.keys(productosPorCategoria).length > 0) {
+            contenido += `
+                <div style="margin-bottom: 10px;">
+                    <h4>🛍️ Productos Disponibles</h4>
+            `;
+            
+            Object.entries(productosPorCategoria).forEach(([categoria, productos]) => {
+                contenido += `
+                    <div style="margin-bottom: 12px; background: #fff5f5; padding: 10px; border-radius: 6px;">
+                        <h5 style="margin: 0 0 6px 0; color: #c53030; font-size: 12px; font-weight: bold;">${categoria}</h5>
+                        <div style="font-size: 11px;">
+                            ${productos.map(prod => `
+                                <div style="display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px solid #fed7d7;">
+                                    <span>${prod.producto}</span>
+                                    <span style="color: #38a169; font-weight: bold;">Bs. ${prod.precio}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            contenido += `</div>`;
+        }
+        
+        return contenido;
+    }
+
+    generarContenidoLugarTuristico(data) {
+        const lugar = data.lugar_turistico;
+        
+        return `
+            <div style="margin-bottom: 15px;">
+                <h4>📍 Información Turística</h4>
+                <div style="background: #f7fafc; padding: 12px; border-radius: 6px; font-size: 13px;">
+                    <p style="margin: 4px 0;"><strong>🏷️ Tipo:</strong> ${lugar.tipo || 'No especificado'}</p>
+                    <p style="margin: 4px 0;"><strong>♿ Accesibilidad:</strong> ${lugar.accesibilidad || 'No especificada'}</p>
+                    <p style="margin: 4px 0;"><strong>👥 Afluencia:</strong> ${lugar.afluencia || 'No especificada'}</p>
+                    <p style="margin: 4px 0;"><strong>🏘️ Comunidad:</strong> ${lugar.comunidad || 'No especificada'}</p>
+                    ${lugar.descripcion ? `
+                        <div style="margin-top: 8px; padding: 8px; background: white; border-radius: 4px; border-left: 3px solid #3182ce;">
+                            <p style="margin: 0; color: #4a5568; font-style: italic; font-size: 12px;">${lugar.descripcion}</p>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    }
+
+    generarContenidoMirador(data) {
+        const mirador = data.mirador;
+        
+        return `
+            <div style="margin-bottom: 15px;">
+                <h4>🔭 Información del Mirador</h4>
+                <div style="background: #f7fafc; padding: 12px; border-radius: 6px; font-size: 13px;">
+                    <p style="margin: 4px 0;"><strong>🚶 Dificultad acceso:</strong> ${mirador.dificultad_acceso || 'No especificada'}</p>
+                    <p style="margin: 4px 0;"><strong>✅ Estado:</strong> ${mirador.estado || 'No especificado'}</p>
+                    <p style="margin: 4px 0;"><strong>👥 Afluencia:</strong> ${mirador.afluencia || 'No especificada'}</p>
+                    <p style="margin: 4px 0;"><strong>🏘️ Comunidad:</strong> ${mirador.comunidad || 'No especificada'}</p>
+                    ${mirador.puntos_cercanos ? `
+                        <p style="margin: 4px 0;"><strong>📍 Puntos cercanos:</strong> ${mirador.puntos_cercanos}</p>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    }
+
+    generarContenidoPlaya(data) {
+        const playa = data.playa;
+        
+        return `
+            <div style="margin-bottom: 15px;">
+                <h4>🏖️ Información de la Playa</h4>
+                <div style="background: #f7fafc; padding: 12px; border-radius: 6px; font-size: 13px;">
+                    <p style="margin: 4px 0;"><strong>🚗 Acceso:</strong> ${playa.acceso || 'No especificado'}</p>
+                    <p style="margin: 4px 0;"><strong>🚶 Dificultad acceso:</strong> ${playa.dificultad_acceso || 'No especificada'}</p>
+                    <p style="margin: 4px 0;"><strong>🏝️ Tipo playa:</strong> ${playa.tipo_playa || 'No especificado'}</p>
+                    <p style="margin: 4px 0;"><strong>✅ Estado:</strong> ${playa.estado || 'No especificado'}</p>
+                    <p style="margin: 4px 0;"><strong>👥 Afluencia:</strong> ${playa.afluencia || 'No especificada'}</p>
+                    <p style="margin: 4px 0;"><strong>🏘️ Comunidad:</strong> ${playa.comunidad || 'No especificada'}</p>
+                    ${playa.puntos_cercanos ? `
+                        <p style="margin: 4px 0;"><strong>📍 Puntos cercanos:</strong> ${playa.puntos_cercanos}</p>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    }
+
+    generarContenidoBasico(tipoCapa, nombre) {
+        return `
+            <div style="text-align: center; padding: 20px; color: #718096;">
+                <i class="fas fa-info-circle" style="font-size: 24px; margin-bottom: 10px;"></i>
+                <p style="margin: 0; font-size: 13px;">Información básica para ${nombre}</p>
+                <p style="margin: 8px 0 0 0; font-size: 11px;">Tipo: ${tipoCapa}</p>
+            </div>
+        `;
+    }
+
+    extraerIdLugar(idString) {
+        if (!idString) return null;
+        const match = idString.match(/\d+/);
+        return match ? parseInt(match[0]) : null;
+    }
+
+    obtenerNombrePorTipo(tipoCapa) {
+        const nombres = {
+            'viviendas': 'Vivienda',
+            'sembradios': 'Sembradío',
+            'areas_verdes': 'Área Verde',
+            'tiendas_artesania': 'Tienda de Artesanía',
+            'basura': 'Punto de Basura',
+            'puntos_basura': 'Zona de Basura',
+            'aguas_contaminadas': 'Zona de Agua Contaminada'
+        };
+        return nombres[tipoCapa] || tipoCapa.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+    }
+
+    obtenerCategoria(tipoCapa) {
+        const categorias = {
+            'puntos_turisticos': 'Turismo', 'miradores': 'Turismo', 'playas': 'Turismo',
+            'tiendas_artesania': 'Comercio', 'restaurantes': 'Servicio', 'hoteles': 'Servicio',
+            'comunidades': 'Comunidad', 'viviendas': 'Residencial', 'rutas': 'Transporte',
+            'areas_verdes': 'Naturaleza', 'sembradios': 'Agricultura',
+            'basura': 'Medio Ambiente', 'puntos_basura': 'Medio Ambiente', 'aguas_contaminadas': 'Medio Ambiente'
+        };
+        return categorias[tipoCapa] || 'General';
+    }
+
+    actualizarContadores() {
+        this.contadorTotal = 0;
+        
+        Object.entries(this.capas).forEach(([nombreCapa, capa]) => {
+            if (this.capasActivas.has(nombreCapa)) {
+                this.contadorTotal += capa.getLayers().length;
+            }
+        });
+        
+        this.actualizarEstadisticasMovil();
+    }
+
+    actualizarContadorCapa(nombreCapa, cantidad) {
+        this.actualizarContadorCapaMovil(nombreCapa, cantidad);
+    }
+
+    limpiarDuplicadosCapa(nombreCapa) {
+        if (!this.capas[nombreCapa]) return;
+        
+        const capa = this.capas[nombreCapa];
+        const layers = capa.getLayers();
+        const coordenadasUnicas = new Set();
+        const layersUnicos = [];
+        
+        layers.forEach(layer => {
+            const latlng = layer.getLatLng ? layer.getLatLng() : null;
+            if (latlng) {
+                const clave = `${latlng.lat.toFixed(6)},${latlng.lng.toFixed(6)}`;
+                if (!coordenadasUnicas.has(clave)) {
+                    coordenadasUnicas.add(clave);
+                    layersUnicos.push(layer);
+                }
+            } else {
+                layersUnicos.push(layer);
+            }
+        });
+        
+        if (layersUnicos.length < layers.length) {
+            console.log(`🔄 Eliminando ${layers.length - layersUnicos.length} duplicados de ${nombreCapa}`);
+            
+            this.map.removeLayer(capa);
+            
+            const nuevaCapa = L.layerGroup(layersUnicos);
+            this.capas[nombreCapa] = nuevaCapa;
+            
+            if (this.capasActivas.has(nombreCapa)) {
+                nuevaCapa.addTo(this.map);
+            }
+            
+            this.actualizarContadorCapa(nombreCapa, layersUnicos.length);
+        }
+    }
+
+    buscarMiUbicacion() {
+        if (!navigator.geolocation) {
+            this.mostrarMensajeMovil('La geolocalización no es soportada', 'error');
+            return;
+        }
+
+        this.mostrarMensajeMovil('Buscando tu ubicación...', 'info');
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                
+                const ubicacionIcon = L.divIcon({
+                    html: `
+                        <div style="
+                            background: #4299e1;
+                            width: 45px;
+                            height: 45px;
+                            border-radius: 50%;
+                            border: 4px solid white;
+                            box-shadow: 0 4px 20px rgba(66, 153, 225, 0.5);
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 20px;
+                            color: white;
+                            animation: pulse 1.5s infinite;
+                        ">📍</div>
+                    `,
+                    className: 'ubicacion-marker',
+                    iconSize: [45, 45],
+                    iconAnchor: [22, 22]
+                });
+
+                L.marker([latitude, longitude], { icon: ubicacionIcon })
+                    .addTo(this.map)
+                    .bindPopup('<strong>¡Tu ubicación actual!</strong><br>Estás aquí en el mapa.')
+                    .openPopup();
+
+                this.map.flyTo([latitude, longitude], 15, {
+                    duration: 2,
+                    easeLinearity: 0.25
+                });
+
+                this.mostrarMensajeMovil('Ubicación encontrada ✅', 'success');
+            },
+            (error) => {
+                let mensaje = 'Error al obtener la ubicación';
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        mensaje = 'Permiso de ubicación denegado';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        mensaje = 'Información de ubicación no disponible';
+                        break;
+                    case error.TIMEOUT:
+                        mensaje = 'Tiempo de espera agotado';
+                        break;
+                }
+                this.mostrarMensajeMovil(mensaje, 'error');
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 60000
+            }
+        );
+    }
+
+    limpiarCapas() {
+        Object.values(this.capas).forEach(capa => {
+            this.map.removeLayer(capa);
+        });
+        this.capas = {};
+        this.capasActivas.clear();
+        
+        if (this.marcadoresAgrupados) {
+            this.marcadoresAgrupados.clearLayers();
+        }
+        
+        const elementos = document.querySelectorAll('.mobile-layer-item');
+        elementos.forEach(elemento => {
+            elemento.classList.remove('active');
+        });
+        
+        console.log('🗑️ Todas las capas limpiadas');
+        this.actualizarContadores();
+        
+        this.mostrarMensajeMovil('Todas las capas limpiadas', 'info');
+        
+        setTimeout(() => {
+            this.cargarTodasLasCapas();
+        }, 1000);
+    }
 }
 
-// AGREGAR ESTILOS DE ANIMACIÓN MEJORADOS
+// ESTILOS DE ANIMACIÓN ADICIONALES MEJORADOS
 const mobileAnimationStyles = document.createElement('style');
 mobileAnimationStyles.textContent = `
     @keyframes slideInDown {
@@ -979,7 +1780,7 @@ mobileAnimationStyles.textContent = `
         }
     }
     
-    @keyframes slideInFromLeft {
+    @keyframes slideInLeft {
         from {
             transform: translateX(-100%);
         }
@@ -988,43 +1789,267 @@ mobileAnimationStyles.textContent = `
         }
     }
     
-    @keyframes slideOutToLeft {
-        from {
-            transform: translateX(0);
+    /* MEJORAS ESPECÍFICAS PARA EL MAPA EN MÓVIL */
+    .leaflet-container {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    
+    .leaflet-popup-content-wrapper {
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+    
+    .leaflet-popup-tip {
+        box-shadow: none;
+    }
+    
+    .mobile-popup .leaflet-popup-content {
+        margin: 15px;
+        font-size: 14px;
+        line-height: 1.4;
+    }
+    
+       /* PREVENIR SELECTION EN MÓVIL */
+    .leaflet-container * {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
+    }
+    
+    /* MEJORAR BOTONES DE CONTROL */
+    .leaflet-control-zoom a {
+        -webkit-tap-highlight-color: transparent;
+        min-width: 44px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+    }
+    
+    /* OPTIMIZAR PARA PANTALLAS PEQUEÑAS */
+    @media (max-width: 480px) {
+        .leaflet-popup-content {
+            max-width: 280px !important;
         }
-        to {
-            transform: translateX(-100%);
+        
+        .leaflet-control-zoom {
+            margin-bottom: 70px !important;
         }
     }
-
-    /* MEJORAS DE RENDIMIENTO PARA ANIMACIONES */
-    .mobile-panel {
-        will-change: transform;
-        backface-visibility: hidden;
-        perspective: 1000;
+    
+    @media (max-width: 360px) {
+        .leaflet-popup-content {
+            max-width: 250px !important;
+        }
     }
 `;
 document.head.appendChild(mobileAnimationStyles);
 
-// INICIALIZACIÓN MEJORADA
+// ✅ INICIALIZACIÓN MEJORADA PARA MÓVIL
 document.addEventListener('DOMContentLoaded', function() {
-    // Forzar carga sin cache
-    if (performance.navigation.type === 1) {
-        console.log('🔄 Página recargada - limpiando cache móvil');
-        localStorage.setItem('mobileForceReload', Date.now());
+    // Detectar si es móvil y aplicar configuraciones específicas
+    const isMobile = window.innerWidth <= 768;
+    
+    if (isMobile) {
+        console.log('📱 Dispositivo móvil detectado - aplicando optimizaciones táctiles');
+        
+        // Prevenir zoom con doble toque en el mapa
+        document.addEventListener('touchstart', function(e) {
+            if (e.touches.length > 1) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function(e) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+
+        // Mejorar el rendimiento táctil
+        document.documentElement.style.setProperty('--touch-action', 'pan-x pan-y');
     }
 
-    const lastMobileLoad = localStorage.getItem('mobileForceReload');
+    // ✅ FORZAR CARGA SIN CACHE MEJORADO
+    if (performance.navigation.type === 1 || performance.getEntriesByType("navigation")[0]?.type === 'reload') {
+        console.log('🔄 Página recargada - aplicando optimizaciones móviles');
+        const cacheBuster = Date.now();
+        localStorage.setItem('mobileMapCacheBuster', cacheBuster);
+        
+        // Limpiar cache de Leaflet
+        if (window.L) {
+            try {
+                // Forzar recreación de tiles
+                L.gridLayer.prototype._removeTilesAtZoom = function () {};
+            } catch (e) {
+                console.log('✅ Cache de mapa limpiado');
+            }
+        }
+    }
+
+    // Verificar si necesitamos forzar recarga
+    const lastMobileLoad = localStorage.getItem('mobileMapCacheBuster');
     const currentTime = Date.now();
     
     if (lastMobileLoad && (currentTime - parseInt(lastMobileLoad)) < 5000) {
         console.log('🔥 Forzando carga móvil sin cache');
-        window.location.reload(true);
+        window.location.href = window.location.href.split('?')[0] + '?t=' + Date.now();
         return;
     }
     
-    console.log('🚀 Inicializando mapa móvil con soporte táctil completo...');
-    window.interactiveMap = new InteractiveMap();
+    console.log('🚀 Inicializando mapa móvil optimizado con soporte táctil completo...');
     
-    localStorage.setItem('mobileForceReload', Date.now());
+    // Pequeño delay para asegurar que el DOM esté listo
+    setTimeout(() => {
+        try {
+            window.interactiveMap = new InteractiveMap();
+            console.log('✅ Mapa móvil inicializado correctamente');
+            
+            // Guardar timestamp de carga exitosa
+            localStorage.setItem('mobileMapCacheBuster', Date.now());
+            
+            // Mostrar indicador de carga completada
+            const loadingIndicator = document.createElement('div');
+            loadingIndicator.style.cssText = `
+                position: fixed;
+                top: 10px;
+                right: 10px;
+                background: #10b981;
+                color: white;
+                padding: 8px 12px;
+                border-radius: 6px;
+                font-size: 12px;
+                font-weight: bold;
+                z-index: 10000;
+                animation: slideInRight 0.3s ease;
+            `;
+            loadingIndicator.textContent = '🗺️ Mapa Listo';
+            document.body.appendChild(loadingIndicator);
+            
+            setTimeout(() => {
+                if (loadingIndicator.parentNode) {
+                    loadingIndicator.parentNode.removeChild(loadingIndicator);
+                }
+            }, 3000);
+            
+        } catch (error) {
+            console.error('❌ Error inicializando el mapa móvil:', error);
+            
+            // Mostrar error amigable
+            const errorMsg = document.createElement('div');
+            errorMsg.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: #ef4444;
+                color: white;
+                padding: 20px;
+                border-radius: 10px;
+                text-align: center;
+                z-index: 10000;
+                max-width: 300px;
+            `;
+            errorMsg.innerHTML = `
+                <h3>😕 Error al cargar el mapa</h3>
+                <p>Recarga la página o intenta más tarde</p>
+                <button onclick="window.location.reload()" style="
+                    background: white;
+                    color: #ef4444;
+                    border: none;
+                    padding: 10px 20px;
+                    border-radius: 5px;
+                    margin-top: 10px;
+                    cursor: pointer;
+                    font-weight: bold;
+                ">Reintentar</button>
+            `;
+            document.body.appendChild(errorMsg);
+        }
+    }, 100);
 });
+
+// ✅ POLYFILLS PARA MEJOR COMPATIBILIDAD MÓVIL
+if (!Element.prototype.matches) {
+    Element.prototype.matches = Element.prototype.msMatchesSelector || 
+                                Element.prototype.webkitMatchesSelector;
+}
+
+if (!Element.prototype.closest) {
+    Element.prototype.closest = function(s) {
+        var el = this;
+        if (!document.documentElement.contains(el)) return null;
+        do {
+            if (el.matches(s)) return el;
+            el = el.parentElement || el.parentNode;
+        } while (el !== null && el.nodeType === 1);
+        return null;
+    };
+}
+
+// ✅ OPTIMIZACIONES DE RENDIMIENTO PARA MÓVIL
+if (window.innerWidth <= 768) {
+    // Reducir el uso de memoria en móviles
+    const originalTimeout = window.setTimeout;
+    window.setTimeout = function(callback, delay) {
+        return originalTimeout(callback, Math.max(delay, 16)); // Limitar a 60fps
+    };
+
+    // Optimizar event listeners
+    const originalAddEventListener = EventTarget.prototype.addEventListener;
+    EventTarget.prototype.addEventListener = function(type, listener, options) {
+        // Usar passive para eventos táctiles cuando sea posible
+        if (['touchstart', 'touchmove', 'touchend'].includes(type)) {
+            options = Object.assign({ passive: true }, options);
+        }
+        return originalAddEventListener.call(this, type, listener, options);
+    };
+}
+
+// ✅ DETECCIÓN DE GESTOS TÁCTILES ADICIONALES
+document.addEventListener('DOMContentLoaded', function() {
+    // Detectar gesto de pellizco para zoom
+    let initialDistance = null;
+    
+    document.addEventListener('touchstart', function(e) {
+        if (e.touches.length === 2) {
+            initialDistance = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+        }
+    });
+    
+    document.addEventListener('touchmove', function(e) {
+        if (e.touches.length === 2 && initialDistance !== null) {
+            e.preventDefault();
+            
+            const currentDistance = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            
+            if (window.interactiveMap && window.interactiveMap.map) {
+                const zoomDiff = (currentDistance - initialDistance) * 0.01;
+                const currentZoom = window.interactiveMap.map.getZoom();
+                const newZoom = Math.max(10, Math.min(18, currentZoom + zoomDiff));
+                
+                if (Math.abs(newZoom - currentZoom) > 0.5) {
+                    window.interactiveMap.map.setZoom(newZoom);
+                    initialDistance = currentDistance;
+                }
+            }
+        }
+    }, { passive: false });
+    
+    document.addEventListener('touchend', function() {
+        initialDistance = null;
+    });
+});
+
+console.log('🎯 Mapa móvil optimizado cargado - listo para uso táctil');
+
