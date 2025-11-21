@@ -1,4 +1,4 @@
-// scripts/modules/map.js - VERSIÓN COMPLETA OPTIMIZADA PARA CELULAR CON GESTOS TÁCTILES MEJORADOS
+// scripts/modules/map.js - VERSIÓN COMPLETA OPTIMIZADA PARA CELULAR
 class InteractiveMap {
     constructor() {
         this.map = null;
@@ -9,12 +9,6 @@ class InteractiveMap {
         this.API_BASE_URL = 'https://mi-api-6jmx.onrender.com/api';
         this.isMobile = window.innerWidth <= 768;
         
-        // Variables para gestos táctiles
-        this.touchStartX = 0;
-        this.touchStartY = 0;
-        this.panelOpen = false;
-        this.swipeThreshold = 50;
-        
         this.init();
     }
 
@@ -23,7 +17,6 @@ class InteractiveMap {
         this.inicializarMapa();
         this.crearInterfazMovil();
         this.configurarEventosInterfaz();
-        this.configurarGestosTactiles();
         this.inicializarCluster();
         this.cargarTodasLasCapas();
     }
@@ -41,12 +34,7 @@ class InteractiveMap {
             center: [-16.0167, -69.1833],
             zoom: 13,
             zoomControl: false,
-            attributionControl: true,
-            // Configuración para mejor rendimiento en móviles
-            preferCanvas: true,
-            fadeAnimation: true,
-            zoomAnimation: true,
-            markerZoomAnimation: true
+            attributionControl: true
         });
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -107,10 +95,6 @@ class InteractiveMap {
                         <i class="fas fa-location-crosshairs"></i>
                         Mi Ubicación
                     </button>
-                    <button class="quick-btn" id="btnRefresh">
-                        <i class="fas fa-sync-alt"></i>
-                        Actualizar
-                    </button>
                 </div>
 
                 <div class="mobile-layers-container">
@@ -152,12 +136,6 @@ class InteractiveMap {
 
             <!-- OVERLAY -->
             <div class="mobile-overlay" id="mobileOverlay"></div>
-
-            <!-- INDICADOR DE DESLIZAMIENTO -->
-            <div class="swipe-indicator" id="swipeIndicator">
-                <div class="swipe-arrow">←</div>
-                <span>Desliza para cerrar</span>
-            </div>
         `;
 
         mapContainer.insertAdjacentHTML('beforeend', controlesHTML);
@@ -224,19 +202,13 @@ class InteractiveMap {
                     background: rgba(15, 23, 42, 0.95);
                     backdrop-filter: blur(20px);
                     z-index: 2000;
-                    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    transition: left 0.3s ease;
                     overflow-y: auto;
                     border-right: 1px solid rgba(255,255,255,0.1);
-                    transform: translateX(-100%);
                 }
 
                 .mobile-panel.active {
-                    transform: translateX(0);
                     left: 0;
-                }
-
-                .mobile-panel.swiping {
-                    transition: none;
                 }
 
                 .mobile-panel-header {
@@ -246,8 +218,6 @@ class InteractiveMap {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    position: relative;
-                    touch-action: pan-y;
                 }
 
                 .mobile-panel-header h3 {
@@ -268,7 +238,6 @@ class InteractiveMap {
                     align-items: center;
                     justify-content: center;
                     transition: all 0.3s ease;
-                    touch-action: manipulation;
                 }
 
                 .mobile-close-btn:hover {
@@ -320,7 +289,6 @@ class InteractiveMap {
                     align-items: center;
                     gap: 5px;
                     transition: all 0.3s ease;
-                    touch-action: manipulation;
                 }
 
                 .quick-btn:hover {
@@ -336,7 +304,6 @@ class InteractiveMap {
                     padding: 15px 20px;
                     max-height: 50vh;
                     overflow-y: auto;
-                    -webkit-overflow-scrolling: touch;
                 }
 
                 .mobile-layers-grid {
@@ -353,8 +320,6 @@ class InteractiveMap {
                     cursor: pointer;
                     transition: all 0.3s ease;
                     position: relative;
-                    touch-action: manipulation;
-                    user-select: none;
                 }
 
                 .mobile-layer-item.active {
@@ -458,7 +423,6 @@ class InteractiveMap {
                     gap: 8px;
                     box-shadow: 0 8px 25px rgba(6, 182, 212, 0.4);
                     transition: all 0.3s ease;
-                    touch-action: manipulation;
                 }
 
                 .btn-3d-mobile:hover {
@@ -485,53 +449,9 @@ class InteractiveMap {
                     visibility: visible;
                 }
 
-                .swipe-indicator {
-                    position: absolute;
-                    top: 50%;
-                    right: 10px;
-                    transform: translateY(-50%);
-                    background: rgba(255,255,255,0.9);
-                    padding: 8px 12px;
-                    border-radius: 20px;
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    font-size: 12px;
-                    color: #4a5568;
-                    opacity: 0;
-                    transition: opacity 0.3s ease;
-                    z-index: 2001;
-                    pointer-events: none;
-                }
-
-                .swipe-indicator.show {
-                    opacity: 1;
-                }
-
-                .swipe-arrow {
-                    animation: swipeArrow 1.5s infinite;
-                    font-size: 14px;
-                    font-weight: bold;
-                }
-
                 @keyframes pulse {
                     0%, 100% { transform: scale(1); }
                     50% { transform: scale(1.1); }
-                }
-
-                @keyframes swipeArrow {
-                    0%, 100% { transform: translateX(0); }
-                    50% { transform: translateX(-5px); }
-                }
-
-                @keyframes slideInLeft {
-                    from { transform: translateX(-100%); }
-                    to { transform: translateX(0); }
-                }
-
-                @keyframes slideOutLeft {
-                    from { transform: translateX(0); }
-                    to { transform: translateX(-100%); }
                 }
 
                 @media (max-width: 480px) {
@@ -550,11 +470,6 @@ class InteractiveMap {
                     }
                     .legend-grid-mobile {
                         grid-template-columns: 1fr;
-                    }
-                    .swipe-indicator {
-                        right: 5px;
-                        font-size: 10px;
-                        padding: 6px 10px;
                     }
                 }
 
@@ -585,9 +500,6 @@ class InteractiveMap {
                     .mobile-layer-item {
                         padding: 15px 12px;
                     }
-                    .mobile-panel-header {
-                        padding: 20px 15px;
-                    }
                 }
 
                 .mobile-layers-container::-webkit-scrollbar {
@@ -600,22 +512,6 @@ class InteractiveMap {
                 .mobile-layers-container::-webkit-scrollbar-thumb {
                     background: #6366f1;
                     border-radius: 2px;
-                }
-
-                /* Mejoras de rendimiento para móviles */
-                .mobile-panel * {
-                    -webkit-tap-highlight-color: transparent;
-                    -webkit-touch-callout: none;
-                    -webkit-user-select: none;
-                    user-select: none;
-                }
-
-                .mobile-layer-item:active {
-                    transform: scale(0.98);
-                }
-
-                .quick-btn:active {
-                    transform: scale(0.95);
                 }
             </style>
         `;
@@ -650,10 +546,6 @@ class InteractiveMap {
             this.buscarMiUbicacion();
         });
 
-        document.getElementById('btnRefresh')?.addEventListener('click', () => {
-            this.recargarCapas();
-        });
-
         document.getElementById('btn3DMobile')?.addEventListener('click', () => {
             this.irAVista3D();
         });
@@ -669,172 +561,46 @@ class InteractiveMap {
             }
         });
 
-        // Prevenir scroll cuando el panel está abierto
-        document.addEventListener('touchmove', (e) => {
-            if (this.panelOpen) {
-                e.preventDefault();
-            }
-        }, { passive: false });
+        this.configurarGestosTactiles();
     }
 
     configurarGestosTactiles() {
+        let startX = 0;
         const panel = document.getElementById('mobilePanel');
-        const panelHeader = document.querySelector('.mobile-panel-header');
-        const swipeIndicator = document.getElementById('swipeIndicator');
         
-        if (!panel || !panelHeader) return;
+        panel?.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+        });
 
-        // Gesto de deslizar en el header del panel
-        panelHeader.addEventListener('touchstart', (e) => {
-            this.touchStartX = e.touches[0].clientX;
-            this.touchStartY = e.touches[0].clientY;
-            panel.classList.add('swiping');
+        panel?.addEventListener('touchmove', (e) => {
+            if (!startX) return;
             
-            // Mostrar indicador de deslizamiento
-            if (swipeIndicator) {
-                swipeIndicator.classList.add('show');
-            }
-        }, { passive: true });
-
-        panelHeader.addEventListener('touchmove', (e) => {
-            if (!this.touchStartX || !this.panelOpen) return;
+            const currentX = e.touches[0].clientX;
+            const diff = startX - currentX;
             
-            const touchX = e.touches[0].clientX;
-            const touchY = e.touches[0].clientY;
-            const diffX = this.touchStartX - touchX;
-            const diffY = this.touchStartY - touchY;
-            
-            // Solo procesar si el movimiento horizontal es mayor que el vertical
-            if (Math.abs(diffX) > Math.abs(diffY)) {
-                e.preventDefault();
-                
-                if (diffX > 0) {
-                    // Deslizando hacia la izquierda - calcular transformación
-                    const translateX = Math.max(-100, -Math.min(diffX, 100));
-                    panel.style.transform = `translateX(${translateX}px)`;
-                    
-                    // Actualizar opacidad del overlay
-                    const overlay = document.getElementById('mobileOverlay');
-                    if (overlay) {
-                        const opacity = 1 - (Math.abs(translateX) / 100);
-                        overlay.style.opacity = opacity.toString();
-                    }
-                }
-            }
-        }, { passive: false });
-
-        panelHeader.addEventListener('touchend', (e) => {
-            if (!this.touchStartX) return;
-            
-            const touchX = e.changedTouches[0].clientX;
-            const diffX = this.touchStartX - touchX;
-            
-            panel.classList.remove('swiping');
-            panel.style.transform = '';
-            
-            // Ocultar indicador de deslizamiento
-            if (swipeIndicator) {
-                swipeIndicator.classList.remove('show');
-            }
-            
-            // Si el deslizamiento supera el umbral, cerrar el panel
-            if (diffX > this.swipeThreshold) {
+            if (diff > 50) {
                 this.cerrarPanelMovil();
-            } else {
-                // Si no supera el umbral, restaurar el panel
-                this.abrirPanelMovil();
+                startX = 0;
             }
-            
-            this.touchStartX = 0;
-            this.touchStartY = 0;
-        }, { passive: true });
-
-        // Gesto de deslizar en el overlay para cerrar
-        const overlay = document.getElementById('mobileOverlay');
-        if (overlay) {
-            overlay.addEventListener('touchstart', (e) => {
-                this.touchStartX = e.touches[0].clientX;
-            }, { passive: true });
-
-            overlay.addEventListener('touchmove', (e) => {
-                if (!this.touchStartX || !this.panelOpen) return;
-                
-                const touchX = e.touches[0].clientX;
-                const diffX = touchX - this.touchStartX;
-                
-                if (diffX < -this.swipeThreshold) {
-                    this.cerrarPanelMovil();
-                }
-            }, { passive: true });
-
-            overlay.addEventListener('touchend', () => {
-                this.touchStartX = 0;
-            }, { passive: true });
-        }
-
-        // Gesto de deslizar desde el borde izquierdo para abrir
-        let edgeStartX = 0;
-        document.addEventListener('touchstart', (e) => {
-            if (e.touches[0].clientX < 50) { // 50px desde el borde izquierdo
-                edgeStartX = e.touches[0].clientX;
-            }
-        }, { passive: true });
-
-        document.addEventListener('touchmove', (e) => {
-            if (!edgeStartX || this.panelOpen) return;
-            
-            const touchX = e.touches[0].clientX;
-            const diffX = touchX - edgeStartX;
-            
-            if (diffX > this.swipeThreshold) {
-                this.abrirPanelMovil();
-                edgeStartX = 0;
-            }
-        }, { passive: true });
-
-        document.addEventListener('touchend', () => {
-            edgeStartX = 0;
-        }, { passive: true });
-
-        console.log('✅ Gestos táctiles configurados');
+        });
     }
 
     abrirPanelMovil() {
         const panel = document.getElementById('mobilePanel');
         const overlay = document.getElementById('mobileOverlay');
         
-        if (panel && overlay) {
-            panel.classList.add('active');
-            overlay.classList.add('active');
-            this.panelOpen = true;
-            
-            // Prevenir scroll del body
-            document.body.style.overflow = 'hidden';
-            
-            console.log('📱 Panel móvil abierto');
-        }
+        panel?.classList.add('active');
+        overlay?.classList.add('active');
+        document.body.style.overflow = 'hidden';
     }
 
     cerrarPanelMovil() {
         const panel = document.getElementById('mobilePanel');
         const overlay = document.getElementById('mobileOverlay');
-        const swipeIndicator = document.getElementById('swipeIndicator');
         
-        if (panel && overlay) {
-            panel.classList.remove('active');
-            overlay.classList.remove('active');
-            this.panelOpen = false;
-            
-            // Ocultar indicador de deslizamiento
-            if (swipeIndicator) {
-                swipeIndicator.classList.remove('show');
-            }
-            
-            // Restaurar scroll del body
-            document.body.style.overflow = '';
-            
-            console.log('📱 Panel móvil cerrado');
-        }
+        panel?.classList.remove('active');
+        overlay?.classList.remove('active');
+        document.body.style.overflow = '';
     }
 
     generarListaCapasMovil() {
@@ -874,19 +640,8 @@ class InteractiveMap {
                 elemento.addEventListener('click', () => {
                     this.toggleCapaMovil(capa.id, elemento);
                 });
-                
-                // Agregar feedback táctil
-                elemento.addEventListener('touchstart', () => {
-                    elemento.style.transform = 'scale(0.95)';
-                }, { passive: true });
-                
-                elemento.addEventListener('touchend', () => {
-                    elemento.style.transform = '';
-                }, { passive: true });
             }
         });
-
-        console.log('✅ Lista de capas móvil generada');
     }
 
     toggleCapaMovil(nombreCapa, elemento) {
@@ -939,7 +694,7 @@ class InteractiveMap {
         notificacion.className = `mobile-notification ${tipo}`;
         notificacion.innerHTML = `
             <div class="notification-content">
-                <i class="fas fa-${tipo === 'success' ? 'check' : tipo === 'error' ? 'exclamation' : 'info'}-circle"></i>
+                <i class="fas fa-${tipo === 'success' ? 'check' : 'info'}-circle"></i>
                 <span>${mensaje}</span>
             </div>
         `;
@@ -960,7 +715,6 @@ class InteractiveMap {
             text-align: center;
             font-size: 14px;
             font-weight: 500;
-            backdrop-filter: blur(10px);
         `;
 
         document.body.appendChild(notificacion);
@@ -991,16 +745,7 @@ class InteractiveMap {
         this.cerrarPanelMovil();
     }
 
-    recargarCapas() {
-        this.mostrarMensajeMovil('Actualizando capas...', 'info');
-        this.limpiarCapas();
-        
-        setTimeout(() => {
-            this.cargarTodasLasCapas();
-        }, 1000);
-    }
-
-    // MÉTODOS EXISTENTES DEL MAPA (se mantienen igual)
+    // MÉTODOS EXISTENTES DEL MAPA
     ocultarLoading() {
         const loading = document.querySelector('.map-loading');
         if (loading) {
@@ -1828,7 +1573,7 @@ class InteractiveMap {
     }
 }
 
-// ESTILOS DE ANIMACIÓN ADICIONALES MEJORADOS
+// ESTILOS DE ANIMACIÓN ADICIONALES
 const mobileAnimationStyles = document.createElement('style');
 mobileAnimationStyles.textContent = `
     @keyframes slideInDown {
@@ -1861,91 +1606,31 @@ mobileAnimationStyles.textContent = `
             transform: translateX(0);
         }
     }
-    
-    @keyframes slideOutLeft {
-        from {
-            transform: translateX(0);
-        }
-        to {
-            transform: translateX(-100%);
-        }
-    }
-    
-    /* Mejoras de rendimiento para animaciones */
-    .mobile-panel {
-        will-change: transform;
-    }
-    
-    .mobile-notification {
-        will-change: transform, opacity;
-    }
-    
-    .swipe-indicator {
-        will-change: opacity;
-    }
 `;
 document.head.appendChild(mobileAnimationStyles);
 
-// ✅ FORZAR CARGA SIN CACHE MEJORADO
-if (performance.navigation.type === 1 || performance.getEntriesByType("navigation")[0]?.type === 'reload') {
+// ✅ FORZAR CARGA SIN CACHE
+if (performance.navigation.type === 1) {
     console.log('🔄 Página recargada - limpiando cache móvil');
-    sessionStorage.setItem('mobileForceReload', Date.now());
+    localStorage.setItem('mobileForceReload', Date.now());
 }
 
-// DETECCIÓN MEJORADA DE DISPOSITIVOS TÁCTILES
-function isTouchDevice() {
-    return (('ontouchstart' in window) ||
-        (navigator.maxTouchPoints > 0) ||
-        (navigator.msMaxTouchPoints > 0));
-}
-
-// INICIALIZACIÓN MEJORADA
+// INICIALIZACIÓN
 document.addEventListener('DOMContentLoaded', function() {
-    const lastMobileLoad = sessionStorage.getItem('mobileForceReload');
+    const lastMobileLoad = localStorage.getItem('mobileForceReload');
     const currentTime = Date.now();
     
     if (lastMobileLoad && (currentTime - parseInt(lastMobileLoad)) < 5000) {
         console.log('🔥 Forzando carga móvil sin cache');
-        window.location.reload();
+        window.location.reload(true);
         return;
     }
     
-    console.log('🚀 Inicializando mapa móvil optimizado con gestos táctiles...');
-    console.log('📱 Dispositivo táctil detectado:', isTouchDevice());
-    
-    // Configuración específica para dispositivos táctiles
-    if (isTouchDevice()) {
-        document.documentElement.style.setProperty('--touch-optimized', 'true');
-    }
-    
+    console.log('🚀 Inicializando mapa móvil optimizado...');
     window.interactiveMap = new InteractiveMap();
     
-    sessionStorage.setItem('mobileForceReload', Date.now());
+    localStorage.setItem('mobileForceReload', Date.now());
 });
 
-// Manejo de errores global para móviles
-window.addEventListener('error', function(e) {
-    console.error('❌ Error global capturado:', e.error);
-    
-    if (window.interactiveMap && window.interactiveMap.mostrarMensajeMovil) {
-        window.interactiveMap.mostrarMensajeMovil('Error en la aplicación', 'error');
-    }
-});
-
-// Prevenir zoom no deseado en dispositivos móviles
-document.addEventListener('touchstart', function(e) {
-    if (e.touches.length > 1) {
-        e.preventDefault();
-    }
-}, { passive: false });
-
-let lastTouchEnd = 0;
-document.addEventListener('touchend', function(e) {
-    const now = (new Date()).getTime();
-    if (now - lastTouchEnd <= 300) {
-        e.preventDefault();
-    }
-    lastTouchEnd = now;
-}, false);
 
 
