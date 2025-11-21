@@ -1,4 +1,4 @@
-// assets/scripts/modules/cesium-3d-simple.js - VERSIÓN PRODUCCIÓN
+// assets/scripts/modules/cesium-3d-simple.js - VERSIÓN CORREGIDA PARA RENDER
 class Cesium3DMap {
     constructor() {
         this.viewer = null;
@@ -6,14 +6,14 @@ class Cesium3DMap {
         this.capasConfig = new Map();
         this.infoPanel = null;
         
-        // ✅ URL DE API PARA PRODUCCIÓN - CAMBIAR POR TU URL DE RENDER
-        this.API_BASE_URL = 'https://mi-api-6jmx.onrender.com';
+        // ✅ URL CORREGIDA - IGUAL QUE EN MAP.JS
+        this.API_BASE_URL = 'https://mi-api-6jmx.onrender.com/api';
         
         this.init();
     }
 
     init() {
-        console.log('🚀 Iniciando Cesium 3D - Interfaz Mejorada - PRODUCCIÓN');
+        console.log('🚀 Iniciando Cesium 3D - Conectado a Render');
         
         if (typeof Cesium === 'undefined') {
             console.error('❌ Cesium no está cargado');
@@ -71,7 +71,7 @@ class Cesium3DMap {
         controlPanel.className = 'cesium-control-panel';
         controlPanel.innerHTML = `
             <div class="control-header">
-                <h3>🎯 Control de Capas</h3>
+                <h3>🎯 Control de Capas 3D</h3>
                 <div class="control-buttons">
                     <button id="toggleAllLayers" class="btn-control">📁 Todas</button>
                     <button id="clearAllLayers" class="btn-control">🗑️ Limpiar</button>
@@ -81,31 +81,36 @@ class Cesium3DMap {
             <div class="layers-list" id="cesiumLayersList">
                 <div class="category-section">
                     <h4>🏞️ Puntos Turísticos</h4>
-                    ${this.createLayerItem('miradores', '🔭', 'Miradores', '#FF6B35')}
-                    ${this.createLayerItem('playas', '🏖️', 'Playas', '#4ECDC4')}
-                    ${this.createLayerItem('tiendas_artesania', '🎨', 'Tiendas Artesanía', '#FF9800')}
+                    ${this.createLayerItem('puntos_turisticos', '📍', 'Puntos Turísticos', '#e53e3e')}
+                    ${this.createLayerItem('miradores', '🔭', 'Miradores', '#3182ce')}
+                    ${this.createLayerItem('playas', '🏖️', 'Playas', '#38b2ac')}
                 </div>
 
                 <div class="category-section">
                     <h4>🏘️ Servicios</h4>
-                    ${this.createLayerItem('restaurantes', '🍽️', 'Restaurantes', '#E91E63')}
-                    ${this.createLayerItem('hoteles', '🏨', 'Hoteles', '#2196F3')}
+                    ${this.createLayerItem('tiendas_artesania', '🎨', 'Artesanía', '#d69e2e')}
+                    ${this.createLayerItem('restaurantes', '🍽️', 'Restaurantes', '#dd6b20')}
+                    ${this.createLayerItem('hoteles', '🏨', 'Hoteles', '#805ad5')}
                 </div>
 
                 <div class="category-section">
-                    <h4>🗺️ Rutas</h4>
-                    ${this.createLayerItem('rutas', '🛣️', 'Todas las Rutas', '#FFEB3B')}
+                    <h4>🗺️ Rutas y Comunidades</h4>
+                    ${this.createLayerItem('rutas', '🛣️', 'Rutas Turísticas', '#dd6b20')}
+                    ${this.createLayerItem('comunidades', '🏘️', 'Comunidades', '#4a5568')}
                 </div>
 
                 <div class="category-section">
-                    <h4>🏘️ Comunidades</h4>
-                    ${this.createLayerItem('comunidades', '🏘️', 'Todas las Comunidades', '#795548')}
+                    <h4>🌳 Áreas y Viviendas</h4>
+                    ${this.createLayerItem('areas_verdes', '🌳', 'Áreas Verdes', '#38a169')}
+                    ${this.createLayerItem('sembradios', '🌾', 'Sembradíos', '#22543d')}
+                    ${this.createLayerItem('viviendas', '🏠', 'Viviendas', '#2d3748')}
                 </div>
 
                 <div class="category-section">
-                    <h4>🌳 Áreas Verdes</h4>
-                    ${this.createLayerItem('areas_verdes', '🌳', 'Áreas Verdes', '#4CAF50')}
-                    ${this.createLayerItem('sembradios', '🌾', 'Sembradíos', '#8BC34A')}
+                    <h4>🗑️ Medio Ambiente</h4>
+                    ${this.createLayerItem('basura', '🗑️', 'Puntos Basura', '#718096')}
+                    ${this.createLayerItem('puntos_basura', '🚯', 'Zonas Basura', '#a0aec0')}
+                    ${this.createLayerItem('aguas_contaminadas', '⚠️', 'Agua Contaminada', '#e53e3e')}
                 </div>
             </div>
 
@@ -158,8 +163,414 @@ class Cesium3DMap {
     }
 
     addImprovedStyles() {
-        // ... (los mismos estilos que en tu archivo original)
-        // Se mantienen iguales, solo cambian las URLs de API
+        const styles = `
+            <style>
+                .cesium-control-panel {
+                    position: absolute;
+                    top: 20px;
+                    left: 20px;
+                    width: 320px;
+                    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+                    border-radius: 16px;
+                    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+                    padding: 20px;
+                    color: white;
+                    border: 1px solid #4a5568;
+                    backdrop-filter: blur(15px);
+                    z-index: 1000;
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                }
+
+                .control-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 20px;
+                    padding-bottom: 15px;
+                    border-bottom: 2px solid #4a5568;
+                }
+
+                .control-header h3 {
+                    margin: 0;
+                    font-size: 18px;
+                    font-weight: 600;
+                    color: #f7fafc;
+                }
+
+                .control-buttons {
+                    display: flex;
+                    gap: 8px;
+                }
+
+                .btn-control {
+                    background: rgba(74, 85, 104, 0.5);
+                    border: 1px solid #4a5568;
+                    color: white;
+                    padding: 8px 12px;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    font-size: 12px;
+                    transition: all 0.3s ease;
+                }
+
+                .btn-control:hover {
+                    background: rgba(74, 85, 104, 0.8);
+                    transform: translateY(-1px);
+                }
+
+                .layers-list {
+                    max-height: 400px;
+                    overflow-y: auto;
+                    margin-bottom: 15px;
+                }
+
+                .layers-list::-webkit-scrollbar {
+                    width: 6px;
+                }
+
+                .layers-list::-webkit-scrollbar-track {
+                    background: rgba(255, 255, 255, 0.1);
+                    border-radius: 3px;
+                }
+
+                .layers-list::-webkit-scrollbar-thumb {
+                    background: #4299e1;
+                    border-radius: 3px;
+                }
+
+                .category-section {
+                    margin-bottom: 15px;
+                }
+
+                .category-section h4 {
+                    margin: 0 0 10px 0;
+                    font-size: 14px;
+                    font-weight: 600;
+                    color: #cbd5e0;
+                    padding-left: 10px;
+                    border-left: 3px solid #4299e1;
+                }
+
+                .layer-item {
+                    margin-bottom: 8px;
+                }
+
+                .layer-item input[type="checkbox"] {
+                    display: none;
+                }
+
+                .layer-label {
+                    display: flex;
+                    align-items: center;
+                    padding: 10px;
+                    background: rgba(74, 85, 104, 0.3);
+                    border-radius: 8px;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    border: 1px solid transparent;
+                }
+
+                .layer-label:hover {
+                    background: rgba(74, 85, 104, 0.5);
+                    border-color: #4299e1;
+                }
+
+                input[type="checkbox"]:checked + .layer-label {
+                    background: rgba(66, 153, 225, 0.2);
+                    border-color: #4299e1;
+                }
+
+                .layer-color {
+                    width: 12px;
+                    height: 12px;
+                    border-radius: 50%;
+                    margin-right: 10px;
+                    border: 2px solid white;
+                }
+
+                .layer-emoji {
+                    font-size: 16px;
+                    margin-right: 8px;
+                    width: 20px;
+                    text-align: center;
+                }
+
+                .layer-text {
+                    flex: 1;
+                    font-size: 13px;
+                    font-weight: 500;
+                    color: #f7fafc;
+                }
+
+                .layer-count {
+                    background: rgba(26, 32, 44, 0.7);
+                    color: #cbd5e0;
+                    padding: 4px 8px;
+                    border-radius: 12px;
+                    font-size: 11px;
+                    font-weight: bold;
+                    min-width: 25px;
+                    text-align: center;
+                }
+
+                input[type="checkbox"]:checked + .layer-label .layer-count {
+                    background: #48bb78;
+                    color: white;
+                }
+
+                .panel-footer {
+                    border-top: 1px solid #4a5568;
+                    padding-top: 15px;
+                }
+
+                .system-stats {
+                    display: flex;
+                    justify-content: space-between;
+                    font-size: 12px;
+                    color: #cbd5e0;
+                }
+
+                .cesium-info-panel {
+                    position: absolute;
+                    top: 20px;
+                    right: 20px;
+                    width: 350px;
+                    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+                    border-radius: 16px;
+                    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+                    color: white;
+                    border: 1px solid #4a5568;
+                    backdrop-filter: blur(15px);
+                    z-index: 1000;
+                    transform: translateX(400px);
+                    transition: transform 0.3s ease;
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                }
+
+                .cesium-info-panel.visible {
+                    transform: translateX(0);
+                }
+
+                .info-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 20px;
+                    border-bottom: 2px solid #4a5568;
+                }
+
+                .info-header h3 {
+                    margin: 0;
+                    font-size: 18px;
+                    font-weight: 600;
+                    color: #f7fafc;
+                }
+
+                .btn-close {
+                    background: none;
+                    border: none;
+                    color: #cbd5e0;
+                    font-size: 24px;
+                    cursor: pointer;
+                    padding: 0;
+                    width: 30px;
+                    height: 30px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 50%;
+                    transition: all 0.3s ease;
+                }
+
+                .btn-close:hover {
+                    background: rgba(229, 62, 62, 0.2);
+                    color: #e53e3e;
+                }
+
+                .info-content {
+                    padding: 20px;
+                    max-height: 500px;
+                    overflow-y: auto;
+                }
+
+                .no-selection {
+                    text-align: center;
+                    padding: 40px 20px;
+                    color: #cbd5e0;
+                }
+
+                .no-selection-icon {
+                    font-size: 48px;
+                    margin-bottom: 15px;
+                    opacity: 0.5;
+                }
+
+                .no-selection p {
+                    margin: 0;
+                    font-size: 14px;
+                    line-height: 1.5;
+                }
+
+                .entity-info-detailed {
+                    color: #f7fafc;
+                }
+
+                .info-header-detailed {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    margin-bottom: 20px;
+                    padding-bottom: 15px;
+                    border-bottom: 2px solid #4a5568;
+                }
+
+                .info-icon {
+                    font-size: 24px;
+                }
+
+                .info-header-detailed h3 {
+                    margin: 0;
+                    font-size: 18px;
+                    font-weight: 600;
+                    color: #f7fafc;
+                }
+
+                .info-details {
+                    font-size: 13px;
+                }
+
+                .info-section {
+                    margin-bottom: 20px;
+                }
+
+                .info-section h4 {
+                    margin: 0 0 12px 0;
+                    font-size: 14px;
+                    font-weight: 600;
+                    color: #cbd5e0;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+
+                .info-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 10px;
+                    margin-bottom: 12px;
+                }
+
+                .info-item {
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                .info-item.full-width {
+                    grid-column: 1 / -1;
+                }
+
+                .info-label {
+                    font-size: 11px;
+                    color: #a0aec0;
+                    font-weight: 500;
+                    margin-bottom: 4px;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                }
+
+                .info-value {
+                    font-size: 13px;
+                    color: #f7fafc;
+                    font-weight: 500;
+                }
+
+                .services-list, .menu-list, .rooms-list, .products-list {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                }
+
+                .service-tag {
+                    background: rgba(66, 153, 225, 0.2);
+                    color: #90cdf4;
+                    padding: 6px 10px;
+                    border-radius: 6px;
+                    font-size: 11px;
+                    border: 1px solid rgba(66, 153, 225, 0.3);
+                }
+
+                .menu-item, .room-item, .product-item {
+                    display: flex;
+                    justify-content: space-between;
+                    padding: 8px;
+                    background: rgba(74, 85, 104, 0.3);
+                    border-radius: 6px;
+                    border: 1px solid #4a5568;
+                }
+
+                .dish-name, .room-type, .product-name {
+                    color: #f7fafc;
+                    font-weight: 500;
+                }
+
+                .dish-price, .room-capacity, .product-price {
+                    color: #48bb78;
+                    font-weight: bold;
+                }
+
+                .menu-more {
+                    text-align: center;
+                    padding: 8px;
+                    color: #a0aec0;
+                    font-style: italic;
+                    font-size: 11px;
+                }
+
+                .category-section h5 {
+                    margin: 10px 0 8px 0;
+                    font-size: 12px;
+                    color: #e53e3e;
+                    font-weight: 600;
+                }
+
+                .info-note {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    padding: 12px;
+                    background: rgba(237, 137, 54, 0.1);
+                    border-radius: 6px;
+                    border: 1px solid rgba(237, 137, 54, 0.3);
+                    color: #fbd38d;
+                    font-size: 12px;
+                }
+
+                .entity-info-loading {
+                    text-align: center;
+                    padding: 30px 20px;
+                }
+
+                .loading-details {
+                    margin-top: 20px;
+                }
+
+                .loading-spinner {
+                    color: #4299e1;
+                }
+
+                .loading-spinner i {
+                    font-size: 24px;
+                    margin-bottom: 10px;
+                }
+
+                .loading-spinner p {
+                    margin: 0;
+                    font-size: 13px;
+                    color: #cbd5e0;
+                }
+            </style>
+        `;
+        document.head.insertAdjacentHTML('beforeend', styles);
     }
 
     setupEventHandlers() {
@@ -185,7 +596,7 @@ class Cesium3DMap {
     }
 
     async loadAllLayers() {
-        console.log('🗺️ Cargando capas corregidas...');
+        console.log('🗺️ Cargando capas 3D desde Render...');
         
         const apiAvailable = await this.checkAPIStatus();
         if (!apiAvailable) {
@@ -194,34 +605,19 @@ class Cesium3DMap {
             return;
         }
 
-        // ✅ LISTA CORREGIDA - Solo capas unificadas
-        const finalLayers = [
-            // PUNTOS TURÍSTICOS
-            'miradores',
-            'playas', 
-            'tiendas_artesania',
-            
-            // SERVICIOS
-            'restaurantes',
-            'hoteles',
-            
-            // RUTAS (UNIFICADA) - SOLO UNA CAPA
-            'rutas',
-            
-            // COMUNIDADES (UNIFICADA)
-            'comunidades',
-            
-            // ÁREAS VERDES
-            'areas_verdes',
-            'sembradios'
+        // ✅ MISMAS CAPAS QUE EN MAP.JS
+        const todasLasCapas = [
+            'puntos_turisticos', 'miradores', 'playas', 'tiendas_artesania',
+            'restaurantes', 'hoteles', 'rutas', 'comunidades', 'viviendas',
+            'areas_verdes', 'sembradios', 'basura', 'puntos_basura', 'aguas_contaminadas'
         ];
 
         let loadedCount = 0;
-        const totalLayers = finalLayers.length;
+        const totalLayers = todasLasCapas.length;
         
-        console.log(`🎯 Cargando ${totalLayers} capas unificadas...`);
+        console.log(`🎯 Cargando ${totalLayers} capas 3D...`);
 
-        for (const layerName of finalLayers) {
+        for (const layerName of todasLasCapas) {
             try {
                 await this.loadLayer(layerName);
                 loadedCount++;
@@ -234,14 +630,14 @@ class Cesium3DMap {
 
         this.hideLoading();
         this.updateSystemStats();
-        console.log(`🎉 Carga completada: ${loadedCount}/${totalLayers} capas`);
+        console.log(`🎉 Carga 3D completada: ${loadedCount}/${totalLayers} capas`);
     }
 
     async loadLayer(layerName) {
         try {
-            console.log(`🔄 Cargando: ${layerName}`);
+            console.log(`🔄 Cargando capa 3D: ${layerName}`);
             
-            // ✅ URL DE PRODUCCIÓN - CAMBIAR POR TU URL DE RENDER
+            // ✅ URL CORREGIDA - IGUAL QUE EN MAP.JS
             const response = await fetch(`${this.API_BASE_URL}/capas/${layerName}`);
             
             if (!response.ok) {
@@ -296,22 +692,14 @@ class Cesium3DMap {
                 })
             };
         } 
-        else if (layerName === 'comunidades') {
+        else if (layerName === 'comunidades' || layerName === 'areas_verdes' || 
+                 layerName === 'sembradios' || layerName === 'aguas_contaminadas') {
             return {
                 stroke: baseColor,
                 fill: baseColor.withAlpha(0.15),
                 strokeWidth: 3,
                 clampToGround: true,
                 material: new Cesium.ColorMaterialProperty(baseColor.withAlpha(0.15))
-            };
-        }
-        else if (layerName === 'areas_verdes' || layerName === 'sembradios') {
-            return {
-                stroke: baseColor,
-                fill: baseColor.withAlpha(0.3),
-                strokeWidth: 2,
-                clampToGround: true,
-                material: new Cesium.ColorMaterialProperty(baseColor.withAlpha(0.3))
             };
         } else {
             return {
@@ -324,15 +712,20 @@ class Cesium3DMap {
 
     getMarkerConfig(layerName) {
         const configs = {
-            'miradores': { emoji: '🔭', color: '#FF6B35' },
-            'playas': { emoji: '🏖️', color: '#4ECDC4' },
-            'tiendas_artesania': { emoji: '🎨', color: '#FF9800' },
-            'restaurantes': { emoji: '🍽️', color: '#E91E63' },
-            'hoteles': { emoji: '🏨', color: '#2196F3' },
-            'rutas': { emoji: '🛣️', color: '#FF6B35' }, // Color unificado para todas las rutas
-            'comunidades': { emoji: '🏘️', color: '#795548' },
-            'areas_verdes': { emoji: '🌳', color: '#4CAF50' },
-            'sembradios': { emoji: '🌾', color: '#8BC34A' }
+            'puntos_turisticos': { emoji: '📍', color: '#e53e3e' },
+            'miradores': { emoji: '🔭', color: '#3182ce' },
+            'playas': { emoji: '🏖️', color: '#38b2ac' },
+            'tiendas_artesania': { emoji: '🎨', color: '#d69e2e' },
+            'restaurantes': { emoji: '🍽️', color: '#dd6b20' },
+            'hoteles': { emoji: '🏨', color: '#805ad5' },
+            'rutas': { emoji: '🛣️', color: '#dd6b20' },
+            'comunidades': { emoji: '🏘️', color: '#4a5568' },
+            'viviendas': { emoji: '🏠', color: '#2d3748' },
+            'areas_verdes': { emoji: '🌳', color: '#38a169' },
+            'sembradios': { emoji: '🌾', color: '#22543d' },
+            'basura': { emoji: '🗑️', color: '#718096' },
+            'puntos_basura': { emoji: '🚯', color: '#a0aec0' },
+            'aguas_contaminadas': { emoji: '⚠️', color: '#e53e3e' }
         };
         
         return configs[layerName] || { emoji: '📍', color: '#3498DB' };
@@ -345,75 +738,17 @@ class Cesium3DMap {
             if (entity.position && entity.properties) {
                 const nombre = entity.properties.nombre?.getValue?.() || this.getDefaultName(layerName);
                 const tipo = entity.properties.tipo?.getValue?.() || '';
-                const idLugar = entity.properties.id?.getValue?.() || '';
+                const idLugar = entity.properties.id_lugar?.getValue?.() || entity.properties.id?.getValue?.() || '';
                 
-                let entityColor = config.color;
+                // ✅ EXTRACCIÓN DE ID_LUGAR MEJORADA - IGUAL QUE EN MAP.JS
+                const idLugarFinal = this.extractIdLugar(idLugar);
                 
-                if (layerName === 'rutas') {
-                    // Para rutas, usar colores diferentes según el tipo
-                    const tipoRuta = tipo.toLowerCase();
-                    if (tipoRuta.includes('sagrad') || tipoRuta.includes('espiritual')) {
-                        entityColor = '#9C27B0'; // Púrpura para rutas sagradas
-                    } else if (tipoRuta.includes('turístic') || tipoRuta.includes('recreativa')) {
-                        entityColor = '#FF9800'; // Naranja para rutas turísticas
-                    } else if (tipoRuta.includes('corta') || tipoRuta.includes('fácil')) {
-                        entityColor = '#4CAF50'; // Verde para rutas fáciles
-                    } else if (tipoRuta.includes('larga') || tipoRuta.includes('difícil')) {
-                        entityColor = '#F44336'; // Rojo para rutas difíciles
-                    } else {
-                        entityColor = '#FF6B35'; // Color por defecto
-                    }
-                    
-                    if (entity.polyline) {
-                        entity.polyline.material = new Cesium.PolylineGlowMaterialProperty({
-                            glowPower: 0.8,
-                            color: Cesium.Color.fromCssColorString(entityColor),
-                            taperPower: 0.7
-                        });
-                        entity.polyline.width = 8;
-                    }
-
-                    // Agregar información de la ruta
-                    entity.basicInfo = {
-                        nombre: nombre,
-                        tipo: tipo,
-                        descripcion: entity.properties.descripcion?.getValue?.() || '',
-                        duracion: entity.properties.duracion?.getValue?.() || '',
-                        distancia: entity.properties.distancia?.getValue?.() || '',
-                        dificultad: entity.properties.dificultad?.getValue?.() || ''
-                    };
-                }
-                else if (layerName === 'comunidades') {
-                    const comunidad = entity.properties.comunidad?.getValue?.() || '';
-                    if (comunidad.includes('Challa')) {
-                        entityColor = '#795548';
-                    } else if (comunidad.includes('Challapampa')) {
-                        entityColor = '#8D6E63';
-                    } else if (comunidad.includes('Yumani')) {
-                        entityColor = '#A1887F';
-                    } else {
-                        entityColor = '#5D4037';
-                    }
-                    
-                    if (entity.polygon) {
-                        entity.polygon.material = Cesium.Color.fromCssColorString(entityColor).withAlpha(0.15);
-                        entity.polygon.outlineColor = Cesium.Color.fromCssColorString(entityColor);
-                    }
-                }
-                else if (layerName === 'areas_verdes' || layerName === 'sembradios') {
-                    if (entity.polygon) {
-                        entity.polygon.material = Cesium.Color.fromCssColorString(entityColor).withAlpha(0.3);
-                        entity.polygon.outlineColor = Cesium.Color.fromCssColorString(entityColor);
-                        entity.polygon.outlineWidth = 2;
-                        entity.polygon.clampToGround = true;
-                    }
-                }
-                
-                // Crear marcadores para puntos (no rutas, comunidades ni áreas)
+                // Solo crear marcadores para puntos (no para polígonos/líneas)
                 if (!layerName.includes('ruta') && 
                     !layerName.includes('comunidad') && 
                     !layerName.includes('area_verde') &&
-                    !layerName.includes('sembrad')) {
+                    !layerName.includes('sembrad') &&
+                    !layerName.includes('agua_contaminada')) {
                     
                     entity.point = null;
                     
@@ -437,19 +772,25 @@ class Cesium3DMap {
                 }
 
                 entity.layerType = layerName;
-                entity.entityId = idLugar;
+                entity.entityId = idLugarFinal;
                 
-                // Solo establecer basicInfo si no se estableció anteriormente (para rutas)
-                if (!entity.basicInfo) {
-                    entity.basicInfo = {
-                        nombre: nombre,
-                        tipo: tipo,
-                        comunidad: entity.properties.comunidad?.getValue?.() || '',
-                        descripcion: entity.properties.descripcion?.getValue?.() || ''
-                    };
-                }
+                entity.basicInfo = {
+                    nombre: nombre,
+                    tipo: tipo,
+                    comunidad: entity.properties.comunidad?.getValue?.() || '',
+                    descripcion: entity.properties.descripcion?.getValue?.() || ''
+                };
             }
         });
+    }
+
+    // ✅ MÉTODO PARA EXTRAER ID_LUGAR - IGUAL QUE EN MAP.JS
+    extractIdLugar(idString) {
+        if (!idString) return null;
+        
+        // Extraer número del ID (ej: "rest_1" -> 1, "hotel_21" -> 21)
+        const match = idString.match(/\d+/);
+        return match ? parseInt(match[0]) : null;
     }
 
     createCustomMarkerSVG(config) {
@@ -521,49 +862,6 @@ class Cesium3DMap {
     createBasicInfo(entity) {
         const config = this.getMarkerConfig(entity.layerType);
         
-        // Información especial para rutas
-        if (entity.layerType === 'rutas') {
-            return `
-                <div class="entity-info-detailed">
-                    <div class="info-header-detailed">
-                        <span class="info-icon">${config.emoji}</span>
-                        <h3>${entity.basicInfo.nombre}</h3>
-                    </div>
-                    <div class="info-details">
-                        <div class="info-section">
-                            <h4>🛣️ Información de la Ruta</h4>
-                            <div class="info-grid">
-                                <div class="info-item">
-                                    <span class="info-label">Tipo</span>
-                                    <span class="info-value">${entity.basicInfo.tipo}</span>
-                                </div>
-                                ${entity.basicInfo.duracion ? `
-                                <div class="info-item">
-                                    <span class="info-label">Duración</span>
-                                    <span class="info-value">${entity.basicInfo.duracion}</span>
-                                </div>` : ''}
-                                ${entity.basicInfo.distancia ? `
-                                <div class="info-item">
-                                    <span class="info-label">Distancia</span>
-                                    <span class="info-value">${entity.basicInfo.distancia}</span>
-                                </div>` : ''}
-                                ${entity.basicInfo.dificultad ? `
-                                <div class="info-item">
-                                    <span class="info-label">Dificultad</span>
-                                    <span class="info-value">${entity.basicInfo.dificultad}</span>
-                                </div>` : ''}
-                            </div>
-                            ${entity.basicInfo.descripcion ? `
-                            <div class="info-item full-width">
-                                <span class="info-label">Descripción</span>
-                                <span class="info-value">${entity.basicInfo.descripcion}</span>
-                            </div>` : ''}
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
         return `
             <div class="entity-info-detailed">
                 <div class="info-header-detailed">
@@ -625,62 +923,15 @@ class Cesium3DMap {
             case 'playas':
                 contenido += this.createBeachInfo(detailedData);
                 break;
-            case 'rutas':
-                contenido += this.createRouteInfo(detailedData);
+            case 'puntos_turisticos':
+                contenido += this.createGenericInfo(detailedData);
                 break;
             default:
-                contenido += this.createGenericInfo(detailedData);
+                contenido += this.createBasicInfo(entity);
         }
 
         contenido += `</div>`;
         return contenido;
-    }
-
-    createRouteInfo(data) {
-        const ruta = data.ruta || {};
-        return `
-            <div class="info-details">
-                <div class="info-section">
-                    <h4>🛣️ Información Detallada de la Ruta</h4>
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <span class="info-label">Tipo</span>
-                            <span class="info-value">${ruta.tipo || 'No especificado'}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Dificultad</span>
-                            <span class="info-value">${ruta.dificultad || 'No especificada'}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Duración</span>
-                            <span class="info-value">${ruta.duracion || 'No especificada'}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Distancia</span>
-                            <span class="info-value">${ruta.distancia || 'No especificada'}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Elevación</span>
-                            <span class="info-value">${ruta.elevacion || 'No especificada'}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Estado</span>
-                            <span class="info-value">${ruta.estado || 'No especificado'}</span>
-                        </div>
-                    </div>
-                    ${ruta.descripcion ? `
-                    <div class="info-item full-width">
-                        <span class="info-label">Descripción</span>
-                        <span class="info-value">${ruta.descripcion}</span>
-                    </div>` : ''}
-                    ${ruta.puntos_interes ? `
-                    <div class="info-item full-width">
-                        <span class="info-label">Puntos de Interés</span>
-                        <span class="info-value">${ruta.puntos_interes}</span>
-                    </div>` : ''}
-                </div>
-            </div>
-        `;
     }
 
     createRestaurantInfo(data) {
@@ -695,7 +946,7 @@ class Cesium3DMap {
                     <div class="info-grid">
                         <div class="info-item">
                             <span class="info-label">Tipo</span>
-                            <span class="info-value">${restaurante.tipo || 'No especificado'}</span>
+                            <span class="info-value">${restaurante.tipo_restaurante || 'No especificado'}</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Capacidad</span>
@@ -707,7 +958,7 @@ class Cesium3DMap {
                         </div>
                         <div class="info-item">
                             <span class="info-label">Estilo</span>
-                            <span class="info-value">${restaurante.estilo || 'No especificado'}</span>
+                            <span class="info-value">${restaurante.estilo_culinario || 'No especificado'}</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Estado</span>
@@ -724,7 +975,7 @@ class Cesium3DMap {
                 <div class="info-section">
                     <h4>⚡ Servicios</h4>
                     <div class="services-list">
-                        ${servicios.map(servicio => `<span class="service-tag">${servicio}</span>`).join('')}
+                        ${servicios.map(servicio => `<span class="service-tag">${servicio.tipo}</span>`).join('')}
                     </div>
                 </div>` : ''}
 
@@ -782,7 +1033,7 @@ class Cesium3DMap {
                 <div class="info-section">
                     <h4>⚡ Servicios</h4>
                     <div class="services-list">
-                        ${servicios.map(servicio => `<span class="service-tag">${servicio}</span>`).join('')}
+                        ${servicios.map(servicio => `<span class="service-tag">${servicio.tipo}</span>`).join('')}
                     </div>
                 </div>` : ''}
 
@@ -979,9 +1230,6 @@ class Cesium3DMap {
                 case 'playas':
                     endpoint = `detalle/playa/${entityId}`;
                     break;
-                case 'rutas':
-                    endpoint = `detalle/ruta/${entityId}`;
-                    break;
                 case 'puntos_turisticos':
                     endpoint = `detalle/lugar_turistico/${entityId}`;
                     break;
@@ -989,7 +1237,7 @@ class Cesium3DMap {
                     return null;
             }
 
-            // ✅ URL DE PRODUCCIÓN - CAMBIAR POR TU URL DE RENDER
+            // ✅ URL CORREGIDA - IGUAL QUE EN MAP.JS
             const response = await fetch(`${this.API_BASE_URL}/${endpoint}`);
             
             if (!response.ok) {
@@ -1003,7 +1251,6 @@ class Cesium3DMap {
         }
     }
 
-    // Resto de métodos se mantienen igual...
     toggleLayer(layerName, visible) {
         const config = this.capasConfig.get(layerName);
         if (config) {
@@ -1079,7 +1326,7 @@ class Cesium3DMap {
 
     async checkAPIStatus() {
         try {
-            // ✅ URL DE PRODUCCIÓN - CAMBIAR POR TU URL DE RENDER
+            // ✅ URL CORREGIDA - IGUAL QUE EN MAP.JS
             const response = await fetch(`${this.API_BASE_URL}/status`);
             return response.ok;
         } catch (error) {
@@ -1090,6 +1337,7 @@ class Cesium3DMap {
 
     getDefaultName(layerType) {
         const names = {
+            'puntos_turisticos': 'Punto Turístico',
             'miradores': 'Mirador',
             'playas': 'Playa',
             'tiendas_artesania': 'Tienda de Artesanía',
@@ -1097,8 +1345,12 @@ class Cesium3DMap {
             'hoteles': 'Hotel',
             'rutas': 'Ruta',
             'comunidades': 'Comunidad',
+            'viviendas': 'Vivienda',
             'areas_verdes': 'Área Verde',
-            'sembradios': 'Sembradío'
+            'sembradios': 'Sembradío',
+            'basura': 'Punto de Basura',
+            'puntos_basura': 'Zona de Basura',
+            'aguas_contaminadas': 'Agua Contaminada'
         };
         return names[layerType] || 'Elemento';
     }
