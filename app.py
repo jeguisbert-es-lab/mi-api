@@ -59,10 +59,10 @@ def get_db_connection():
         else:
             # Conexión local de respaldo (sin SSL)
             conn = pg8000.connect(
-                host=os.environ.get('DB_HOST', 'localhost'),
-                database=os.environ.get('DB_NAME', 'isla_del_sol'),
-                user=os.environ.get('DB_USER', 'postgres'),
-                password=os.environ.get('DB_PASSWORD', 'password'),
+                host=os.environ.get('DB_HOST', 'dpg-d4fvdsufu37c739k369g-a'),
+                database=os.environ.get('DB_NAME', 'db_isla_del_sol'),
+                user=os.environ.get('DB_USER', 'db_isla_del_sol_user'),
+                password=os.environ.get('DB_PASSWORD', 'evcwph1e286cfjQJ8flkhkWo0OQNpQTi'),
                 port=int(os.environ.get('DB_PORT', '5432'))
             )
         
@@ -696,6 +696,7 @@ if __name__ == '__main__':
     print("=" * 60)
 
     app.run(debug=False, port=port, host='0.0.0.0')
+
 
 
 
