@@ -1,3 +1,4 @@
+// scripts/modules/map.js - VERSIÓN COMPLETA OPTIMIZADA PARA CELULAR
 class InteractiveMap {
     constructor() {
         this.map = null;
@@ -5,549 +6,447 @@ class InteractiveMap {
         this.capasActivas = new Set();
         this.marcadoresAgrupados = null;
         this.contadorTotal = 0;
-        
-        // ✅ URL CORREGIDA - CON /api/ INCLUIDO
         this.API_BASE_URL = 'https://mi-api-6jmx.onrender.com/api';
+        this.isMobile = window.innerWidth <= 768;
         
         this.init();
     }
 
     init() {
-        // Ocultar loading inmediatamente
-        this.ocultarLoading();
-        
-        // Inicializar mapa con mejor configuración
-        this.map = L.map('map', {
-            zoomControl: false,
-            fadeAnimation: true,
-            markerZoomAnimation: true,
-            preferCanvas: true
-        }).setView([-16.0167, -69.1833], 13);
-
-        // ✅ CORREGIDO: URL correcta del tile layer
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-            maxZoom: 18,
-            detectRetina: true
-        }).addTo(this.map);
-
-        // Agregar control de zoom personalizado
-        L.control.zoom({
-            position: 'topright'
-        }).addTo(this.map);
-
-        // Crear interfaz unificada
-        this.crearInterfazUnificada();
-        
-        // Inicializar agrupación de marcadores
+        console.log('🗺️ Inicializando mapa interactivo para celular...');
+        this.inicializarMapa();
+        this.crearInterfazMovil();
+        this.configurarEventosInterfaz();
         this.inicializarCluster();
-        
-        // Cargar capas automáticamente
         this.cargarTodasLasCapas();
-
-        console.log('✅ Mapa 2D Isla del Sol - Conectado a Render');
     }
 
-    ocultarLoading() {
-        const loading = document.querySelector('.map-loading');
-        if (loading) {
-            loading.style.display = 'none';
+    inicializarMapa() {
+        const mapContainer = document.getElementById('map');
+        if (!mapContainer) {
+            console.error('❌ No se encontró el contenedor del mapa');
+            return;
         }
+
+        this.ocultarLoading();
+
+        this.map = L.map('map', {
+            center: [-16.0167, -69.1833],
+            zoom: 13,
+            zoomControl: false,
+            attributionControl: true
+        });
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 18
+        }).addTo(this.map);
+
+        L.control.zoom({
+            position: this.isMobile ? 'bottomright' : 'topright'
+        }).addTo(this.map);
+
+        console.log('✅ Mapa base inicializado');
     }
 
-    crearInterfazUnificada() {
-        const container = document.querySelector('.map-controls-container');
-        if (!container) return;
+    crearInterfazMovil() {
+        const mapContainer = document.getElementById('map');
+        if (!mapContainer) return;
 
-        container.innerHTML = `
-            <!-- Panel de Control Principal - DISEÑO MEJORADO -->
-            <div class="control-panel-unified">
-                <div class="panel-header">
-                    <h3><i class="fas fa-map-marked-alt"></i> Control de Capas</h3>
-                    <div class="contador-global" id="contador-global">
-                        <i class="fas fa-layer-group"></i> 0 elementos
+        const controlesHTML = `
+            <!-- BOTÓN FLOTANTE PRINCIPAL MÓVIL -->
+            <div class="mobile-main-control">
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <i class="fas fa-layer-group"></i>
+                    <span class="badge-mobile" id="mobileBadge">0</span>
+                </button>
+            </div>
+
+            <!-- PANEL DESLIZANTE MÓVIL -->
+            <div class="mobile-panel" id="mobilePanel">
+                <div class="mobile-panel-header">
+                    <h3>🗺️ Capas del Mapa</h3>
+                    <button class="mobile-close-btn" id="mobileCloseBtn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="mobile-stats">
+                    <div class="stat-item">
+                        <i class="fas fa-layer-group"></i>
+                        <span id="mobileTotal">0 elementos</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-eye"></i>
+                        <span id="mobileActive">0 activas</span>
                     </div>
                 </div>
-                
-                <!-- Controles Rápidos - DISEÑO MEJORADO -->
-                <div class="controles-rapidos">
-                    <button class="btn-rapido btn-primary" id="btn-activar-todas">
-                        <i class="fas fa-layer-group"></i>
-                        Activar Todas
+
+                <div class="mobile-quick-controls">
+                    <button class="quick-btn" id="btnAllOn">
+                        <i class="fas fa-toggle-on"></i>
+                        Todas
                     </button>
-                    <button class="btn-rapido btn-secondary" id="btn-desactivar-todas">
-                        <i class="fas fa-eye-slash"></i>
-                        Ocultar Todas
+                    <button class="quick-btn" id="btnAllOff">
+                        <i class="fas fa-toggle-off"></i>
+                        Ninguna
                     </button>
-                    <button class="btn-rapido btn-accent" id="btn-mi-ubicacion">
+                    <button class="quick-btn" id="btnMyLocation">
                         <i class="fas fa-location-crosshairs"></i>
                         Mi Ubicación
                     </button>
                 </div>
-                
-                <!-- Lista de Capas - DISEÑO MEJORADO -->
-                <div class="lista-capas" id="lista-capas">
-                    <!-- Las capas se generarán dinámicamente -->
+
+                <div class="mobile-layers-container">
+                    <div class="mobile-layers-grid" id="mobileLayersList">
+                        <!-- Las capas se generarán dinámicamente -->
+                    </div>
                 </div>
-            </div>
-            
-            <!-- ✅ LEYENDA INDEPENDIENTE - DISEÑO MEJORADO -->
-            <div class="leyenda-independiente">
-                <h4><i class="fas fa-palette"></i> Leyenda del Mapa</h4>
-                <div class="leyenda-grid">
-                    <div class="leyenda-item">
-                        <span class="leyenda-color" style="background: #e53e3e;"></span>
-                        <span class="leyenda-texto">Puntos Turísticos</span>
-                    </div>
-                    <div class="leyenda-item">
-                        <span class="leyenda-color" style="background: #3182ce;"></span>
-                        <span class="leyenda-texto">Comunidades</span>
-                    </div>
-                    <div class="leyenda-item">
-                        <span class="leyenda-color" style="background: #dd6b20;"></span>
-                        <span class="leyenda-texto">Rutas</span>
-                    </div>
-                    <div class="leyenda-item">
-                        <span class="leyenda-color" style="background: #38a169;"></span>
-                        <span class="leyenda-texto">Áreas Verdes</span>
-                    </div>
-                    <div class="leyenda-item">
-                        <span class="leyenda-color" style="background: #805ad5;"></span>
-                        <span class="leyenda-texto">Servicios</span>
-                    </div>
-                    <div class="leyenda-item">
-                        <span class="leyenda-color" style="background: #d69e2e;"></span>
-                        <span class="leyenda-texto">Comercio</span>
-                    </div>
-                    <div class="leyenda-item">
-                        <span class="leyenda-color" style="background: #718096;"></span>
-                        <span class="leyenda-texto">Puntos Basura</span>
-                    </div>
-                    <div class="leyenda-item">
-                        <span class="leyenda-color" style="background: #e53e3e;"></span>
-                        <span class="leyenda-texto">Agua Contaminada</span>
+
+                <div class="mobile-legend">
+                    <h4>📊 Leyenda</h4>
+                    <div class="legend-grid-mobile">
+                        <div class="legend-item-mobile">
+                            <span class="legend-color" style="background: #e53e3e"></span>
+                            <span>Turismo</span>
+                        </div>
+                        <div class="legend-item-mobile">
+                            <span class="legend-color" style="background: #3182ce"></span>
+                            <span>Servicios</span>
+                        </div>
+                        <div class="legend-item-mobile">
+                            <span class="legend-color" style="background: #38a169"></span>
+                            <span>Naturaleza</span>
+                        </div>
+                        <div class="legend-item-mobile">
+                            <span class="legend-color" style="background: #718096"></span>
+                            <span>Ambiente</span>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <!-- BOTÓN 3D FLOTANTE -->
+            <div class="mobile-3d-btn">
+                <button class="btn-3d-mobile" id="btn3DMobile" title="Ver en 3D">
+                    <i class="fas fa-cube"></i>
+                    <span>3D</span>
+                </button>
+            </div>
+
+            <!-- OVERLAY -->
+            <div class="mobile-overlay" id="mobileOverlay"></div>
         `;
 
-        // Controles Inferiores - DISEÑO MEJORADO
-        const controlesInferiores = document.createElement('div');
-        controlesInferiores.className = 'controles-inferiores';
-        controlesInferiores.innerHTML = `
-            <button class="btn-control-inferior btn-info" id="btn-reset-view">
-                <i class="fas fa-location-arrow"></i>
-                Centrar Mapa
-            </button>
-            <button class="btn-control-inferior btn-warning" id="btn-limpiar-capas">
-                <i class="fas fa-trash-alt"></i>
-                Limpiar Capas
-            </button>
-            <a href="3D.html" class="btn-control-inferior btn-3d">
-                <i class="fas fa-cube"></i>
-                Ver en 3D
-            </a>
-        `;
-        container.appendChild(controlesInferiores);
-
-        // Agregar estilos CSS mejorados
-        this.agregarEstilosMejorados();
-
-        // Configurar eventos
-        this.configurarEventosInterfaz();
-        
-        // Generar lista de capas
-        this.generarListaCapas();
+        mapContainer.insertAdjacentHTML('beforeend', controlesHTML);
+        this.agregarEstilosMovil();
     }
 
-    agregarEstilosMejorados() {
+    agregarEstilosMovil() {
         const styles = `
             <style>
-                /* ===== ESTILOS MEJORADOS ===== */
-                .map-controls-container {
+                .mobile-main-control {
                     position: absolute;
-                    top: 20px;
-                    left: 20px;
+                    top: 15px;
+                    left: 15px;
                     z-index: 1000;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 15px;
-                    max-width: 380px;
-                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
                 }
 
-                /* Panel de Control Principal */
-                .control-panel-unified {
-                    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
-                    border-radius: 16px;
-                    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
-                    padding: 24px;
-                    color: white;
-                    border: 1px solid #4a5568;
-                    backdrop-filter: blur(15px);
-                    transition: all 0.3s ease;
-                }
-
-                .control-panel-unified:hover {
-                    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5);
-                }
-
-                .panel-header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    margin-bottom: 20px;
-                    padding-bottom: 16px;
-                    border-bottom: 2px solid #4a5568;
-                }
-
-                .panel-header h3 {
-                    margin: 0;
-                    font-size: 20px;
-                    font-weight: 700;
-                    color: #f7fafc;
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                }
-
-                .contador-global {
-                    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-                    color: white;
-                    padding: 10px 16px;
-                    border-radius: 12px;
-                    font-size: 14px;
-                    font-weight: 600;
-                    box-shadow: 0 4px 12px rgba(72, 187, 120, 0.3);
-                    border: 1px solid rgba(255, 255, 255, 0.1);
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                }
-
-                /* Controles Rápidos */
-                .controles-rapidos {
-                    display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    gap: 12px;
-                    margin-bottom: 20px;
-                }
-
-                .btn-rapido {
+                .mobile-menu-btn {
+                    width: 60px;
+                    height: 60px;
+                    background: linear-gradient(135deg, #6366f1, #8b5cf6);
                     border: none;
-                    padding: 14px 12px;
-                    border-radius: 12px;
-                    font-size: 14px;
-                    font-weight: 600;
+                    border-radius: 50%;
+                    color: white;
+                    font-size: 20px;
                     cursor: pointer;
+                    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    gap: 8px;
                     transition: all 0.3s ease;
-                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    position: relative;
                 }
 
-                .btn-primary {
-                    background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+                .mobile-menu-btn:hover {
+                    transform: scale(1.1);
+                    box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+                }
+
+                .badge-mobile {
+                    position: absolute;
+                    top: -5px;
+                    right: -5px;
+                    background: #ef4444;
                     color: white;
-                }
-
-                .btn-primary:hover {
-                    background: linear-gradient(135deg, #3182ce 0%, #2c5aa0 100%);
-                    transform: translateY(-2px);
-                    box-shadow: 0 6px 20px rgba(66, 153, 225, 0.4);
-                }
-
-                .btn-secondary {
-                    background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
-                    color: white;
-                }
-
-                .btn-secondary:hover {
-                    background: linear-gradient(135deg, #c53030 0%, #9b2c2c 100%);
-                    transform: translateY(-2px);
-                    box-shadow: 0 6px 20px rgba(229, 62, 62, 0.4);
-                }
-
-                .btn-accent {
-                    background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
-                    color: white;
-                }
-
-                .btn-accent:hover {
-                    background: linear-gradient(135deg, #dd6b20 0%, #c05621 100%);
-                    transform: translateY(-2px);
-                    box-shadow: 0 6px 20px rgba(237, 137, 54, 0.4);
-                }
-
-                /* Lista de Capas */
-                .lista-capas {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 10px;
-                    max-height: 400px;
-                    overflow-y: auto;
-                    padding-right: 5px;
-                }
-
-                .lista-capas::-webkit-scrollbar {
-                    width: 6px;
-                }
-
-                .lista-capas::-webkit-scrollbar-track {
-                    background: rgba(255, 255, 255, 0.1);
-                    border-radius: 3px;
-                }
-
-                .lista-capas::-webkit-scrollbar-thumb {
-                    background: #4299e1;
-                    border-radius: 3px;
-                }
-
-                .capa-item-mejorado {
-                    display: flex;
-                    align-items: center;
-                    padding: 16px;
-                    background: rgba(74, 85, 104, 0.3);
-                    border-radius: 12px;
-                    cursor: pointer;
-                    transition: all 0.3s ease;
-                    border: 1px solid transparent;
-                    backdrop-filter: blur(5px);
-                }
-
-                .capa-item-mejorado:hover {
-                    background: rgba(74, 85, 104, 0.5);
-                    border-color: #4299e1;
-                    transform: translateY(-2px);
-                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-                }
-
-                .capa-item-mejorado input[type="checkbox"] {
-                    margin-right: 16px;
-                    transform: scale(1.4);
-                    accent-color: #4299e1;
-                }
-
-                .capa-info {
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    flex-grow: 1;
-                }
-
-                .capa-emoji {
-                    font-size: 20px;
-                    margin-right: 14px;
-                    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3));
-                }
-
-                .capa-texto {
-                    flex-grow: 1;
-                    font-size: 15px;
-                    color: #f7fafc;
-                    font-weight: 500;
-                }
-
-                .capa-contador {
-                    background: rgba(26, 32, 44, 0.7);
-                    color: #cbd5e0;
-                    padding: 6px 12px;
-                    border-radius: 15px;
+                    border-radius: 50%;
+                    width: 24px;
+                    height: 24px;
                     font-size: 12px;
                     font-weight: bold;
-                    min-width: 35px;
-                    text-align: center;
-                    border: 1px solid #4a5568;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border: 2px solid white;
+                    animation: pulse 2s infinite;
+                }
+
+                .mobile-panel {
+                    position: fixed;
+                    top: 0;
+                    left: -100%;
+                    width: 85%;
+                    max-width: 400px;
+                    height: 100vh;
+                    background: rgba(15, 23, 42, 0.95);
+                    backdrop-filter: blur(20px);
+                    z-index: 2000;
+                    transition: left 0.3s ease;
+                    overflow-y: auto;
+                    border-right: 1px solid rgba(255,255,255,0.1);
+                }
+
+                .mobile-panel.active {
+                    left: 0;
+                }
+
+                .mobile-panel-header {
+                    padding: 20px;
+                    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+                    color: white;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+
+                .mobile-panel-header h3 {
+                    margin: 0;
+                    font-size: 18px;
+                    font-weight: 600;
+                }
+
+                .mobile-close-btn {
+                    background: rgba(255,255,255,0.2);
+                    border: none;
+                    color: white;
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
                     transition: all 0.3s ease;
                 }
 
-                .capa-contador.activo {
-                    background: #48bb78;
-                    color: white;
-                    border-color: #38a169;
+                .mobile-close-btn:hover {
+                    background: rgba(255,255,255,0.3);
+                    transform: rotate(90deg);
                 }
 
-                /* Leyenda */
-                .leyenda-independiente {
-                    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
-                    border-radius: 16px;
-                    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
-                    padding: 24px;
-                    color: white;
-                    border: 1px solid #4a5568;
-                    backdrop-filter: blur(15px);
+                .mobile-stats {
+                    display: flex;
+                    padding: 15px 20px;
+                    background: rgba(255,255,255,0.05);
+                    border-bottom: 1px solid rgba(255,255,255,0.1);
+                    gap: 15px;
                 }
 
-                .leyenda-independiente h4 {
-                    margin: 0 0 20px 0;
-                    font-size: 18px;
-                    font-weight: 600;
-                    color: #f7fafc;
+                .stat-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    color: #e2e8f0;
+                    font-size: 12px;
+                    font-weight: 500;
+                }
+
+                .stat-item i {
+                    color: #6366f1;
+                    font-size: 14px;
+                }
+
+                .mobile-quick-controls {
+                    padding: 15px 20px;
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 10px;
+                    border-bottom: 1px solid rgba(255,255,255,0.1);
+                }
+
+                .quick-btn {
+                    background: rgba(255,255,255,0.1);
+                    border: 1px solid rgba(255,255,255,0.2);
+                    color: #e2e8f0;
+                    padding: 12px 8px;
+                    border-radius: 10px;
+                    cursor: pointer;
+                    font-size: 12px;
+                    font-weight: 500;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 5px;
+                    transition: all 0.3s ease;
+                }
+
+                .quick-btn:hover {
+                    background: rgba(255,255,255,0.2);
+                    transform: translateY(-2px);
+                }
+
+                .quick-btn i {
+                    font-size: 14px;
+                }
+
+                .mobile-layers-container {
+                    padding: 15px 20px;
+                    max-height: 50vh;
+                    overflow-y: auto;
+                }
+
+                .mobile-layers-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 10px;
+                }
+
+                .mobile-layer-item {
+                    background: rgba(255,255,255,0.05);
+                    border: 1px solid rgba(255,255,255,0.1);
+                    border-radius: 12px;
+                    padding: 12px;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    position: relative;
+                }
+
+                .mobile-layer-item.active {
+                    background: rgba(99, 102, 241, 0.2);
+                    border-color: #6366f1;
+                }
+
+                .mobile-layer-item:hover {
+                    background: rgba(255,255,255,0.1);
+                    transform: translateY(-2px);
+                }
+
+                .mobile-layer-content {
                     display: flex;
                     align-items: center;
                     gap: 10px;
                 }
 
-                .leyenda-grid {
-                    display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    gap: 12px;
-                }
-
-                .leyenda-item {
-                    display: flex;
-                    align-items: center;
-                    gap: 12px;
-                    padding: 10px;
-                    background: rgba(74, 85, 104, 0.3);
-                    border-radius: 8px;
-                    border: 1px solid #4a5568;
-                    transition: all 0.2s ease;
-                }
-
-                .leyenda-item:hover {
-                    background: rgba(74, 85, 104, 0.5);
-                    transform: translateY(-1px);
-                }
-
-                .leyenda-color {
-                    width: 20px;
-                    height: 20px;
-                    border-radius: 4px;
-                    border: 2px solid white;
-                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-                    flex-shrink: 0;
-                }
-
-                .leyenda-texto {
-                    font-size: 13px;
-                    color: #f7fafc;
-                    font-weight: 500;
-                }
-
-                /* Controles Inferiores */
-                .controles-inferiores {
-                    display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    gap: 12px;
-                }
-
-                .btn-control-inferior {
-                    border: none;
-                    padding: 16px 12px;
-                    border-radius: 12px;
-                    font-size: 14px;
-                    font-weight: 600;
-                    cursor: pointer;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 8px;
-                    transition: all 0.3s ease;
-                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-                    border: 1px solid rgba(255, 255, 255, 0.1);
-                    text-decoration: none;
-                    color: white;
-                }
-
-                .btn-info {
-                    background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
-                }
-
-                .btn-info:hover {
-                    background: linear-gradient(135deg, #3182ce 0%, #2c5aa0 100%);
-                    transform: translateY(-2px);
-                    box-shadow: 0 6px 20px rgba(66, 153, 225, 0.4);
-                }
-
-                .btn-warning {
-                    background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
-                }
-
-                .btn-warning:hover {
-                    background: linear-gradient(135deg, #dd6b20 0%, #c05621 100%);
-                    transform: translateY(-2px);
-                    box-shadow: 0 6px 20px rgba(237, 137, 54, 0.4);
-                }
-
-                .btn-3d {
-                    background: linear-gradient(135deg, #9f7aea 0%, #805ad5 100%);
-                    grid-column: span 2;
-                }
-
-                .btn-3d:hover {
-                    background: linear-gradient(135deg, #805ad5 0%, #6b46c1 100%);
-                    transform: translateY(-2px);
-                    box-shadow: 0 6px 20px rgba(159, 122, 234, 0.4);
-                }
-
-                /* Mensajes Temporales Mejorados */
-                .map-mensaje-temporal {
-                    position: absolute;
-                    top: 20px;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    padding: 16px 24px;
-                    border-radius: 12px;
-                    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-                    z-index: 1000;
-                    max-width: 350px;
+                .mobile-layer-emoji {
+                    font-size: 18px;
+                    width: 24px;
                     text-align: center;
-                    font-weight: 600;
-                    animation: slideDown 0.4s ease;
+                }
+
+                .mobile-layer-text {
+                    flex: 1;
+                    color: #e2e8f0;
+                    font-size: 12px;
+                    font-weight: 500;
+                    line-height: 1.3;
+                }
+
+                .mobile-layer-count {
+                    background: rgba(30, 41, 59, 0.8);
+                    color: #e2e8f0;
+                    padding: 4px 8px;
+                    border-radius: 10px;
+                    font-size: 10px;
+                    font-weight: bold;
+                    min-width: 20px;
+                    text-align: center;
+                }
+
+                .mobile-layer-item.active .mobile-layer-count {
+                    background: #10b981;
                     color: white;
-                    font-size: 15px;
-                    backdrop-filter: blur(10px);
-                    border: 1px solid rgba(255, 255, 255, 0.1);
                 }
 
-                /* Popup Mejorado */
-                .popup-isla-sol {
-                    max-width: 350px;
-                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                .mobile-legend {
+                    padding: 15px 20px;
+                    border-top: 1px solid rgba(255,255,255,0.1);
+                    background: rgba(255,255,255,0.03);
                 }
 
-                .popup-isla-sol h3 {
-                    color: #2d3748;
-                    margin-bottom: 8px;
-                    font-size: 16px;
-                    font-weight: 600;
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                }
-
-                .popup-isla-sol h4 {
-                    color: #4299e1;
-                    margin: 15px 0 8px 0;
+                .mobile-legend h4 {
+                    color: #e2e8f0;
+                    margin: 0 0 12px 0;
                     font-size: 14px;
                     font-weight: 600;
                 }
 
-                /* Animaciones */
-                @keyframes slideDown {
-                    from {
-                        opacity: 0;
-                        transform: translateX(-50%) translateY(-30px);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: translateX(-50%) translateY(0);
-                    }
+                .legend-grid-mobile {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 8px;
                 }
 
-                @keyframes slideUp {
-                    from {
-                        opacity: 1;
-                        transform: translateX(-50%) translateY(0);
-                    }
-                    to {
-                        opacity: 0;
-                        transform: translateX(-50%) translateY(-30px);
-                    }
+                .legend-item-mobile {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-size: 11px;
+                    color: #cbd5e0;
+                }
+
+                .legend-color {
+                    width: 12px;
+                    height: 12px;
+                    border-radius: 50%;
+                    border: 2px solid rgba(255,255,255,0.3);
+                }
+
+                .mobile-3d-btn {
+                    position: absolute;
+                    bottom: 20px;
+                    right: 20px;
+                    z-index: 1000;
+                }
+
+                .btn-3d-mobile {
+                    background: linear-gradient(135deg, #06b6d4, #6366f1);
+                    border: none;
+                    color: white;
+                    padding: 12px 16px;
+                    border-radius: 25px;
+                    cursor: pointer;
+                    font-weight: 600;
+                    font-size: 14px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    box-shadow: 0 8px 25px rgba(6, 182, 212, 0.4);
+                    transition: all 0.3s ease;
+                }
+
+                .btn-3d-mobile:hover {
+                    transform: translateY(-3px);
+                    box-shadow: 0 12px 30px rgba(6, 182, 212, 0.6);
+                }
+
+                .mobile-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0,0,0,0.5);
+                    backdrop-filter: blur(5px);
+                    z-index: 1999;
+                    opacity: 0;
+                    visibility: hidden;
+                    transition: all 0.3s ease;
+                }
+
+                .mobile-overlay.active {
+                    opacity: 1;
+                    visibility: visible;
                 }
 
                 @keyframes pulse {
@@ -555,60 +454,157 @@ class InteractiveMap {
                     50% { transform: scale(1.1); }
                 }
 
-                /* Responsive */
-                @media (max-width: 768px) {
-                    .map-controls-container {
-                        max-width: 320px;
-                        left: 10px;
-                        top: 10px;
+                @media (max-width: 480px) {
+                    .mobile-panel {
+                        width: 90%;
                     }
-                    
-                    .controles-rapidos, .controles-inferiores {
+                    .mobile-layers-grid {
                         grid-template-columns: 1fr;
                     }
-                    
-                    .btn-3d {
-                        grid-column: span 1;
+                    .mobile-quick-controls {
+                        grid-template-columns: 1fr;
                     }
-                    
-                    .leyenda-grid {
+                    .mobile-stats {
+                        flex-direction: column;
+                        gap: 10px;
+                    }
+                    .legend-grid-mobile {
                         grid-template-columns: 1fr;
                     }
                 }
+
+                @media (max-width: 360px) {
+                    .mobile-panel {
+                        width: 95%;
+                    }
+                    .mobile-layer-content {
+                        flex-direction: column;
+                        text-align: center;
+                        gap: 5px;
+                    }
+                    .mobile-layer-emoji {
+                        font-size: 16px;
+                    }
+                    .mobile-layer-text {
+                        font-size: 11px;
+                    }
+                }
+
+                @media (hover: none) and (pointer: coarse) {
+                    .mobile-menu-btn,
+                    .quick-btn,
+                    .mobile-layer-item,
+                    .btn-3d-mobile {
+                        min-height: 44px;
+                    }
+                    .mobile-layer-item {
+                        padding: 15px 12px;
+                    }
+                }
+
+                .mobile-layers-container::-webkit-scrollbar {
+                    width: 4px;
+                }
+                .mobile-layers-container::-webkit-scrollbar-track {
+                    background: rgba(255,255,255,0.05);
+                    border-radius: 2px;
+                }
+                .mobile-layers-container::-webkit-scrollbar-thumb {
+                    background: #6366f1;
+                    border-radius: 2px;
+                }
             </style>
         `;
-        
+
         document.head.insertAdjacentHTML('beforeend', styles);
     }
 
     configurarEventosInterfaz() {
-        // Controles rápidos
-        document.getElementById('btn-activar-todas')?.addEventListener('click', () => {
-            this.activarTodasLasCapas();
-        });
-        document.getElementById('btn-desactivar-todas')?.addEventListener('click', () => {
-            this.desactivarTodasLasCapas();
+        document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
+            this.abrirPanelMovil();
         });
 
-        document.getElementById('btn-mi-ubicacion')?.addEventListener('click', () => {
+        document.getElementById('mobileCloseBtn')?.addEventListener('click', () => {
+            this.cerrarPanelMovil();
+        });
+
+        document.getElementById('mobileOverlay')?.addEventListener('click', () => {
+            this.cerrarPanelMovil();
+        });
+
+        document.getElementById('btnAllOn')?.addEventListener('click', () => {
+            this.activarTodasLasCapas();
+            this.mostrarMensajeMovil('Todas las capas activadas ✅', 'success');
+        });
+
+        document.getElementById('btnAllOff')?.addEventListener('click', () => {
+            this.desactivarTodasLasCapas();
+            this.mostrarMensajeMovil('Todas las capas desactivadas ⚡', 'info');
+        });
+
+        document.getElementById('btnMyLocation')?.addEventListener('click', () => {
             this.buscarMiUbicacion();
         });
-        
-        // Controles inferiores
-        document.getElementById('btn-reset-view')?.addEventListener('click', () => {
-            this.map.flyTo([-16.0167, -69.1833], 13, {
-                duration: 1.5,
-                easeLinearity: 0.25
-            });
+
+        document.getElementById('btn3DMobile')?.addEventListener('click', () => {
+            this.irAVista3D();
         });
 
-        document.getElementById('btn-limpiar-capas')?.addEventListener('click', () => {
-            this.limpiarCapas();
+        document.addEventListener('click', (e) => {
+            const panel = document.getElementById('mobilePanel');
+            const menuBtn = document.getElementById('mobileMenuBtn');
+            
+            if (panel?.classList.contains('active') && 
+                !panel.contains(e.target) && 
+                !menuBtn?.contains(e.target)) {
+                this.cerrarPanelMovil();
+            }
+        });
+
+        this.configurarGestosTactiles();
+    }
+
+    configurarGestosTactiles() {
+        let startX = 0;
+        const panel = document.getElementById('mobilePanel');
+        
+        panel?.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+        });
+
+        panel?.addEventListener('touchmove', (e) => {
+            if (!startX) return;
+            
+            const currentX = e.touches[0].clientX;
+            const diff = startX - currentX;
+            
+            if (diff > 50) {
+                this.cerrarPanelMovil();
+                startX = 0;
+            }
         });
     }
 
-    generarListaCapas() {
-        const listaCapas = document.getElementById('lista-capas');
+    abrirPanelMovil() {
+        const panel = document.getElementById('mobilePanel');
+        const overlay = document.getElementById('mobileOverlay');
+        
+        panel?.classList.add('active');
+        overlay?.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    cerrarPanelMovil() {
+        const panel = document.getElementById('mobilePanel');
+        const overlay = document.getElementById('mobileOverlay');
+        
+        panel?.classList.remove('active');
+        overlay?.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    generarListaCapasMovil() {
+        const listaCapas = document.getElementById('mobileLayersList');
         if (!listaCapas) return;
 
         const configCapas = [
@@ -618,41 +614,146 @@ class InteractiveMap {
             { id: 'tiendas_artesania', nombre: 'Artesanía', emoji: '🎨', categoria: 'comercio' },
             { id: 'restaurantes', nombre: 'Restaurantes', emoji: '🍽️', categoria: 'servicios' },
             { id: 'hoteles', nombre: 'Hoteles', emoji: '🏨', categoria: 'servicios' },
-            { id: 'rutas', nombre: 'Rutas Turísticas', emoji: '🗺️', categoria: 'rutas' },
+            { id: 'rutas', nombre: 'Rutas', emoji: '🗺️', categoria: 'rutas' },
             { id: 'comunidades', nombre: 'Comunidades', emoji: '🏘️', categoria: 'comunidad' },
             { id: 'viviendas', nombre: 'Viviendas', emoji: '🏠', categoria: 'comunidad' },
             { id: 'areas_verdes', nombre: 'Áreas Verdes', emoji: '🌳', categoria: 'naturaleza' },
             { id: 'sembradios', nombre: 'Sembradíos', emoji: '🌾', categoria: 'naturaleza' },
-            { id: 'basura', nombre: 'Puntos de Basura', emoji: '🗑️', categoria: 'medio_ambiente' },
-            { id: 'puntos_basura', nombre: 'Zonas de Basura', emoji: '🚯', categoria: 'medio_ambiente' },
+            { id: 'basura', nombre: 'Basura', emoji: '🗑️', categoria: 'medio_ambiente' },
+            { id: 'puntos_basura', nombre: 'Zonas Basura', emoji: '🚯', categoria: 'medio_ambiente' },
             { id: 'aguas_contaminadas', nombre: 'Agua Contaminada', emoji: '⚠️', categoria: 'medio_ambiente' }
         ];
 
         listaCapas.innerHTML = configCapas.map(capa => `
-            <label class="capa-item-mejorado" data-capa="${capa.id}">
-                <input type="checkbox" id="capa-${capa.id}">
-                <div class="capa-info">
-                    <span class="capa-emoji">${capa.emoji}</span>
-                    <span class="capa-texto">${capa.nombre}</span>
-                    <span class="capa-contador" id="contador-${capa.id}">0</span>
+            <div class="mobile-layer-item" data-capa="${capa.id}" data-categoria="${capa.categoria}">
+                <div class="mobile-layer-content">
+                    <span class="mobile-layer-emoji">${capa.emoji}</span>
+                    <span class="mobile-layer-text">${capa.nombre}</span>
+                    <span class="mobile-layer-count" id="mobile-count-${capa.id}">0</span>
                 </div>
-            </label>
+            </div>
         `).join('');
 
-        // Configurar eventos de checkboxes
         configCapas.forEach(capa => {
-            const checkbox = document.getElementById(`capa-${capa.id}`);
-            if (checkbox) {
-                checkbox.addEventListener('change', (e) => {
-                    if (e.target.checked) {
-                        this.activarCapa(capa.id);
-                    } else {
-                        this.desactivarCapa(capa.id);
-                    }
-                    this.actualizarContadores();
+            const elemento = document.querySelector(`[data-capa="${capa.id}"]`);
+            if (elemento) {
+                elemento.addEventListener('click', () => {
+                    this.toggleCapaMovil(capa.id, elemento);
                 });
             }
         });
+    }
+
+    toggleCapaMovil(nombreCapa, elemento) {
+        const estaActiva = this.capasActivas.has(nombreCapa);
+        
+        if (estaActiva) {
+            this.desactivarCapa(nombreCapa);
+            elemento.classList.remove('active');
+        } else {
+            this.activarCapa(nombreCapa);
+            elemento.classList.add('active');
+        }
+        
+        this.actualizarEstadisticasMovil();
+    }
+
+    actualizarEstadisticasMovil() {
+        const totalElementos = this.contadorTotal;
+        const capasActivas = this.capasActivas.size;
+        
+        const badge = document.getElementById('mobileBadge');
+        if (badge) {
+            badge.textContent = capasActivas;
+            badge.style.background = capasActivas > 0 ? '#10b981' : '#ef4444';
+        }
+        
+        const totalElement = document.getElementById('mobileTotal');
+        const activeElement = document.getElementById('mobileActive');
+        
+        if (totalElement) totalElement.textContent = `${totalElementos} elementos`;
+        if (activeElement) activeElement.textContent = `${capasActivas} activas`;
+    }
+
+    actualizarContadorCapaMovil(nombreCapa, cantidad) {
+        const contador = document.getElementById(`mobile-count-${nombreCapa}`);
+        if (contador) {
+            contador.textContent = cantidad;
+            
+            const elemento = document.querySelector(`[data-capa="${nombreCapa}"]`);
+            if (elemento && cantidad > 0) {
+                contador.style.background = '#10b981';
+            } else {
+                contador.style.background = '#4a5568';
+            }
+        }
+    }
+
+    mostrarMensajeMovil(mensaje, tipo = 'info') {
+        const notificacion = document.createElement('div');
+        notificacion.className = `mobile-notification ${tipo}`;
+        notificacion.innerHTML = `
+            <div class="notification-content">
+                <i class="fas fa-${tipo === 'success' ? 'check' : 'info'}-circle"></i>
+                <span>${mensaje}</span>
+            </div>
+        `;
+        
+        notificacion.style.cssText = `
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: ${tipo === 'success' ? '#10b981' : tipo === 'error' ? '#ef4444' : '#6366f1'};
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            z-index: 3000;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            animation: slideInDown 0.3s ease;
+            max-width: 90%;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+        `;
+
+        document.body.appendChild(notificacion);
+        
+        setTimeout(() => {
+            notificacion.style.animation = 'slideOutUp 0.3s ease';
+            setTimeout(() => {
+                if (notificacion.parentNode) {
+                    notificacion.parentNode.removeChild(notificacion);
+                }
+            }, 300);
+        }, 3000);
+    }
+
+    irAVista3D() {
+        this.mostrarMensajeMovil('Redirigiendo a vista 3D...', 'info');
+        
+        const seccion3D = document.getElementById('map3dSection');
+        if (seccion3D) {
+            seccion3D.scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
+            });
+        } else {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        this.cerrarPanelMovil();
+    }
+
+    // MÉTODOS EXISTENTES DEL MAPA
+    ocultarLoading() {
+        const loading = document.querySelector('.map-loading');
+        if (loading) {
+            loading.style.opacity = '0';
+            setTimeout(() => {
+                loading.style.display = 'none';
+            }, 500);
+        }
     }
 
     inicializarCluster() {
@@ -660,48 +761,42 @@ class InteractiveMap {
     }
 
     async cargarTodasLasCapas() {
-        console.log('🔄 Cargando TODAS las capas del mapa 2D desde Render...');
+        console.log('🔄 Cargando TODAS las capas desde Render (Móvil)...');
         
         try {
-            // ✅ CORREGIDO: URL correcta para status
-            const statusResponse = await fetch(`${this.API_BASE_URL}/status`);
+            const timestamp = new Date().getTime();
+            const statusResponse = await fetch(`${this.API_BASE_URL}/status?t=${timestamp}`);
+            
             if (!statusResponse.ok) {
                 throw new Error('API no responde');
             }
             
-            const statusData = await statusResponse.json();
-            console.log('✅ API Status:', statusData);
-
-            // ✅ CARGAR TODAS LAS CAPAS
             const todasLasCapas = [
                 'puntos_turisticos', 'miradores', 'playas', 'tiendas_artesania',
                 'restaurantes', 'hoteles', 'rutas', 'comunidades', 'viviendas',
                 'areas_verdes', 'sembradios', 'basura', 'puntos_basura', 'aguas_contaminadas'
             ];
             
-            // Cargar todas las capas pero solo activar las principales
+            this.generarListaCapasMovil();
+            
             for (const capa of todasLasCapas) {
                 await this.cargarCapa(capa);
                 
-                // Activar solo las capas principales inicialmente
                 const capasPrincipales = ['puntos_turisticos', 'comunidades', 'rutas'];
                 if (capasPrincipales.includes(capa)) {
                     this.activarCapa(capa);
-                    const checkbox = document.getElementById(`capa-${capa}`);
-                    if (checkbox) checkbox.checked = true;
+                    const elemento = document.querySelector(`[data-capa="${capa}"]`);
+                    if (elemento) elemento.classList.add('active');
                 }
             }
             
-            console.log('✅ Todas las capas cargadas desde Render');
-            this.actualizarContadores();
-            this.mostrarMensaje('Mapa cargado correctamente desde Render', 'success');
+            console.log('✅ Todas las capas cargadas (Móvil)');
+            this.actualizarEstadisticasMovil();
+            this.mostrarMensajeMovil('Mapa cargado correctamente 🗺️', 'success');
             
         } catch (error) {
-            console.error('❌ Error cargando capas:', error);
-            this.mostrarError('Error al conectar con la API en Render');
-        } finally {
-            // ✅ SIEMPRE OCULTAR LOADING
-            this.ocultarLoading();
+            console.error('❌ Error cargando capas (Móvil):', error);
+            this.mostrarMensajeMovil('Error al cargar el mapa ❌', 'error');
         }
     }
 
@@ -713,8 +808,8 @@ class InteractiveMap {
         try {
             console.log(`🔄 Cargando capa: ${nombreCapa}`);
             
-            // ✅ CORREGIDO: URL correcta para capas
-            const response = await fetch(`${this.API_BASE_URL}/capas/${nombreCapa}`);
+            const timestamp = new Date().getTime();
+            const response = await fetch(`${this.API_BASE_URL}/capas/${nombreCapa}?t=${timestamp}`);
             
             if (!response.ok) {
                 throw new Error(`Error HTTP: ${response.status}`);
@@ -725,7 +820,6 @@ class InteractiveMap {
             if (data.features && data.features.length > 0) {
                 this.agregarCapaAlMapa(nombreCapa, data);
                 
-                // ✅ LIMPIAR DUPLICADOS DESPUÉS DE CARGAR
                 setTimeout(() => {
                     this.limpiarDuplicadosCapa(nombreCapa);
                 }, 100);
@@ -738,13 +832,11 @@ class InteractiveMap {
             }
         } catch (error) {
             console.error(`❌ Error cargando ${nombreCapa}:`, error);
-            this.mostrarError(`Error cargando ${nombreCapa}`);
             this.actualizarContadorCapa(nombreCapa, 0);
         }
     }
 
     agregarCapaAlMapa(nombreCapa, geojsonData) {
-        // ✅ VERIFICAR SI LA CAPA YA EXISTE
         if (this.capas[nombreCapa]) {
             console.log(`⚠️ Capa ${nombreCapa} ya existe, omitiendo...`);
             return;
@@ -820,12 +912,6 @@ class InteractiveMap {
             this.capas[nombreCapa].addTo(this.map);
             this.capasActivas.add(nombreCapa);
             console.log(`✅ Capa activada: ${nombreCapa}`);
-            
-            // Actualizar contador visual
-            const contador = document.getElementById(`contador-${nombreCapa}`);
-            if (contador) {
-                contador.classList.add('activo');
-            }
         } else if (!this.capas[nombreCapa]) {
             this.cargarCapa(nombreCapa).then(() => {
                 this.activarCapa(nombreCapa);
@@ -838,35 +924,25 @@ class InteractiveMap {
             this.map.removeLayer(this.capas[nombreCapa]);
             this.capasActivas.delete(nombreCapa);
             console.log(`❌ Capa desactivada: ${nombreCapa}`);
-            
-            // Actualizar contador visual
-            const contador = document.getElementById(`contador-${nombreCapa}`);
-            if (contador) {
-                contador.classList.remove('activo');
-            }
         }
     }
 
     activarTodasLasCapas() {
-        const checkboxes = document.querySelectorAll('.capa-item-mejorado input[type="checkbox"]');
-        checkboxes.forEach(checkbox => {
-            checkbox.checked = true;
-            const capaId = checkbox.id.replace('capa-', '');
+        Object.keys(this.capas).forEach(capaId => {
             this.activarCapa(capaId);
+            const elemento = document.querySelector(`[data-capa="${capaId}"]`);
+            if (elemento) elemento.classList.add('active');
         });
         this.actualizarContadores();
-        this.mostrarMensaje('Todas las capas activadas', 'success');
     }
 
     desactivarTodasLasCapas() {
-        const checkboxes = document.querySelectorAll('.capa-item-mejorado input[type="checkbox"]');
-        checkboxes.forEach(checkbox => {
-            checkbox.checked = false;
-            const capaId = checkbox.id.replace('capa-', '');
+        Object.keys(this.capas).forEach(capaId => {
             this.desactivarCapa(capaId);
+            const elemento = document.querySelector(`[data-capa="${capaId}"]`);
+            if (elemento) elemento.classList.remove('active');
         });
         this.actualizarContadores();
-        this.mostrarMensaje('Todas las capas desactivadas', 'info');
     }
 
     obtenerEstilo(tipoCapa) {
@@ -994,14 +1070,12 @@ class InteractiveMap {
                     </span>
                 </div>
                 
-                <!-- Loading para detalles -->
                 <div id="loading-${idLugar}" style="text-align: center; padding: 20px;">
                     <div style="color: #3182ce; font-size: 14px;">
                         <i class="fas fa-spinner fa-spin"></i> Cargando información detallada...
                     </div>
                 </div>
                 
-                <!-- Contenedor para detalles -->
                 <div id="detalles-${idLugar}" style="display: none;"></div>
             `;
             
@@ -1009,7 +1083,6 @@ class InteractiveMap {
             
             layer.bindPopup(contenido);
             
-            // ✅ CARGAR INFORMACIÓN DETALLADA AL ABRIR EL POPUP
             layer.on('popupopen', async () => {
                 await this.cargarInformacionDetallada(tipoCapa, idLugar, nombre);
             });
@@ -1026,7 +1099,6 @@ class InteractiveMap {
             let endpoint = '';
             let tipoDetalle = '';
             
-            // Determinar el endpoint según el tipo de capa
             switch(tipoCapa) {
                 case 'restaurantes':
                     endpoint = `detalle/restaurante/${idLugar}`;
@@ -1053,15 +1125,14 @@ class InteractiveMap {
                     tipoDetalle = 'playa';
                     break;
                 default:
-                    // Para otros tipos, mostrar información básica
                     detallesElement.innerHTML = this.generarContenidoBasico(tipoCapa, nombre);
                     loadingElement.style.display = 'none';
                     detallesElement.style.display = 'block';
                     return;
             }
             
-            // ✅ CORREGIDO: URL correcta para detalles
-            const response = await fetch(`${this.API_BASE_URL}/${endpoint}`);
+            const timestamp = new Date().getTime();
+            const response = await fetch(`${this.API_BASE_URL}/${endpoint}?t=${timestamp}`);
             
             if (!response.ok) {
                 throw new Error(`Error HTTP: ${response.status}`);
@@ -1069,7 +1140,6 @@ class InteractiveMap {
             
             const data = await response.json();
             
-            // Generar contenido según el tipo
             let contenidoDetallado = '';
             switch(tipoDetalle) {
                 case 'restaurante':
@@ -1092,7 +1162,6 @@ class InteractiveMap {
                     break;
             }
             
-            // Mostrar contenido
             loadingElement.style.display = 'none';
             detallesElement.innerHTML = contenidoDetallado;
             detallesElement.style.display = 'block';
@@ -1126,7 +1195,6 @@ class InteractiveMap {
             </div>
         `;
         
-        // Servicios
         if (servicios && servicios.length > 0) {
             contenido += `
                 <div style="margin-bottom: 15px;">
@@ -1140,7 +1208,6 @@ class InteractiveMap {
             `;
         }
         
-        // Menú (mostrar solo los primeros 5 platos)
         if (menu && menu.length > 0) {
             const platosMostrar = menu.slice(0, 5);
             contenido += `
@@ -1180,7 +1247,6 @@ class InteractiveMap {
             </div>
         `;
         
-        // Servicios
         if (servicios && servicios.length > 0) {
             contenido += `
                 <div style="margin-bottom: 15px;">
@@ -1194,7 +1260,6 @@ class InteractiveMap {
             `;
         }
         
-        // Habitaciones
         if (habitaciones && habitaciones.length > 0) {
             contenido += `
                 <div style="margin-bottom: 10px;">
@@ -1230,7 +1295,6 @@ class InteractiveMap {
             </div>
         `;
         
-        // Productos por categoría
         if (productosPorCategoria && Object.keys(productosPorCategoria).length > 0) {
             contenido += `
                 <div style="margin-bottom: 10px;">
@@ -1332,8 +1396,6 @@ class InteractiveMap {
 
     extraerIdLugar(idString) {
         if (!idString) return null;
-        
-        // Extraer número del ID (ej: "rest_1" -> 1, "hotel_21" -> 21)
         const match = idString.match(/\d+/);
         return match ? parseInt(match[0]) : null;
     }
@@ -1371,25 +1433,11 @@ class InteractiveMap {
             }
         });
         
-        const contadorGlobal = document.getElementById('contador-global');
-        if (contadorGlobal) {
-            contadorGlobal.innerHTML = `<i class="fas fa-layer-group"></i> ${this.contadorTotal} elementos`;
-            contadorGlobal.style.background = this.contadorTotal > 0 ? 
-                'linear-gradient(135deg, #48bb78 0%, #38a169 100%)' : 
-                'linear-gradient(135deg, #e53e3e 0%, #c53030 100%)';
-        }
+        this.actualizarEstadisticasMovil();
     }
 
     actualizarContadorCapa(nombreCapa, cantidad) {
-        const contador = document.getElementById(`contador-${nombreCapa}`);
-        if (contador) {
-            contador.textContent = cantidad;
-            if (cantidad > 0) {
-                contador.classList.add('activo');
-            } else {
-                contador.classList.remove('activo');
-            }
-        }
+        this.actualizarContadorCapaMovil(nombreCapa, cantidad);
     }
 
     limpiarDuplicadosCapa(nombreCapa) {
@@ -1400,7 +1448,6 @@ class InteractiveMap {
         const coordenadasUnicas = new Set();
         const layersUnicos = [];
         
-        // Filtrar duplicados por coordenadas
         layers.forEach(layer => {
             const latlng = layer.getLatLng ? layer.getLatLng() : null;
             if (latlng) {
@@ -1414,18 +1461,14 @@ class InteractiveMap {
             }
         });
         
-        // Recrear la capa sin duplicados
         if (layersUnicos.length < layers.length) {
             console.log(`🔄 Eliminando ${layers.length - layersUnicos.length} duplicados de ${nombreCapa}`);
             
-            // Remover capa actual
             this.map.removeLayer(capa);
             
-            // Crear nueva capa sin duplicados
             const nuevaCapa = L.layerGroup(layersUnicos);
             this.capas[nombreCapa] = nuevaCapa;
             
-            // Reactivar si estaba activa
             if (this.capasActivas.has(nombreCapa)) {
                 nuevaCapa.addTo(this.map);
             }
@@ -1436,11 +1479,11 @@ class InteractiveMap {
 
     buscarMiUbicacion() {
         if (!navigator.geolocation) {
-            this.mostrarError('La geolocalización no es soportada por este navegador');
+            this.mostrarMensajeMovil('La geolocalización no es soportada', 'error');
             return;
         }
 
-        this.mostrarMensaje('Buscando tu ubicación...', 'info');
+        this.mostrarMensajeMovil('Buscando tu ubicación...', 'info');
 
         navigator.geolocation.getCurrentPosition(
             (position) => {
@@ -1478,7 +1521,7 @@ class InteractiveMap {
                     easeLinearity: 0.25
                 });
 
-                this.mostrarMensaje('Ubicación encontrada ✅', 'success');
+                this.mostrarMensajeMovil('Ubicación encontrada ✅', 'success');
             },
             (error) => {
                 let mensaje = 'Error al obtener la ubicación';
@@ -1493,7 +1536,7 @@ class InteractiveMap {
                         mensaje = 'Tiempo de espera agotado';
                         break;
                 }
-                this.mostrarError(mensaje);
+                this.mostrarMensajeMovil(mensaje, 'error');
             },
             {
                 enableHighAccuracy: true,
@@ -1514,68 +1557,29 @@ class InteractiveMap {
             this.marcadoresAgrupados.clearLayers();
         }
         
-        // Resetear checkboxes
-        const checkboxes = document.querySelectorAll('.capa-item-mejorado input[type="checkbox"]');
-        checkboxes.forEach(checkbox => {
-            checkbox.checked = false;
+        const elementos = document.querySelectorAll('.mobile-layer-item');
+        elementos.forEach(elemento => {
+            elemento.classList.remove('active');
         });
         
         console.log('🗑️ Todas las capas limpiadas');
         this.actualizarContadores();
         
-        this.mostrarMensaje('Todas las capas limpiadas', 'info');
+        this.mostrarMensajeMovil('Todas las capas limpiadas', 'info');
         
-        // Recargar capas principales después de un tiempo
         setTimeout(() => {
             this.cargarTodasLasCapas();
         }, 1000);
     }
-
-    mostrarError(mensaje) {
-        this.mostrarMensaje(mensaje, 'error');
-    }
-
-    mostrarMensaje(mensaje, tipo = 'info') {
-        const colores = {
-            error: '#e53e3e',
-            success: '#38a169',
-            info: '#4299e1'
-        };
-
-        // Remover mensajes existentes
-        const mensajesExistentes = document.querySelectorAll('.map-mensaje-temporal');
-        mensajesExistentes.forEach(msg => msg.remove());
-
-        const mensajeDiv = document.createElement('div');
-        mensajeDiv.className = 'map-mensaje-temporal';
-        mensajeDiv.style.background = colores[tipo];
-        mensajeDiv.innerHTML = `${tipo === 'error' ? '❌' : tipo === 'success' ? '✅' : 'ℹ️'} ${mensaje}`;
-        
-        const mapContainer = document.getElementById('map');
-        if (mapContainer) {
-            mapContainer.appendChild(mensajeDiv);
-            
-            setTimeout(() => {
-                if (mensajeDiv.parentNode) {
-                    mensajeDiv.style.animation = 'slideUp 0.3s ease';
-                    setTimeout(() => {
-                        if (mensajeDiv.parentNode) {
-                            mensajeDiv.parentNode.removeChild(mensajeDiv);
-                        }
-                    }, 300);
-                }
-            }, 4000);
-        }
-    }
 }
 
-// Agregar estilos CSS para animaciones
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideDown {
+// ESTILOS DE ANIMACIÓN ADICIONALES
+const mobileAnimationStyles = document.createElement('style');
+mobileAnimationStyles.textContent = `
+    @keyframes slideInDown {
         from {
             opacity: 0;
-            transform: translateX(-50%) translateY(-20px);
+            transform: translateX(-50%) translateY(-30px);
         }
         to {
             opacity: 1;
@@ -1583,25 +1587,47 @@ style.textContent = `
         }
     }
     
-    @keyframes slideUp {
+    @keyframes slideOutUp {
         from {
             opacity: 1;
             transform: translateX(-50%) translateY(0);
         }
         to {
             opacity: 0;
-            transform: translateX(-50%) translateY(-20px);
+            transform: translateX(-50%) translateY(-30px);
         }
     }
     
-    @keyframes pulse {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.1); }
+    @keyframes slideInLeft {
+        from {
+            transform: translateX(-100%);
+        }
+        to {
+            transform: translateX(0);
+        }
     }
 `;
-document.head.appendChild(style);
+document.head.appendChild(mobileAnimationStyles);
 
-// Inicializar mapa cuando el DOM esté listo
+// ✅ FORZAR CARGA SIN CACHE
+if (performance.navigation.type === 1) {
+    console.log('🔄 Página recargada - limpiando cache móvil');
+    localStorage.setItem('mobileForceReload', Date.now());
+}
+
+// INICIALIZACIÓN
 document.addEventListener('DOMContentLoaded', function() {
+    const lastMobileLoad = localStorage.getItem('mobileForceReload');
+    const currentTime = Date.now();
+    
+    if (lastMobileLoad && (currentTime - parseInt(lastMobileLoad)) < 5000) {
+        console.log('🔥 Forzando carga móvil sin cache');
+        window.location.reload(true);
+        return;
+    }
+    
+    console.log('🚀 Inicializando mapa móvil optimizado...');
     window.interactiveMap = new InteractiveMap();
+    
+    localStorage.setItem('mobileForceReload', Date.now());
 });
