@@ -1,4 +1,4 @@
-// assets/scripts/modules/cesium-3d-simple.js - VERSIÓN COMPLETA CORREGIDA
+// assets/scripts/modules/cesium-3d-simple.js - VERSIÓN PREMIUM NEGRO Y VERDE DORADO
 class Cesium3DMap {
     constructor() {
         this.viewer = null;
@@ -13,7 +13,7 @@ class Cesium3DMap {
     }
 
     init() {
-        console.log('🚀 Iniciando Cesium 3D - Conectado a Render');
+        console.log('🚀 Iniciando Cesium 3D Premium - Conectado a Render');
         
         if (typeof Cesium === 'undefined') {
             console.error('❌ Cesium no está cargado');
@@ -110,55 +110,95 @@ class Cesium3DMap {
         controlPanel.className = 'cesium-control-panel';
         controlPanel.innerHTML = `
             <div class="control-header">
-                <h3>🎯 Control de Capas 3D</h3>
-                <button class="btn-mobile-toggle" id="mobileTogglePanel">☰</button>
-                <div class="control-buttons">
-                    <button id="toggleAllLayers" class="btn-control">📁 Todas</button>
-                    <button id="clearAllLayers" class="btn-control">🗑️ Limpiar</button>
+                <div class="header-content">
+                    <div class="header-icon">🌍</div>
+                    <div class="header-text">
+                        <h3>Control de Capas</h3>
+                        <span class="header-subtitle">Sistema Turístico Premium</span>
+                    </div>
                 </div>
+                <button class="btn-mobile-toggle" id="mobileTogglePanel">
+                    <i class="fas fa-bars"></i>
+                </button>
             </div>
             
             <div class="panel-content">
+                <div class="control-actions">
+                    <button id="toggleAllLayers" class="btn-action btn-action-primary">
+                        <i class="fas fa-layer-group"></i>
+                        <span>Todas</span>
+                    </button>
+                    <button id="clearAllLayers" class="btn-action btn-action-secondary">
+                        <i class="fas fa-broom"></i>
+                        <span>Limpiar</span>
+                    </button>
+                </div>
+
                 <div class="layers-list" id="cesiumLayersList">
                     <div class="category-section">
-                        <h4>🏞️ Puntos Turísticos</h4>
-                        ${this.createLayerItem('puntos_turisticos', '📍', 'Puntos Turísticos', '#1fb57a')}
-                        ${this.createLayerItem('miradores', '🔭', 'Miradores', '#1fb57a')}
-                        ${this.createLayerItem('playas', '🏖️', 'Playas', '#1fb57a')}
+                        <div class="category-header">
+                            <i class="fas fa-mountain"></i>
+                            <h4>PUNTOS TURÍSTICOS</h4>
+                        </div>
+                        ${this.createLayerItem('puntos_turisticos', '📍', 'Puntos Turísticos', '#10b981')}
+                        ${this.createLayerItem('miradores', '🔭', 'Miradores', '#10b981')}
+                        ${this.createLayerItem('playas', '🏖️', 'Playas', '#10b981')}
                     </div>
 
                     <div class="category-section">
-                        <h4>🏘️ Servicios</h4>
-                        ${this.createLayerItem('tiendas_artesania', '🎨', 'Artesanía', '#16a34a')}
-                        ${this.createLayerItem('restaurantes', '🍽️', 'Restaurantes', '#16a34a')}
-                        ${this.createLayerItem('hoteles', '🏨', 'Hoteles', '#16a34a')}
+                        <div class="category-header">
+                            <i class="fas fa-concierge-bell"></i>
+                            <h4>SERVICIOS</h4>
+                        </div>
+                        ${this.createLayerItem('tiendas_artesania', '🎨', 'Artesanía', '#d4af37')}
+                        ${this.createLayerItem('restaurantes', '🍽️', 'Restaurantes', '#d4af37')}
+                        ${this.createLayerItem('hoteles', '🏨', 'Hoteles', '#d4af37')}
                     </div>
 
                     <div class="category-section">
-                        <h4>🗺️ Rutas y Comunidades</h4>
-                        ${this.createLayerItem('rutas', '🛣️', 'Rutas Turísticas', '#16a34a')}
-                        ${this.createLayerItem('comunidades', '🏘️', 'Comunidades', '#16a34a')}
+                        <div class="category-header">
+                            <i class="fas fa-route"></i>
+                            <h4>RUTAS Y COMUNIDADES</h4>
+                        </div>
+                        ${this.createLayerItem('rutas', '🛣️', 'Rutas Turísticas', '#34d399')}
+                        ${this.createLayerItem('comunidades', '🏘️', 'Comunidades', '#34d399')}
                     </div>
 
                     <div class="category-section">
-                        <h4>🌳 Áreas y Viviendas</h4>
-                        ${this.createLayerItem('areas_verdes', '🌳', 'Áreas Verdes', '#10b981')}
-                        ${this.createLayerItem('sembradios', '🌾', 'Sembradíos', '#10b981')}
-                        ${this.createLayerItem('viviendas', '🏠', 'Viviendas', '#10b981')}
+                        <div class="category-header">
+                            <i class="fas fa-tree"></i>
+                            <h4>ÁREAS Y VIVIENDAS</h4>
+                        </div>
+                        ${this.createLayerItem('areas_verdes', '🌳', 'Áreas Verdes', '#059669')}
+                        ${this.createLayerItem('sembradios', '🌾', 'Sembradíos', '#059669')}
+                        ${this.createLayerItem('viviendas', '🏠', 'Viviendas', '#059669')}
                     </div>
 
                     <div class="category-section">
-                        <h4>🗑️ Medio Ambiente</h4>
+                        <div class="category-header">
+                            <i class="fas fa-recycle"></i>
+                            <h4>MEDIO AMBIENTE</h4>
+                        </div>
                         ${this.createLayerItem('basura', '🗑️', 'Puntos Basura', '#94a3b8')}
                         ${this.createLayerItem('puntos_basura', '🚯', 'Zonas Basura', '#94a3b8')}
-                        ${this.createLayerItem('aguas_contaminadas', '⚠️', 'Agua Contaminada', '#f43f5e')}
+                        ${this.createLayerItem('aguas_contaminadas', '⚠️', 'Agua Contaminada', '#ef4444')}
                     </div>
                 </div>
 
                 <div class="panel-footer">
                     <div class="system-stats">
-                        <span id="totalElements">Total: 0 elementos</span>
-                        <span id="activeLayers">Activas: 0 capas</span>
+                        <div class="stat-item">
+                            <i class="fas fa-cube"></i>
+                            <span id="totalElements">0 elementos</span>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-layer-group"></i>
+                            <span id="activeLayers">0 capas</span>
+                        </div>
+                    </div>
+                    <div class="system-status">
+                        <div class="status-indicator active"></div>
+                        <span>Sistema Online</span>
                     </div>
                 </div>
             </div>
@@ -172,9 +212,13 @@ class Cesium3DMap {
             <div class="layer-item">
                 <input type="checkbox" id="layer-${layerName}" checked data-layer="${layerName}">
                 <label for="layer-${layerName}" class="layer-label">
-                    <span class="layer-color" style="background:${color}"></span>
-                    <span class="layer-emoji">${emoji}</span>
-                    <span class="layer-text">${label}</span>
+                    <div class="layer-indicator">
+                        <div class="layer-checkbox">
+                            <div class="checkbox-inner"></div>
+                        </div>
+                        <span class="layer-emoji">${emoji}</span>
+                        <span class="layer-text">${label}</span>
+                    </div>
                     <span class="layer-count" id="count-${layerName}">0</span>
                 </label>
             </div>
@@ -187,10 +231,17 @@ class Cesium3DMap {
         this.infoPanel.className = 'cesium-info-panel';
         this.infoPanel.innerHTML = `
             <div class="info-header">
-                <h3>📊 Información Detallada</h3>
+                <div class="info-header-content">
+                    <i class="fas fa-info-circle"></i>
+                    <h3>Información Detallada</h3>
+                </div>
                 <div class="info-header-controls">
-                    <button id="mobileToggleInfo" class="btn-mobile-toggle">📱</button>
-                    <button id="closeInfo" class="btn-close">×</button>
+                    <button id="mobileToggleInfo" class="btn-mobile-toggle">
+                        <i class="fas fa-mobile-alt"></i>
+                    </button>
+                    <button id="closeInfo" class="btn-close">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
             </div>
             <div class="info-content" id="cesiumInfoContent">
@@ -198,132 +249,226 @@ class Cesium3DMap {
                     <div class="no-selection-icon">
                         <i class="fas fa-mouse-pointer"></i>
                     </div>
+                    <h4>Explora el Mapa</h4>
                     <p>Haz clic en cualquier punto del mapa para ver información detallada</p>
                 </div>
             </div>
         `;
         container.appendChild(this.infoPanel);
-        this.addCorrectedStyles();
+        this.addPremiumStyles();
     }
 
-    addCorrectedStyles() {
+    addPremiumStyles() {
         const styles = `
             <style>
-                /* ESTILOS PREMIUM - TEMA NEGRO Y VERDE */
+                /* ESTILOS PREMIUM - TEMA NEGRO Y VERDE DORADO LUXE */
                 :root {
-                    --bg-dark: #060606;
-                    --panel-dark: rgba(8, 12, 10, 0.9);
-                    --panel-soft: rgba(12, 18, 15, 0.75);
-                    --emerald-500: #10b981;
-                    --emerald-600: #059669;
-                    --emerald-400: #34d399;
-                    --muted: #9ca3af;
-                    --gold: #c9a84d;
-                    --glass-border: rgba(255,255,255,0.04);
+                    --bg-dark: #0a0a0a;
+                    --panel-dark: rgba(15, 23, 18, 0.97);
+                    --panel-light: rgba(25, 35, 28, 0.95);
+                    --emerald-primary: #10b981;
+                    --emerald-secondary: #059669;
+                    --emerald-accent: #34d399;
+                    --gold-primary: #d4af37;
+                    --gold-secondary: #b8941f;
+                    --gold-accent: #f7e98e;
+                    --text-primary: #f0fdf4;
+                    --text-secondary: #d1fae5;
+                    --text-muted: #9ca3af;
+                    --border-dark: rgba(255,255,255,0.08);
+                    --border-light: rgba(212, 175, 55, 0.3);
+                    --shadow-premium: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+                    --gradient-emerald: linear-gradient(135deg, #10b981, #34d399);
+                    --gradient-gold: linear-gradient(135deg, #d4af37, #f7e98e);
+                    --gradient-panel: linear-gradient(160deg, rgba(15,23,18,0.98), rgba(10,15,12,0.95));
                 }
 
                 .cesium-control-panel {
                     position: absolute;
                     top: 20px;
                     left: 20px;
-                    width: 320px;
-                    background: linear-gradient(180deg, rgba(4,6,4,0.95) 0%, rgba(10,14,12,0.9) 100%);
-                    border-radius: 16px;
-                    box-shadow: 0 30px 80px rgba(0,0,0,0.75), inset 0 1px 0 rgba(255,255,255,0.02);
+                    width: 340px;
+                    background: var(--gradient-panel);
+                    border-radius: 20px;
+                    box-shadow: var(--shadow-premium), 
+                                inset 0 1px 0 var(--border-light),
+                                0 0 0 1px rgba(0,0,0,0.3);
                     padding: 0;
-                    color: #e6fffa;
-                    border: 1px solid var(--glass-border);
-                    backdrop-filter: blur(8px) saturate(1.1);
+                    color: var(--text-primary);
+                    border: 1px solid var(--border-dark);
+                    backdrop-filter: blur(20px) saturate(1.8);
                     z-index: 1000;
-                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                    transition: all 0.3s ease;
+                    font-family: 'Segoe UI', system-ui, sans-serif;
+                    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
                     overflow: hidden;
+                    transform: translateZ(0);
                 }
 
                 .cesium-control-panel.mobile-collapsed {
-                    height: 60px;
-                    width: 60px !important;
+                    height: 70px;
+                    width: 70px !important;
                     overflow: hidden;
                 }
 
                 .control-header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    padding: 18px;
-                    background: linear-gradient(90deg, rgba(0,0,0,0.25), rgba(20, 24, 22, 0.35));
-                    border-bottom: 1px solid rgba(255,255,255,0.02);
+                    padding: 20px 24px;
+                    background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(212,175,55,0.1));
+                    border-bottom: 1px solid var(--border-dark);
+                    position: relative;
+                    overflow: hidden;
                 }
 
-                .control-header h3 {
+                .control-header::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    height: 1px;
+                    background: var(--gradient-gold);
+                    opacity: 0.6;
+                }
+
+                .header-content {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                }
+
+                .header-icon {
+                    font-size: 24px;
+                    background: var(--gradient-emerald);
+                    border-radius: 12px;
+                    width: 48px;
+                    height: 48px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    box-shadow: 0 4px 12px rgba(16,185,129,0.3);
+                }
+
+                .header-text h3 {
                     margin: 0;
                     font-size: 18px;
                     font-weight: 700;
-                    color: var(--emerald-400);
-                    text-shadow: 0 2px 12px rgba(16,185,129,0.08);
-                    letter-spacing: 0.2px;
+                    background: var(--gradient-gold);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    background-clip: text;
+                    letter-spacing: -0.02em;
+                }
+
+                .header-subtitle {
+                    font-size: 11px;
+                    color: var(--text-muted);
+                    font-weight: 500;
+                    letter-spacing: 0.5px;
+                    text-transform: uppercase;
                 }
 
                 .btn-mobile-toggle {
-                    display: none;
-                    background: transparent;
-                    border: 1px solid rgba(255,255,255,0.04);
-                    color: var(--muted);
-                    padding: 8px;
-                    border-radius: 8px;
-                    cursor: pointer;
-                    font-size: 16px;
-                }
-
-                .control-buttons {
-                    display: flex;
-                    gap: 8px;
-                }
-
-                .btn-control {
-                    background: linear-gradient(180deg, rgba(16,185,129,0.09), rgba(16,185,129,0.03));
-                    border: 1px solid rgba(16,185,129,0.14);
-                    color: var(--emerald-400);
-                    padding: 8px 12px;
+                    position: absolute;
+                    top: 20px;
+                    right: 20px;
+                    background: rgba(255,255,255,0.05);
+                    border: 1px solid var(--border-dark);
+                    color: var(--gold-primary);
+                    padding: 10px;
                     border-radius: 10px;
                     cursor: pointer;
-                    font-size: 12px;
-                    font-weight: 600;
-                    backdrop-filter: blur(4px);
-                    box-shadow: 0 6px 18px rgba(16,185,129,0.03), inset 0 -1px 0 rgba(255,255,255,0.02);
+                    font-size: 14px;
+                    transition: all 0.3s ease;
+                    backdrop-filter: blur(10px);
+                }
+
+                .btn-mobile-toggle:hover {
+                    background: rgba(212,175,55,0.1);
+                    transform: scale(1.05);
                 }
 
                 .panel-content {
-                    max-height: 70vh;
                     display: flex;
                     flex-direction: column;
+                    height: calc(100% - 90px);
+                }
+
+                .control-actions {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 12px;
+                    padding: 20px 24px 16px;
+                    border-bottom: 1px solid var(--border-dark);
+                }
+
+                .btn-action {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    padding: 12px 16px;
+                    border: none;
+                    border-radius: 12px;
+                    cursor: pointer;
+                    font-weight: 600;
+                    font-size: 13px;
+                    transition: all 0.3s ease;
+                    backdrop-filter: blur(10px);
+                }
+
+                .btn-action-primary {
+                    background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(16,185,129,0.1));
+                    color: var(--emerald-accent);
+                    border: 1px solid rgba(16,185,129,0.3);
+                }
+
+                .btn-action-secondary {
+                    background: linear-gradient(135deg, rgba(212,175,55,0.15), rgba(212,175,55,0.05));
+                    color: var(--gold-primary);
+                    border: 1px solid rgba(212,175,55,0.2);
+                }
+
+                .btn-action:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 8px 25px rgba(16,185,129,0.2);
                 }
 
                 .layers-list {
                     flex: 1;
                     overflow-y: auto;
-                    padding: 12px 18px 18px 18px;
-                    max-height: calc(70vh - 120px);
+                    padding: 16px 24px;
+                    max-height: calc(70vh - 200px);
                 }
 
                 .category-section {
-                    margin-bottom: 16px;
+                    margin-bottom: 24px;
                 }
 
-                .category-section h4 {
-                    margin: 0 0 12px 0;
-                    font-size: 13px;
+                .category-header {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    margin-bottom: 16px;
+                    padding: 12px 16px;
+                    background: linear-gradient(90deg, rgba(16,185,129,0.1), transparent);
+                    border-radius: 12px;
+                    border-left: 3px solid var(--emerald-primary);
+                }
+
+                .category-header i {
+                    color: var(--emerald-primary);
+                    font-size: 14px;
+                }
+
+                .category-header h4 {
+                    margin: 0;
+                    font-size: 12px;
                     font-weight: 700;
-                    color: var(--emerald-400);
-                    padding-left: 12px;
-                    border-left: 3px solid rgba(16,185,129,0.12);
-                    background: linear-gradient(90deg, rgba(16,185,129,0.02), transparent);
-                    padding: 8px 12px;
-                    border-radius: 0 8px 8px 0;
+                    color: var(--text-primary);
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
                 }
 
                 .layer-item {
-                    margin-bottom: 10px;
+                    margin-bottom: 8px;
                 }
 
                 .layer-item input[type="checkbox"] {
@@ -333,70 +478,156 @@ class Cesium3DMap {
                 .layer-label {
                     display: flex;
                     align-items: center;
-                    padding: 12px;
-                    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.15));
-                    border-radius: 12px;
+                    justify-content: space-between;
+                    padding: 14px 16px;
+                    background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(0,0,0,0.1));
+                    border-radius: 14px;
                     cursor: pointer;
-                    border: 1px solid rgba(255,255,255,0.02);
-                    transition: transform 0.12s ease, box-shadow 0.12s ease;
+                    border: 1px solid var(--border-dark);
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    position: relative;
+                    overflow: hidden;
+                }
+
+                .layer-label::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: -100%;
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient(90deg, transparent, rgba(16,185,129,0.1), transparent);
+                    transition: left 0.6s ease;
+                }
+
+                .layer-label:hover::before {
+                    left: 100%;
                 }
 
                 .layer-label:hover {
-                    transform: translateY(-3px);
-                    box-shadow: 0 8px 30px rgba(2,6,2,0.6);
+                    transform: translateY(-2px);
+                    border-color: var(--border-light);
+                    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
                 }
 
-                .layer-color {
-                    width: 14px;
-                    height: 14px;
-                    border-radius: 50%;
-                    margin-right: 12px;
-                    border: 2px solid rgba(0,0,0,0.5);
-                    box-shadow: 0 2px 8px rgba(16,185,129,0.12);
+                .layer-indicator {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                }
+
+                .layer-checkbox {
+                    width: 20px;
+                    height: 20px;
+                    border: 2px solid var(--border-dark);
+                    border-radius: 6px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: all 0.3s ease;
+                    position: relative;
+                }
+
+                .checkbox-inner {
+                    width: 10px;
+                    height: 10px;
+                    background: var(--gradient-emerald);
+                    border-radius: 2px;
+                    transform: scale(0);
+                    transition: transform 0.3s ease;
+                }
+
+                input[type="checkbox"]:checked + .layer-label .checkbox-inner {
+                    transform: scale(1);
+                }
+
+                input[type="checkbox"]:checked + .layer-label .layer-checkbox {
+                    border-color: var(--emerald-primary);
+                    background: rgba(16,185,129,0.1);
                 }
 
                 .layer-emoji {
                     font-size: 16px;
-                    margin-right: 10px;
-                    width: 26px;
+                    width: 24px;
                     text-align: center;
+                    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
                 }
 
                 .layer-text {
-                    flex: 1;
                     font-size: 14px;
                     font-weight: 600;
-                    color: #e6fff5;
+                    color: var(--text-primary);
+                    letter-spacing: -0.01em;
                 }
 
                 .layer-count {
-                    background: rgba(0,0,0,0.5);
-                    color: var(--emerald-400);
+                    background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(212,175,55,0.1));
+                    color: var(--text-primary);
                     padding: 6px 10px;
-                    border-radius: 14px;
+                    border-radius: 20px;
                     font-size: 11px;
                     font-weight: 700;
-                    min-width: 34px;
+                    min-width: 32px;
                     text-align: center;
-                    border: 1px solid rgba(16,185,129,0.08);
+                    border: 1px solid var(--border-dark);
+                    backdrop-filter: blur(10px);
                 }
 
                 .panel-footer {
-                    border-top: 1px solid rgba(255,255,255,0.02);
-                    padding: 14px 18px;
-                    background: linear-gradient(180deg, rgba(0,0,0,0.14), rgba(0,0,0,0.06));
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
+                    padding: 20px 24px;
+                    border-top: 1px solid var(--border-dark);
+                    background: linear-gradient(180deg, rgba(0,0,0,0.2), rgba(0,0,0,0.4));
                 }
 
                 .system-stats {
                     display: flex;
                     justify-content: space-between;
-                    gap: 12px;
+                    margin-bottom: 12px;
+                }
+
+                .stat-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
                     font-size: 12px;
-                    color: var(--muted);
+                    color: var(--text-muted);
+                }
+
+                .stat-item i {
+                    color: var(--emerald-accent);
+                    font-size: 10px;
+                }
+
+                .system-status {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-size: 11px;
+                    color: var(--text-muted);
+                }
+
+                .status-indicator {
+                    width: 8px;
+                    height: 8px;
+                    border-radius: 50%;
+                    background: var(--emerald-primary);
+                    position: relative;
+                }
+
+                .status-indicator.active::after {
+                    content: '';
+                    position: absolute;
                     width: 100%;
+                    height: 100%;
+                    border-radius: 50%;
+                    background: var(--emerald-primary);
+                    animation: pulse 2s infinite;
+                }
+
+                @keyframes pulse {
+                    0% { transform: scale(1); opacity: 1; }
+                    50% { transform: scale(2); opacity: 0; }
+                    100% { transform: scale(1); opacity: 0; }
                 }
 
                 /* PANEL DE INFORMACIÓN PREMIUM */
@@ -404,83 +635,138 @@ class Cesium3DMap {
                     position: absolute;
                     top: 20px;
                     right: 20px;
-                    width: 380px; /* Aumentado para más espacio */
-                    background: linear-gradient(180deg, rgba(5,7,5,0.96) 0%, rgba(12,14,12,0.92) 100%);
-                    border-radius: 16px;
-                    box-shadow: 0 30px 90px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.02);
-                    color: #e6fff5;
-                    border: 1px solid var(--glass-border);
-                    backdrop-filter: blur(10px) saturate(1.1);
+                    width: 400px;
+                    background: var(--gradient-panel);
+                    border-radius: 20px;
+                    box-shadow: var(--shadow-premium),
+                                inset 0 1px 0 var(--border-light),
+                                0 0 0 1px rgba(0,0,0,0.3);
+                    color: var(--text-primary);
+                    border: 1px solid var(--border-dark);
+                    backdrop-filter: blur(20px) saturate(1.8);
                     z-index: 1000;
-                    transform: translateX(400px);
-                    transition: transform 0.3s ease;
-                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    transform: translateX(420px);
+                    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                    font-family: 'Segoe UI', system-ui, sans-serif;
                     overflow: hidden;
                     max-height: 80vh;
                     display: flex;
                     flex-direction: column;
+                    transform: translateZ(0);
                 }
 
                 .cesium-info-panel.visible {
                     transform: translateX(0);
                 }
 
+                .cesium-info-panel.mobile-fullscreen {
+                    width: calc(100vw - 40px) !important;
+                    height: calc(100vh - 40px) !important;
+                    max-height: none !important;
+                }
+
                 .info-header {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    padding: 20px;
-                    border-bottom: 1px solid rgba(255,255,255,0.02);
-                    background: linear-gradient(90deg, rgba(0,0,0,0.25), rgba(0,0,0,0.12));
+                    padding: 20px 24px;
+                    background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(212,175,55,0.1));
+                    border-bottom: 1px solid var(--border-dark);
+                    position: relative;
+                }
+
+                .info-header::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    height: 1px;
+                    background: var(--gradient-gold);
+                    opacity: 0.6;
+                }
+
+                .info-header-content {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                }
+
+                .info-header-content i {
+                    color: var(--emerald-primary);
+                    font-size: 20px;
                 }
 
                 .info-header h3 {
                     margin: 0;
                     font-size: 18px;
                     font-weight: 700;
-                    color: var(--emerald-400);
+                    background: var(--gradient-gold);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    background-clip: text;
                 }
 
                 .info-header-controls {
                     display: flex;
-                    gap: 10px;
+                    gap: 8px;
                     align-items: center;
                 }
 
                 .btn-close {
-                    background: linear-gradient(180deg, rgba(196,147,61,0.06), rgba(196,147,61,0.02));
-                    border: 1px solid rgba(201,168,77,0.08);
-                    color: var(--gold);
-                    font-size: 18px;
+                    background: linear-gradient(135deg, rgba(239,68,68,0.2), rgba(239,68,68,0.1));
+                    border: 1px solid rgba(239,68,68,0.3);
+                    color: #ef4444;
+                    font-size: 14px;
                     cursor: pointer;
-                    padding: 0;
-                    width: 36px;
-                    height: 36px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    border-radius: 50%;
-                    transition: transform 0.12s ease;
+                    padding: 10px;
+                    border-radius: 10px;
+                    transition: all 0.3s ease;
+                    backdrop-filter: blur(10px);
                 }
 
-                .btn-close:hover { transform: scale(1.05); }
+                .btn-close:hover {
+                    transform: scale(1.05);
+                    background: linear-gradient(135deg, rgba(239,68,68,0.3), rgba(239,68,68,0.2));
+                }
 
                 .info-content {
                     flex: 1;
                     overflow-y: auto;
                     padding: 0;
-                    background: linear-gradient(180deg, rgba(8,10,8,0.6), rgba(4,6,4,0.4));
+                    background: linear-gradient(180deg, rgba(10,15,12,0.6), rgba(5,8,6,0.4));
                 }
 
                 .no-selection {
                     text-align: center;
-                    padding: 60px 20px;
-                    color: var(--muted);
+                    padding: 80px 40px;
+                    color: var(--text-muted);
                 }
 
-                /* CONTENIDO DE INFORMACIÓN - PREMIUM */
+                .no-selection-icon {
+                    font-size: 48px;
+                    color: var(--emerald-primary);
+                    margin-bottom: 20px;
+                    opacity: 0.7;
+                }
+
+                .no-selection h4 {
+                    margin: 0 0 12px 0;
+                    font-size: 18px;
+                    font-weight: 600;
+                    color: var(--text-primary);
+                }
+
+                .no-selection p {
+                    margin: 0;
+                    font-size: 14px;
+                    line-height: 1.5;
+                    opacity: 0.8;
+                }
+
+                /* CONTENIDO DE INFORMACIÓN DETALLADA - PREMIUM */
                 .entity-info-detailed {
-                    color: #e6fff5;
+                    color: var(--text-primary);
                     padding: 0;
                     background: transparent;
                 }
@@ -488,73 +774,91 @@ class Cesium3DMap {
                 .info-header-detailed {
                     display: flex;
                     align-items: center;
-                    gap: 15px;
-                    margin-bottom: 0;
-                    padding: 22px;
-                    border-bottom: 1px solid rgba(255,255,255,0.02);
-                    background: linear-gradient(90deg, rgba(16,24,20,0.2), transparent);
+                    gap: 16px;
+                    padding: 24px;
+                    background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(212,175,55,0.05));
+                    border-bottom: 1px solid var(--border-dark);
                 }
 
                 .info-icon {
-                    font-size: 28px;
-                    width: 54px;
-                    height: 54px;
+                    font-size: 32px;
+                    width: 64px;
+                    height: 64px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    background: linear-gradient(180deg, rgba(16,185,129,0.14), rgba(16,185,129,0.06));
-                    border-radius: 12px;
-                    color: #e6fff5;
-                    border: 1px solid rgba(16,185,129,0.06);
+                    background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(212,175,55,0.1));
+                    border-radius: 16px;
+                    color: var(--text-primary);
+                    border: 1px solid var(--border-light);
+                    backdrop-filter: blur(10px);
+                    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
                 }
 
                 .info-header-detailed h3 {
                     margin: 0;
-                    font-size: 20px;
+                    font-size: 22px;
                     font-weight: 700;
-                    color: #e6fff5;
+                    color: var(--text-primary);
                     flex: 1;
                     word-wrap: break-word;
-                    line-height: 1.25;
+                    line-height: 1.3;
+                    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
                 }
 
                 .info-details {
                     font-size: 14px;
-                    padding: 20px;
+                    padding: 24px;
                     background: transparent;
                 }
 
                 .info-section {
-                    margin-bottom: 18px;
-                    background: linear-gradient(180deg, rgba(8,10,8,0.35), rgba(12,14,12,0.25));
-                    border-radius: 12px;
-                    padding: 16px;
-                    border: 1px solid rgba(255,255,255,0.02);
+                    margin-bottom: 24px;
+                    background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(0,0,0,0.15));
+                    border-radius: 16px;
+                    padding: 20px;
+                    border: 1px solid var(--border-dark);
+                    backdrop-filter: blur(10px);
+                    position: relative;
+                    overflow: hidden;
+                }
+
+                .info-section::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 4px;
+                    height: 100%;
+                    background: var(--gradient-emerald);
                 }
 
                 .info-section h4 {
-                    margin: 0 0 12px 0;
-                    font-size: 15px;
+                    margin: 0 0 16px 0;
+                    font-size: 16px;
                     font-weight: 700;
-                    color: var(--emerald-400);
+                    color: var(--emerald-accent);
                     display: flex;
                     align-items: center;
                     gap: 10px;
-                    padding-bottom: 8px;
-                    border-bottom: 1px dashed rgba(255,255,255,0.02);
+                    padding-left: 12px;
+                }
+
+                .info-section h4 i {
+                    font-size: 14px;
                 }
 
                 .info-grid {
                     display: grid;
                     grid-template-columns: 1fr 1fr;
-                    gap: 12px;
+                    gap: 16px;
                     margin-bottom: 0;
                 }
 
                 .info-item {
                     display: flex;
                     flex-direction: column;
-                    min-width: 0; /* Permite que el texto se ajuste */
+                    min-width: 0;
                 }
 
                 .info-item.full-width {
@@ -562,125 +866,153 @@ class Cesium3DMap {
                 }
 
                 .info-label {
-                    font-size: 12px;
-                    color: var(--muted);
+                    font-size: 11px;
+                    color: var(--text-muted);
                     font-weight: 700;
                     margin-bottom: 8px;
                     text-transform: uppercase;
-                    letter-spacing: 0.6px;
+                    letter-spacing: 0.8px;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                }
+
+                .info-label i {
+                    font-size: 10px;
+                    color: var(--emerald-primary);
                 }
 
                 .info-value {
                     font-size: 14px;
-                    color: #e6fff5;
+                    color: var(--text-primary);
                     font-weight: 600;
-                    line-height: 1.4;
+                    line-height: 1.5;
                     word-wrap: break-word;
                     word-break: break-word;
-                    background: linear-gradient(180deg, rgba(0,0,0,0.2), rgba(0,0,0,0.12));
-                    padding: 10px 12px;
-                    border-radius: 8px;
-                    border: 1px solid rgba(16,185,129,0.04);
-                    min-height: 20px;
+                    background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(0,0,0,0.1));
+                    padding: 12px 16px;
+                    border-radius: 12px;
+                    border: 1px solid var(--border-dark);
+                    min-height: 24px;
                     overflow: visible;
                     white-space: normal;
+                    backdrop-filter: blur(5px);
                 }
 
                 .services-list, .menu-list, .rooms-list, .products-list {
                     display: flex;
                     flex-direction: column;
-                    gap: 8px;
+                    gap: 10px;
                 }
 
                 .service-tag {
-                    background: linear-gradient(180deg, rgba(16,185,129,0.06), rgba(16,185,129,0.02));
-                    color: var(--emerald-400);
-                    padding: 10px 12px;
-                    border-radius: 8px;
+                    background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(16,185,129,0.05));
+                    color: var(--emerald-accent);
+                    padding: 12px 16px;
+                    border-radius: 10px;
                     font-size: 13px;
-                    border: 1px solid rgba(16,185,129,0.06);
+                    border: 1px solid rgba(16,185,129,0.2);
                     text-align: center;
-                    font-weight: 700;
+                    font-weight: 600;
                     word-wrap: break-word;
+                    backdrop-filter: blur(5px);
                 }
 
                 .menu-item, .room-item, .product-item {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    padding: 12px;
-                    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.12));
-                    border-radius: 8px;
-                    border: 1px solid rgba(255,255,255,0.02);
+                    padding: 14px 16px;
+                    background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(0,0,0,0.1));
+                    border-radius: 12px;
+                    border: 1px solid var(--border-dark);
+                    transition: all 0.3s ease;
+                }
+
+                .menu-item:hover, .room-item:hover, .product-item:hover {
+                    transform: translateX(4px);
+                    border-color: var(--border-light);
                 }
 
                 .dish-name, .room-type, .product-name {
-                    color: #e6fff5;
+                    color: var(--text-primary);
                     font-weight: 600;
                     flex: 1;
                     word-wrap: break-word;
                 }
 
                 .dish-price, .room-capacity, .product-price {
-                    color: var(--emerald-400);
-                    font-weight: 800;
-                    font-size: 13px;
-                    background: rgba(16,185,129,0.06);
-                    padding: 6px 10px;
-                    border-radius: 6px;
+                    color: var(--gold-primary);
+                    font-weight: 700;
+                    font-size: 14px;
+                    background: linear-gradient(135deg, rgba(212,175,55,0.1), rgba(212,175,55,0.05));
+                    padding: 8px 12px;
+                    border-radius: 8px;
                     white-space: nowrap;
-                    margin-left: 10px;
-                    border: 1px solid rgba(16,185,129,0.06);
+                    margin-left: 12px;
+                    border: 1px solid rgba(212,175,55,0.2);
                 }
 
                 .menu-more {
                     text-align: center;
-                    padding: 12px;
-                    color: var(--muted);
+                    padding: 14px;
+                    color: var(--text-muted);
                     font-style: italic;
-                    font-size: 12px;
-                    background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.08));
-                    border-radius: 8px;
+                    font-size: 13px;
+                    background: linear-gradient(135deg, rgba(255,255,255,0.01), rgba(0,0,0,0.08));
+                    border-radius: 10px;
+                    border: 1px dashed var(--border-dark);
                 }
 
                 .info-note {
                     display: flex;
                     align-items: center;
                     gap: 12px;
-                    padding: 12px;
-                    background: linear-gradient(90deg, rgba(201,168,77,0.06), rgba(0,0,0,0.06));
-                    border-radius: 8px;
-                    border: 1px solid rgba(201,168,77,0.06);
-                    color: #ffe8b3;
+                    padding: 16px;
+                    background: linear-gradient(135deg, rgba(212,175,55,0.1), rgba(212,175,55,0.05));
+                    border-radius: 12px;
+                    border: 1px solid rgba(212,175,55,0.2);
+                    color: var(--gold-accent);
                     font-size: 13px;
-                    margin-top: 12px;
+                    margin-top: 16px;
+                }
+
+                .info-note i {
+                    color: var(--gold-primary);
+                    font-size: 14px;
                 }
 
                 .entity-info-loading {
                     text-align: center;
-                    padding: 60px 20px;
+                    padding: 80px 40px;
                     background: transparent;
                 }
 
                 .loading-spinner {
-                    color: var(--emerald-400);
+                    color: var(--emerald-primary);
                 }
 
                 .loading-spinner i {
-                    font-size: 32px;
-                    margin-bottom: 15px;
+                    font-size: 36px;
+                    margin-bottom: 20px;
+                    animation: spin 1.5s linear infinite;
+                }
+
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
                 }
 
                 .loading-spinner p {
                     margin: 0;
                     font-size: 14px;
-                    color: var(--muted);
+                    color: var(--text-muted);
                 }
 
                 /* ESTILOS RESPONSIVOS */
                 @media (max-width: 768px) {
                     .cesium-control-panel {
-                        width: 280px !important;
+                        width: 300px !important;
                         top: 10px !important;
                         left: 10px !important;
                     }
@@ -698,28 +1030,28 @@ class Cesium3DMap {
 
                     .info-grid {
                         grid-template-columns: 1fr;
-                        gap: 12px;
+                        gap: 14px;
                     }
 
                     .info-header-detailed {
-                        padding: 16px;
+                        padding: 20px;
                         flex-direction: column;
                         text-align: center;
-                        gap: 10px;
+                        gap: 12px;
                     }
 
                     .info-header-detailed h3 {
-                        font-size: 18px;
+                        font-size: 20px;
                         text-align: center;
                     }
 
                     .info-details {
-                        padding: 16px;
+                        padding: 20px;
                     }
 
                     .info-section {
-                        margin-bottom: 14px;
-                        padding: 12px;
+                        margin-bottom: 20px;
+                        padding: 16px;
                     }
                 }
 
@@ -730,42 +1062,61 @@ class Cesium3DMap {
                     }
 
                     .info-header-detailed {
-                        padding: 12px;
+                        padding: 16px;
                     }
 
                     .info-details {
-                        padding: 12px;
+                        padding: 16px;
                     }
 
                     .info-value {
-                        padding: 8px 10px;
+                        padding: 10px 12px;
                         font-size: 13px;
                     }
                 }
 
-                /* SCROLL */
+                /* SCROLLBAR PREMIUM */
                 .info-content::-webkit-scrollbar {
                     width: 8px;
                 }
 
                 .info-content::-webkit-scrollbar-track {
-                    background: rgba(0,0,0,0.18);
-                    border-radius: 8px;
+                    background: rgba(0,0,0,0.2);
+                    border-radius: 10px;
+                    margin: 4px;
                 }
 
                 .info-content::-webkit-scrollbar-thumb {
-                    background: linear-gradient(180deg, var(--emerald-600), var(--emerald-500));
-                    border-radius: 8px;
+                    background: var(--gradient-emerald);
+                    border-radius: 10px;
                     border: 2px solid rgba(0,0,0,0.2);
                 }
 
-                /* GARANTIZAR VISIBILIDAD */
+                .info-content::-webkit-scrollbar-thumb:hover {
+                    background: var(--gradient-gold);
+                }
+
+                .layers-list::-webkit-scrollbar {
+                    width: 6px;
+                }
+
+                .layers-list::-webkit-scrollbar-track {
+                    background: rgba(0,0,0,0.1);
+                    border-radius: 10px;
+                }
+
+                .layers-list::-webkit-scrollbar-thumb {
+                    background: var(--gradient-emerald);
+                    border-radius: 10px;
+                }
+
+                /* GARANTIZAR VISIBILIDAD DEL TEXTO */
                 .info-value {
                     overflow: visible !important;
                     white-space: normal !important;
                     text-overflow: unset !important;
                     min-height: auto !important;
-                    line-height: 1.4 !important;
+                    line-height: 1.5 !important;
                 }
 
                 .info-label {
@@ -821,7 +1172,7 @@ class Cesium3DMap {
     }
 
     async loadAllLayers() {
-        console.log('🗺️ Cargando capas 3D desde Render...');
+        console.log('🗺️ Cargando capas 3D Premium desde Render...');
         
         const apiAvailable = await this.checkAPIStatus();
         if (!apiAvailable) {
@@ -854,7 +1205,7 @@ class Cesium3DMap {
 
         this.hideLoading();
         this.updateSystemStats();
-        console.log(`🎉 Carga 3D completada: ${loadedCount}/${totalLayers} capas`);
+        console.log(`🎉 Carga 3D Premium completada: ${loadedCount}/${totalLayers} capas`);
     }
 
     async loadLayer(layerName) {
@@ -935,20 +1286,20 @@ class Cesium3DMap {
 
     getMarkerConfig(layerName) {
         const configs = {
-            'puntos_turisticos': { emoji: '📍', color: '#1fb57a' },
-            'miradores': { emoji: '🔭', color: '#1fb57a' },
-            'playas': { emoji: '🏖️', color: '#1fb57a' },
-            'tiendas_artesania': { emoji: '🎨', color: '#16a34a' },
-            'restaurantes': { emoji: '🍽️', color: '#16a34a' },
-            'hoteles': { emoji: '🏨', color: '#16a34a' },
-            'rutas': { emoji: '🛣️', color: '#16a34a' },
-            'comunidades': { emoji: '🏘️', color: '#16a34a' },
-            'viviendas': { emoji: '🏠', color: '#10b981' },
-            'areas_verdes': { emoji: '🌳', color: '#10b981' },
-            'sembradios': { emoji: '🌾', color: '#10b981' },
+            'puntos_turisticos': { emoji: '📍', color: '#10b981' },
+            'miradores': { emoji: '🔭', color: '#10b981' },
+            'playas': { emoji: '🏖️', color: '#10b981' },
+            'tiendas_artesania': { emoji: '🎨', color: '#d4af37' },
+            'restaurantes': { emoji: '🍽️', color: '#d4af37' },
+            'hoteles': { emoji: '🏨', color: '#d4af37' },
+            'rutas': { emoji: '🛣️', color: '#34d399' },
+            'comunidades': { emoji: '🏘️', color: '#34d399' },
+            'viviendas': { emoji: '🏠', color: '#059669' },
+            'areas_verdes': { emoji: '🌳', color: '#059669' },
+            'sembradios': { emoji: '🌾', color: '#059669' },
             'basura': { emoji: '🗑️', color: '#94a3b8' },
             'puntos_basura': { emoji: '🚯', color: '#94a3b8' },
-            'aguas_contaminadas': { emoji: '⚠️', color: '#f43f5e' }
+            'aguas_contaminadas': { emoji: '⚠️', color: '#ef4444' }
         };
         
         return configs[layerName] || { emoji: '📍', color: '#10b981' };
@@ -1018,15 +1369,28 @@ class Cesium3DMap {
         canvas.height = size;
         const ctx = canvas.getContext('2d');
         
-        ctx.beginPath();
-        ctx.arc(24, 24, 18, 0, Math.PI * 2);
-        ctx.fillStyle = config.color;
-        ctx.fill();
+        // Fondo con gradiente premium
+        const gradient = ctx.createRadialGradient(24, 24, 0, 24, 24, 18);
+        gradient.addColorStop(0, config.color);
+        gradient.addColorStop(1, this.darkenColor(config.color, 0.3));
         
         ctx.beginPath();
         ctx.arc(24, 24, 18, 0, Math.PI * 2);
-        ctx.strokeStyle = '#0b0b0b';
-        ctx.lineWidth = 3;
+        ctx.fillStyle = gradient;
+        ctx.fill();
+        
+        // Borde dorado
+        ctx.beginPath();
+        ctx.arc(24, 24, 18, 0, Math.PI * 2);
+        ctx.strokeStyle = '#d4af37';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // Sombra interior
+        ctx.beginPath();
+        ctx.arc(24, 24, 16, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+        ctx.lineWidth = 1;
         ctx.stroke();
         
         ctx.font = '20px "Segoe UI Emoji"';
@@ -1036,6 +1400,18 @@ class Cesium3DMap {
         ctx.fillText(config.emoji, 24, 24);
         
         return canvas.toDataURL();
+    }
+
+    darkenColor(color, factor) {
+        const hex = color.replace('#', '');
+        const num = parseInt(hex, 16);
+        const amt = Math.round(2.55 * factor * 100);
+        const R = (num >> 16) - amt;
+        const G = (num >> 8 & 0x00FF) - amt;
+        const B = (num & 0x0000FF) - amt;
+        return "#" + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+            (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+            (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
     }
 
     async showEntityInfo(entity) {
@@ -1072,7 +1448,7 @@ class Cesium3DMap {
                 </div>
                 <div class="loading-details">
                     <div class="loading-spinner">
-                        <i class="fas fa-spinner fa-spin"></i>
+                        <i class="fas fa-spinner"></i>
                         <p>Cargando información detallada...</p>
                     </div>
                 </div>
@@ -1091,21 +1467,21 @@ class Cesium3DMap {
                 </div>
                 <div class="info-details">
                     <div class="info-section">
-                        <h4>Información Básica</h4>
+                        <h4><i class="fas fa-info-circle"></i>Información Básica</h4>
                         <div class="info-grid">
                             <div class="info-item">
-                                <span class="info-label">Tipo</span>
+                                <span class="info-label"><i class="fas fa-tag"></i>Tipo</span>
                                 <span class="info-value">${entity.basicInfo.tipo}</span>
                             </div>
                             ${entity.basicInfo.comunidad ? `
                             <div class="info-item">
-                                <span class="info-label">Comunidad</span>
+                                <span class="info-label"><i class="fas fa-users"></i>Comunidad</span>
                                 <span class="info-value">${entity.basicInfo.comunidad}</span>
                             </div>` : ''}
                         </div>
                         ${entity.basicInfo.descripcion ? `
                         <div class="info-item full-width">
-                            <span class="info-label">Descripción</span>
+                            <span class="info-label"><i class="fas fa-align-left"></i>Descripción</span>
                             <span class="info-value">${entity.basicInfo.descripcion}</span>
                         </div>` : ''}
                     </div>
@@ -1163,30 +1539,30 @@ class Cesium3DMap {
         return `
             <div class="info-details">
                 <div class="info-section">
-                    <h4>🍽️ Información del Restaurante</h4>
+                    <h4><i class="fas fa-utensils"></i>Información del Restaurante</h4>
                     <div class="info-grid">
                         <div class="info-item">
-                            <span class="info-label">Tipo</span>
+                            <span class="info-label"><i class="fas fa-tag"></i>Tipo</span>
                             <span class="info-value">${restaurante.tipo_restaurante || 'No especificado'}</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">Capacidad</span>
+                            <span class="info-label"><i class="fas fa-users"></i>Capacidad</span>
                             <span class="info-value">${restaurante.capacidad || 'N/A'} personas</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">Horario</span>
+                            <span class="info-label"><i class="fas fa-clock"></i>Horario</span>
                             <span class="info-value">${restaurante.horario || 'No especificado'}</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">Estilo</span>
+                            <span class="info-label"><i class="fas fa-star"></i>Estilo</span>
                             <span class="info-value">${restaurante.estilo_culinario || 'No especificado'}</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">Estado</span>
+                            <span class="info-label"><i class="fas fa-circle"></i>Estado</span>
                             <span class="info-value">${restaurante.estado || 'No especificado'}</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">Comunidad</span>
+                            <span class="info-label"><i class="fas fa-map-marker-alt"></i>Comunidad</span>
                             <span class="info-value">${restaurante.comunidad || 'No especificada'}</span>
                         </div>
                     </div>
@@ -1194,7 +1570,7 @@ class Cesium3DMap {
 
                 ${servicios.length > 0 ? `
                 <div class="info-section">
-                    <h4>⚡ Servicios</h4>
+                    <h4><i class="fas fa-concierge-bell"></i>Servicios</h4>
                     <div class="services-list">
                         ${servicios.map(servicio => `<span class="service-tag">${servicio.tipo}</span>`).join('')}
                     </div>
@@ -1202,7 +1578,7 @@ class Cesium3DMap {
 
                 ${menu.length > 0 ? `
                 <div class="info-section">
-                    <h4>📋 Menú (${data.total_platos || 0} platos)</h4>
+                    <h4><i class="fas fa-utensil-spoon"></i>Menú (${data.total_platos || 0} platos)</h4>
                     <div class="menu-list">
                         ${menu.slice(0, 5).map(plato => `
                             <div class="menu-item">
@@ -1225,26 +1601,26 @@ class Cesium3DMap {
         return `
             <div class="info-details">
                 <div class="info-section">
-                    <h4>🏨 Información del Hotel</h4>
+                    <h4><i class="fas fa-hotel"></i>Información del Hotel</h4>
                     <div class="info-grid">
                         <div class="info-item">
-                            <span class="info-label">Capacidad</span>
+                            <span class="info-label"><i class="fas fa-users"></i>Capacidad</span>
                             <span class="info-value">${hotel.capacidad_personas || 'N/A'} personas</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">Habitaciones</span>
+                            <span class="info-label"><i class="fas fa-door-closed"></i>Habitaciones</span>
                             <span class="info-value">${hotel.numero_habitaciones || 'N/A'}</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">Estado</span>
+                            <span class="info-label"><i class="fas fa-circle"></i>Estado</span>
                             <span class="info-value">${hotel.estado || 'No especificado'}</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">Tipo</span>
+                            <span class="info-label"><i class="fas fa-tag"></i>Tipo</span>
                             <span class="info-value">${hotel.tipo_hotel || 'No especificado'}</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">Comunidad</span>
+                            <span class="info-label"><i class="fas fa-map-marker-alt"></i>Comunidad</span>
                             <span class="info-value">${hotel.comunidad || 'No especificada'}</span>
                         </div>
                     </div>
@@ -1252,7 +1628,7 @@ class Cesium3DMap {
 
                 ${servicios.length > 0 ? `
                 <div class="info-section">
-                    <h4>⚡ Servicios</h4>
+                    <h4><i class="fas fa-concierge-bell"></i>Servicios</h4>
                     <div class="services-list">
                         ${servicios.map(servicio => `<span class="service-tag">${servicio.tipo}</span>`).join('')}
                     </div>
@@ -1260,7 +1636,7 @@ class Cesium3DMap {
 
                 ${habitaciones.length > 0 ? `
                 <div class="info-section">
-                    <h4>🛏️ Tipos de Habitación</h4>
+                    <h4><i class="fas fa-bed"></i>Tipos de Habitación</h4>
                     <div class="rooms-list">
                         ${habitaciones.map(hab => `
                             <div class="room-item">
@@ -1281,18 +1657,18 @@ class Cesium3DMap {
         return `
             <div class="info-details">
                 <div class="info-section">
-                    <h4>🎨 Tienda de Artesanía</h4>
+                    <h4><i class="fas fa-palette"></i>Tienda de Artesanía</h4>
                     <div class="info-grid">
                         <div class="info-item">
-                            <span class="info-label">Estado</span>
+                            <span class="info-label"><i class="fas fa-circle"></i>Estado</span>
                             <span class="info-value">${tienda.estado || 'No especificado'}</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">Comunidad</span>
+                            <span class="info-label"><i class="fas fa-map-marker-alt"></i>Comunidad</span>
                             <span class="info-value">${tienda.comunidad || 'No especificada'}</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">Productos</span>
+                            <span class="info-label"><i class="fas fa-cube"></i>Productos</span>
                             <span class="info-value">${data.total_productos || 0} disponibles</span>
                         </div>
                     </div>
@@ -1300,7 +1676,7 @@ class Cesium3DMap {
 
                 ${Object.keys(productosPorCategoria).length > 0 ? `
                 <div class="info-section">
-                    <h4>🛍️ Productos por Categoría</h4>
+                    <h4><i class="fas fa-shopping-bag"></i>Productos por Categoría</h4>
                     ${Object.entries(productosPorCategoria).map(([categoria, productos]) => `
                         <div class="category-products">
                             <h5>${categoria}</h5>
@@ -1324,27 +1700,27 @@ class Cesium3DMap {
         return `
             <div class="info-details">
                 <div class="info-section">
-                    <h4>🔭 Información del Mirador</h4>
+                    <h4><i class="fas fa-binoculars"></i>Información del Mirador</h4>
                     <div class="info-grid">
                         <div class="info-item">
-                            <span class="info-label">Dificultad acceso</span>
+                            <span class="info-label"><i class="fas fa-hiking"></i>Dificultad acceso</span>
                             <span class="info-value">${mirador.dificultad_acceso || 'No especificada'}</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">Estado</span>
+                            <span class="info-label"><i class="fas fa-circle"></i>Estado</span>
                             <span class="info-value">${mirador.estado || 'No especificado'}</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">Afluencia</span>
+                            <span class="info-label"><i class="fas fa-users"></i>Afluencia</span>
                             <span class="info-value">${mirador.afluencia || 'No especificada'}</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">Comunidad</span>
+                            <span class="info-label"><i class="fas fa-map-marker-alt"></i>Comunidad</span>
                             <span class="info-value">${mirador.comunidad || 'No especificada'}</span>
                         </div>
                         ${mirador.puntos_cercanos ? `
                         <div class="info-item full-width">
-                            <span class="info-label">Puntos cercanos</span>
+                            <span class="info-label"><i class="fas fa-map-pin"></i>Puntos cercanos</span>
                             <span class="info-value">${mirador.puntos_cercanos}</span>
                         </div>` : ''}
                     </div>
@@ -1358,35 +1734,35 @@ class Cesium3DMap {
         return `
             <div class="info-details">
                 <div class="info-section">
-                    <h4>🏖️ Información de la Playa</h4>
+                    <h4><i class="fas fa-umbrella-beach"></i>Información de la Playa</h4>
                     <div class="info-grid">
                         <div class="info-item">
-                            <span class="info-label">Acceso</span>
+                            <span class="info-label"><i class="fas fa-road"></i>Acceso</span>
                             <span class="info-value">${playa.acceso || 'No especificado'}</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">Dificultad acceso</span>
+                            <span class="info-label"><i class="fas fa-hiking"></i>Dificultad acceso</span>
                             <span class="info-value">${playa.dificultad_acceso || 'No especificada'}</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">Tipo playa</span>
+                            <span class="info-label"><i class="fas fa-tag"></i>Tipo playa</span>
                             <span class="info-value">${playa.tipo_playa || 'No especificado'}</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">Estado</span>
+                            <span class="info-label"><i class="fas fa-circle"></i>Estado</span>
                             <span class="info-value">${playa.estado || 'No especificado'}</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">Afluencia</span>
+                            <span class="info-label"><i class="fas fa-users"></i>Afluencia</span>
                             <span class="info-value">${playa.afluencia || 'No especificada'}</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">Comunidad</span>
+                            <span class="info-label"><i class="fas fa-map-marker-alt"></i>Comunidad</span>
                             <span class="info-value">${playa.comunidad || 'No especificada'}</span>
                         </div>
                         ${playa.puntos_cercanos ? `
                         <div class="info-item full-width">
-                            <span class="info-label">Puntos cercanos</span>
+                            <span class="info-label"><i class="fas fa-map-pin"></i>Puntos cercanos</span>
                             <span class="info-value">${playa.puntos_cercanos}</span>
                         </div>` : ''}
                     </div>
@@ -1400,27 +1776,27 @@ class Cesium3DMap {
         return `
             <div class="info-details">
                 <div class="info-section">
-                    <h4>📍 Información Turística</h4>
+                    <h4><i class="fas fa-map-marker-alt"></i>Información Turística</h4>
                     <div class="info-grid">
                         <div class="info-item">
-                            <span class="info-label">Tipo</span>
+                            <span class="info-label"><i class="fas fa-tag"></i>Tipo</span>
                             <span class="info-value">${lugar.tipo || 'No especificado'}</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">Accesibilidad</span>
+                            <span class="info-label"><i class="fas fa-wheelchair"></i>Accesibilidad</span>
                             <span class="info-value">${lugar.accesibilidad || 'No especificada'}</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">Afluencia</span>
+                            <span class="info-label"><i class="fas fa-users"></i>Afluencia</span>
                             <span class="info-value">${lugar.afluencia || 'No especificada'}</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">Comunidad</span>
+                            <span class="info-label"><i class="fas fa-map-marker-alt"></i>Comunidad</span>
                             <span class="info-value">${lugar.comunidad || 'No especificada'}</span>
                         </div>
                         ${lugar.descripcion ? `
                         <div class="info-item full-width">
-                            <span class="info-label">Descripción</span>
+                            <span class="info-label"><i class="fas fa-align-left"></i>Descripción</span>
                             <span class="info-value">${lugar.descripcion}</span>
                         </div>` : ''}
                     </div>
@@ -1516,8 +1892,8 @@ class Cesium3DMap {
         const totalElementsEl = document.getElementById('totalElements');
         const activeLayersEl = document.getElementById('activeLayers');
         
-        if (totalElementsEl) totalElementsEl.textContent = `Total: ${totalElements} elementos`;
-        if (activeLayersEl) activeLayersEl.textContent = `Activas: ${activeLayers} capas`;
+        if (totalElementsEl) totalElementsEl.textContent = `${totalElements} elementos`;
+        if (activeLayersEl) activeLayersEl.textContent = `${activeLayers} capas`;
     }
 
     updateLayerCount(layerName, count) {
@@ -1576,11 +1952,12 @@ class Cesium3DMap {
         const errorDiv = document.createElement('div');
         errorDiv.style.cssText = `
             position: absolute; top: 20px; left: 20px;
-            background: rgba(239,68,68,0.95); color: white;
-            padding: 15px; border-radius: 8px; z-index: 10000;
-            max-width: 400px;
+            background: linear-gradient(135deg, rgba(239,68,68,0.95), rgba(220,38,38,0.9));
+            color: white; padding: 16px 20px; border-radius: 14px; 
+            z-index: 10000; max-width: 400px; border: 1px solid rgba(239,68,68,0.3);
+            backdrop-filter: blur(20px); font-weight: 600; box-shadow: var(--shadow-premium);
         `;
-        errorDiv.innerHTML = `<strong>❌ Error:</strong> ${message}`;
+        errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> <strong>Error:</strong> ${message}`;
         this.viewer.container.appendChild(errorDiv);
         setTimeout(() => errorDiv.remove(), 5000);
     }
@@ -1606,4 +1983,5 @@ if (document.readyState === 'loading') {
 } else {
     setTimeout(initCesium3D, 1000);
 }
+
 
