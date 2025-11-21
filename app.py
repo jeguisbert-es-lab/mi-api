@@ -6,9 +6,7 @@ import os
 from datetime import datetime
 from urllib.parse import urlparse
 import ssl
-import time
 import logging
-import traceback
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO)
@@ -17,166 +15,72 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 CORS(app)
 
-# ✅ CONFIGURACIÓN DE BASE DE DATOS
-class DatabaseManager:
-    def __init__(self):
-        self.connection_attempts = 0
-        
-    def get_connection(self):
-        self.connection_attempts += 1
-        
-        # ESTRATEGIA 1: DATABASE_URL de Render
+# ✅ CONFIGURACIÓN DE BASE DE DATOS - VERSIÓN SIMPLIFICADA
+def get_db_connection():
+    try:
         database_url = os.environ.get('DATABASE_URL')
         if database_url:
-            try:
-                result = urlparse(database_url)
-                port = result.port or 5432
-                database = result.path[1:] if result.path else 'db_isla_del_sol'
-                
-                ssl_context = ssl.create_default_context()
-                ssl_context.check_hostname = False
-                ssl_context.verify_mode = ssl.CERT_NONE
-                
-                conn = pg8000.connect(
-                    host=result.hostname,
-                    database=database,
-                    user=result.username,
-                    password=result.password,
-                    port=port,
-                    ssl_context=ssl_context,
-                    timeout=20
-                )
-                logger.info("✅ Conexión exitosa")
-                return conn
-            except Exception as e:
-                logger.error(f"❌ Error conexión: {str(e)}")
-        
+            result = urlparse(database_url)
+            port = result.port or 5432
+            database = result.path[1:] if result.path else 'db_isla_del_sol'
+            
+            ssl_context = ssl.create_default_context()
+            ssl_context.check_hostname = False
+            ssl_context.verify_mode = ssl.CERT_NONE
+            
+            conn = pg8000.connect(
+                host=result.hostname,
+                database=database,
+                user=result.username,
+                password=result.password,
+                port=port,
+                ssl_context=ssl_context,
+                timeout=20
+            )
+            logger.info("✅ Conexión exitosa")
+            return conn
+    except Exception as e:
+        logger.error(f"❌ Error conexión: {str(e)}")
         return None
 
-db_manager = DatabaseManager()
-
-def get_db_connection():
-    return db_manager.get_connection()
-
-# ✅ ENDPOINTS PRINCIPALES
+# ✅ ENDPOINTS PRINCIPALES - IDÉNTICOS A TU API LOCAL
 @app.route('/')
 def home():
     return jsonify({
-        "message": "🚀 API Isla del Sol - SISTEMA COMPLETO",
+        "message": "🚀 API Isla del Sol - RENDER",
         "status": "active", 
-        "version": "FINAL - TODAS LAS FUNCIONES",
-        "timestamp": datetime.now().isoformat(),
-        "endpoints": {
-            "status": "/api/status",
-            "debug": "/api/debug",
-            "capas": "/api/capas/{categoria}",
-            "detalles": "/api/detalle/{tipo}/{id}",
-            "diagnostico": "/api/diagnostico"
-        }
+        "version": "RENDER - IDÉNTICO A LOCAL",
+        "timestamp": datetime.now().isoformat()
     })
 
 @app.route('/api/status')
 def status():
     return jsonify({
         "status": "online", 
-        "message": "API Isla del Sol - SISTEMA 100% OPERATIVO",
-        "version": "FINAL",
+        "message": "API Isla del Sol - RENDER",
+        "version": "1.0",
         "timestamp": datetime.now().isoformat(),
-        "database": "Render PostgreSQL"
+        "capas_disponibles": [
+            "puntos_turisticos", "miradores", "playas", "tiendas_artesania",
+            "restaurantes", "hoteles", "rutas", "comunidades", "areas_verdes", 
+            "viviendas", "sembradios", "basura", "puntos_basura", "aguas_contaminadas"
+        ]
     })
 
-@app.route('/api/debug')
-def debug_info():
-    conn = get_db_connection()
-    debug_data = {
-        "timestamp": datetime.now().isoformat(),
-        "database_connection": conn is not None,
-        "connection_attempts": db_manager.connection_attempts
-    }
-    
-    if conn:
-        try:
-            cur = conn.cursor()
-            cur.execute("SELECT version();")
-            db_version = cur.fetchone()
-            cur.close()
-            conn.close()
-            debug_data["database_version"] = db_version[0] if db_version else None
-        except Exception as e:
-            debug_data["database_error"] = str(e)
-    
-    return jsonify(debug_data)
-
-# ✅ DIAGNÓSTICO COMPLETO
-@app.route('/api/diagnostico')
-def diagnostico_completo():
-    conn = get_db_connection()
-    if not conn:
-        return jsonify({"error": "Sin conexión a BD"}), 200
-        
-    cur = conn.cursor()
-    
-    try:
-        # 1. TABLAS EXISTENTES
-        cur.execute("SELECT table_name FROM information_schema.tables WHERE table_schema='public'")
-        tablas = [t[0] for t in cur.fetchall()]
-        
-        # 2. CONTEOS
-        conteos = {}
-        for tabla in ['lugares', 'restaurantes', 'hoteles', 'tiendas_artesania', 'miradores', 'playas']:
-            if tabla in tablas:
-                cur.execute(f"SELECT COUNT(*) FROM {tabla}")
-                conteos[tabla] = cur.fetchone()[0]
-        
-        # 3. EJEMPLOS DE DATOS
-        ejemplos = {}
-        
-        # Restaurantes
-        cur.execute("SELECT r.id_rest, r.id_lugar, l.nombre FROM restaurantes r JOIN lugares l ON r.id_lugar = l.id_lugar LIMIT 5")
-        ejemplos['restaurantes'] = [{"id_rest": r[0], "id_lugar": r[1], "nombre": r[2]} for r in cur.fetchall()]
-        
-        # Hoteles
-        cur.execute("SELECT h.id_hotel, h.id_lugar, l.nombre FROM hoteles h JOIN lugares l ON h.id_lugar = l.id_lugar LIMIT 5")
-        ejemplos['hoteles'] = [{"id_hotel": h[0], "id_lugar": h[1], "nombre": h[2]} for h in cur.fetchall()]
-        
-        # Tiendas
-        cur.execute("SELECT t.id_art, t.id_lugar, l.nombre FROM tiendas_artesania t JOIN lugares l ON t.id_lugar = l.id_lugar LIMIT 5")
-        ejemplos['tiendas'] = [{"id_art": t[0], "id_lugar": t[1], "nombre": t[2]} for t in cur.fetchall()]
-        
-        # Miradores
-        cur.execute("SELECT m.id_mirador, m.id_lugar, l.nombre FROM miradores m JOIN lugares l ON m.id_lugar = l.id_lugar LIMIT 5")
-        ejemplos['miradores'] = [{"id_mirador": m[0], "id_lugar": m[1], "nombre": m[2]} for m in cur.fetchall()]
-        
-        # Playas
-        cur.execute("SELECT p.id_playa, p.id_lugar, l.nombre FROM playas p JOIN lugares l ON p.id_lugar = l.id_lugar LIMIT 5")
-        ejemplos['playas'] = [{"id_playa": p[0], "id_lugar": p[1], "nombre": p[2]} for p in cur.fetchall()]
-        
-        cur.close()
-        conn.close()
-        
-        return jsonify({
-            "tablas_existentes": tablas,
-            "conteos": conteos,
-            "ejemplos": ejemplos,
-            "timestamp": datetime.now().isoformat()
-        })
-        
-    except Exception as e:
-        if conn:
-            cur.close()
-            conn.close()
-        return jsonify({"error": str(e)}), 200
-
-# ✅ CAPAS DEL MAPA - COMPLETAS
+# ✅ ENDPOINT PARA CAPAS - EXACTAMENTE IGUAL A TU API LOCAL
 @app.route('/api/capas/<categoria>')
 def get_capa(categoria):
+    """Endpoint principal para cargar capas del mapa - IDÉNTICO A LOCAL"""
     conn = get_db_connection()
     if not conn:
-        return jsonify({"type": "FeatureCollection", "features": []}), 200
-    
+        return jsonify({"error": "No se pudo conectar a la base de datos"}), 500
+        
     cur = conn.cursor()
     
     try:
+        logger.info(f"🎯 Cargando capa: {categoria}")
+        
+        # CONFIGURACIÓN EXACTA DE TU API LOCAL
         mapeo_tablas = {
             'puntos_turisticos': """
                 SELECT id_lugar::text, nombre, tipo, comunidad, 
@@ -236,11 +140,6 @@ def get_capa(categoria):
                        ST_AsGeoJSON(geom) as geometry, 'ruta' as tipo_cesium
                 FROM "RUTA TURISTICA" WHERE geom IS NOT NULL
             """,
-            'ruta_sagrada': """
-                SELECT 'ruta_sagrada' as id, 'RUTA SAGRADA' as nombre, 'ruta_sagrada' as tipo, '' as comunidad,
-                       ST_AsGeoJSON(geom) as geometry, 'ruta_sagrada' as tipo_cesium
-                FROM "RUTA SAGRADA (TURISTICA)" WHERE geom IS NOT NULL
-            """,
             'areas_verdes': """
                 SELECT 'area_verde_' || row_number() over () as id, 'ÁREA VERDE' as nombre, 'area_verde' as tipo, '' as comunidad,
                        ST_AsGeoJSON(geom) as geometry, 'area_verde' as tipo_cesium
@@ -270,28 +169,25 @@ def get_capa(categoria):
                 SELECT 'agua_contaminada_' || row_number() over () as id, 'AGUA CONTAMINADA' as nombre, 'agua_contaminada' as tipo, '' as comunidad,
                        ST_AsGeoJSON(geom) as geometry, 'agua_contaminada' as tipo_cesium
                 FROM "AGUAS CONTAMINDAS" WHERE geom IS NOT NULL
-            """,
-            'sitios_turisticos': """
-                SELECT 'sitio_' || row_number() over () as id, 'SITIO TURÍSTICO' as nombre, 'sitio_turistico' as tipo, '' as comunidad,
-                       ST_AsGeoJSON(geom) as geometry, 'sitio_turistico' as tipo_cesium
-                FROM "SITIOS TURISTICOS" WHERE geom IS NOT NULL
-            """,
-            'muelles': """
-                SELECT 'muelle_' || row_number() over () as id, 'MUELLE' as nombre, 'muelle' as tipo, '' as comunidad,
-                       ST_AsGeoJSON(geom) as geometry, 'muelle' as tipo_cesium
-                FROM "MUELLES" WHERE geom IS NOT NULL
             """
         }
         
         if categoria not in mapeo_tablas:
-            return jsonify({"type": "FeatureCollection", "features": []}), 200
+            return jsonify({
+                "type": "FeatureCollection", 
+                "features": [],
+                "metadata": {"capa": categoria, "total": 0, "message": "Capa no configurada"}
+            })
         
-        cur.execute(mapeo_tablas[categoria])
+        consulta = mapeo_tablas[categoria]
+        
+        # Ejecutar consulta
+        cur.execute(consulta)
         resultados = cur.fetchall()
         
         features = []
         for res in resultados:
-            if len(res) > 4 and res[4]:
+            if res[4]:  # Si tiene geometría
                 try:
                     geometry_data = json.loads(res[4])
                     feature = {
@@ -302,18 +198,20 @@ def get_capa(categoria):
                             "nombre": res[1],
                             "tipo": res[2],
                             "comunidad": res[3],
-                            "tipo_cesium": res[5] if len(res) > 5 else res[2],
+                            "tipo_cesium": res[5],
                             "layer_name": categoria,
-                            "id_lugar": res[0]
+                            "id_lugar": res[0]  # Para los detalles
                         }
                     }
                     features.append(feature)
-                except:
+                except json.JSONDecodeError as e:
+                    logger.warning(f"Error geometría: {e}")
                     continue
         
         cur.close()
         conn.close()
         
+        logger.info(f"✅ {categoria}: {len(features)} elementos")
         return jsonify({
             "type": "FeatureCollection", 
             "features": features,
@@ -325,26 +223,35 @@ def get_capa(categoria):
         })
         
     except Exception as e:
+        logger.error(f"❌ Error en {categoria}: {str(e)}")
         if conn:
             cur.close()
             conn.close()
-        return jsonify({"type": "FeatureCollection", "features": []}), 200
+        return jsonify({
+            "type": "FeatureCollection", 
+            "features": [],
+            "metadata": {
+                "capa": categoria,
+                "total": 0,
+                "error": str(e)
+            }
+        })
 
-# ✅ DETALLES DE RESTAURANTES - COMPLETO
+# ✅ ENDPOINT PARA DETALLES DE RESTAURANTES - EXACTO A TU API LOCAL
 @app.route('/api/detalle/restaurante/<id_lugar>')
 def get_detalle_restaurante(id_lugar):
+    """Obtiene información detallada de un restaurante con relaciones - IDÉNTICO A LOCAL"""
     conn = get_db_connection()
     if not conn:
-        return jsonify({"error": "Sin conexión BD"}), 200
+        return jsonify({"error": "No se pudo conectar a la base de datos"}), 500
         
     cur = conn.cursor()
     
     try:
-        # INFORMACIÓN BASE
+        # Información básica del restaurante - EXACTA A TU LOCAL
         cur.execute("""
             SELECT r.id_rest, r.tipo_restaurante, r.capacidad, r.horario, 
-                   r.estilo_r, r.estado, l.nombre, l.comunidad, l.id_lugar,
-                   l.descripcion, l.telefono, l.email, l.sitio_web
+                   r.estilo_r, r.estado, l.nombre, l.comunidad
             FROM restaurantes r
             JOIN lugares l ON r.id_lugar = l.id_lugar
             WHERE r.id_lugar = %s
@@ -354,81 +261,66 @@ def get_detalle_restaurante(id_lugar):
         if not restaurante:
             return jsonify({"error": "Restaurante no encontrado"}), 404
         
-        # SERVICIOS
+        # Servicios del restaurante - EXACTO
         cur.execute("""
-            SELECT s.id_serv, s.tipo_serv, s.descripcion
+            SELECT s.tipo_serv
             FROM relacio_s_r rsr
             JOIN servicios s ON rsr.id_serv = s.id_serv
             WHERE rsr.id_rest = %s
         """, (restaurante[0],))
-        servicios = [{"id": s[0], "tipo": s[1], "descripcion": s[2]} for s in cur.fetchall()]
+        servicios = [servicio[0] for servicio in cur.fetchall()]
         
-        # MENÚ
+        # Menú del restaurante - EXACTO  
         cur.execute("""
-            SELECT m.id_menu, m.t_plato, m.descripcion, m.categoria, rm.precio
+            SELECT m.t_plato, rm.precio
             FROM relacion_r_m rm
             JOIN menu m ON rm.id_menu = m.id_menu
             WHERE rm.id_rest = %s
             ORDER BY rm.precio ASC
         """, (restaurante[0],))
-        menu_items = [{
-            "id": item[0], 
-            "plato": item[1], 
-            "descripcion": item[2],
-            "categoria": item[3],
-            "precio": float(item[4]) if item[4] else 0
-        } for item in cur.fetchall()]
+        menu_items = [{"plato": item[0], "precio": float(item[1])} for item in cur.fetchall()]
         
         cur.close()
         conn.close()
         
         return jsonify({
             "restaurante": {
-                "id_restaurante": restaurante[0],
-                "id_lugar": restaurante[8],
-                "nombre": restaurante[6],
-                "tipo_restaurante": restaurante[1],
+                "id": restaurante[0],
+                "tipo": restaurante[1],
                 "capacidad": restaurante[2],
                 "horario": restaurante[3],
-                "estilo_culinario": restaurante[4],
+                "estilo": restaurante[4],
                 "estado": restaurante[5],
-                "comunidad": restaurante[7],
-                "descripcion": restaurante[9],
-                "telefono": restaurante[10],
-                "email": restaurante[11],
-                "sitio_web": restaurante[12]
+                "nombre": restaurante[6],
+                "comunidad": restaurante[7]
             },
             "servicios": servicios,
             "menu": menu_items,
-            "estadisticas": {
-                "total_servicios": len(servicios),
-                "total_platos": len(menu_items),
-                "precio_minimo": min([item["precio"] for item in menu_items]) if menu_items else 0,
-                "precio_maximo": max([item["precio"] for item in menu_items]) if menu_items else 0
-            }
+            "total_platos": len(menu_items)
         })
         
     except Exception as e:
+        logger.error(f"❌ Error obteniendo detalle restaurante: {e}")
         if conn:
             cur.close()
             conn.close()
-        return jsonify({"error": str(e)}), 200
+        return jsonify({"error": str(e)}), 500
 
-# ✅ DETALLES DE HOTELES - COMPLETO
+# ✅ ENDPOINT PARA DETALLES DE HOTELES - EXACTO A TU API LOCAL
 @app.route('/api/detalle/hotel/<id_lugar>')
 def get_detalle_hotel(id_lugar):
+    """Obtiene información detallada de un hotel con relaciones - IDÉNTICO A LOCAL"""
     conn = get_db_connection()
     if not conn:
-        return jsonify({"error": "Sin conexión BD"}), 200
+        return jsonify({"error": "No se pudo conectar a la base de datos"}), 500
         
     cur = conn.cursor()
     
     try:
-        # INFORMACIÓN BASE
+        # Información básica del hotel - EXACTA
         cur.execute("""
             SELECT h.id_hotel, h.capaci_p, h.num_hab, h.estado, h.tipo,
-                   l.nombre, l.comunidad, l.id_lugar,
-                   l.descripcion, l.telefono, l.email, l.sitio_web
+                   l.nombre, l.comunidad
             FROM hoteles h
             JOIN lugares l ON h.id_lugar = l.id_lugar
             WHERE h.id_lugar = %s
@@ -438,77 +330,63 @@ def get_detalle_hotel(id_lugar):
         if not hotel:
             return jsonify({"error": "Hotel no encontrado"}), 404
         
-        # SERVICIOS
+        # Servicios del hotel - EXACTO
         cur.execute("""
-            SELECT ts.id_servicio, ts.t_servicio, ts.descripcion
+            SELECT ts.t_servicio
             FROM relacion_serv_h rsh
             JOIN t_servicios ts ON rsh.id_servicio = ts.id_servicio
             WHERE rsh.id_hotel = %s
         """, (hotel[0],))
-        servicios = [{"id": s[0], "tipo": s[1], "descripcion": s[2]} for s in cur.fetchall()]
+        servicios = [servicio[0] for servicio in cur.fetchall()]
         
-        # HABITACIONES
+        # Tipos de habitaciones - EXACTO
         cur.execute("""
-            SELECT th.id_habita, th.t_habita, th.capacidad, th.descripcion, th.precio_noche
+            SELECT th.t_habita, th.capacidad
             FROM relacion_h_hab rhh
             JOIN tipo_habitaciones th ON rhh.id_habita = th.id_habita
             WHERE rhh.id_hotel = %s
         """, (hotel[0],))
-        habitaciones = [{
-            "id": h[0],
-            "tipo": h[1],
-            "capacidad": h[2],
-            "descripcion": h[3],
-            "precio_noche": float(h[4]) if h[4] else 0
-        } for h in cur.fetchall()]
+        habitaciones = [{"tipo": hab[0], "capacidad": hab[1]} for hab in cur.fetchall()]
         
         cur.close()
         conn.close()
         
         return jsonify({
             "hotel": {
-                "id_hotel": hotel[0],
-                "id_lugar": hotel[7],
-                "nombre": hotel[5],
+                "id": hotel[0],
                 "capacidad_personas": hotel[1],
                 "numero_habitaciones": hotel[2],
                 "estado": hotel[3],
                 "tipo_hotel": hotel[4],
-                "comunidad": hotel[6],
-                "descripcion": hotel[8],
-                "telefono": hotel[9],
-                "email": hotel[10],
-                "sitio_web": hotel[11]
+                "nombre": hotel[5],
+                "comunidad": hotel[6]
             },
             "servicios": servicios,
             "habitaciones": habitaciones,
-            "estadisticas": {
-                "total_servicios": len(servicios),
-                "total_tipos_habitacion": len(habitaciones),
-                "capacidad_total": sum([h["capacidad"] for h in habitaciones if h["capacidad"]])
-            }
+            "total_habitaciones": len(habitaciones)
         })
         
     except Exception as e:
+        logger.error(f"❌ Error obteniendo detalle hotel: {e}")
         if conn:
             cur.close()
             conn.close()
-        return jsonify({"error": str(e)}), 200
+        return jsonify({"error": str(e)}), 500
 
-# ✅ DETALLES DE TIENDAS ARTESANÍA - COMPLETO
+# ✅ ENDPOINT PARA DETALLES DE TIENDAS - EXACTO A TU API LOCAL
 @app.route('/api/detalle/tienda_artesania/<id_lugar>')
 def get_detalle_tienda_artesania(id_lugar):
+    """Obtiene información detallada de una tienda de artesanía con productos - IDÉNTICO A LOCAL"""
     conn = get_db_connection()
     if not conn:
-        return jsonify({"error": "Sin conexión BD"}), 200
+        return jsonify({"error": "No se pudo conectar a la base de datos"}), 500
         
     cur = conn.cursor()
     
     try:
-        # INFORMACIÓN BASE
+        # Información básica de la tienda - EXACTA
         cur.execute("""
-            SELECT ta.id_art, ta.estado, l.nombre, l.comunidad, l.id_lugar,
-                   l.descripcion, l.telefono, l.email, l.sitio_web
+            SELECT ta.id_art, ta.estado, l.nombre, l.comunidad
             FROM tiendas_artesania ta
             JOIN lugares l ON ta.id_lugar = l.id_lugar
             WHERE ta.id_lugar = %s
@@ -518,24 +396,17 @@ def get_detalle_tienda_artesania(id_lugar):
         if not tienda:
             return jsonify({"error": "Tienda no encontrada"}), 404
         
-        # PRODUCTOS
+        # Productos de la tienda - EXACTO
         cur.execute("""
-            SELECT pa.id_prod, pa.producto, pa.id_tip_p, pa.precio, pa.descripcion, pa.material
+            SELECT pa.producto, pa.id_tip_p, pa.precio
             FROM relacion_t_pro rtp
             JOIN productos_artesania pa ON rtp.id_prod = pa.id_prod
             WHERE rtp.id_art = %s
             ORDER BY pa.id_tip_p, pa.precio
         """, (tienda[0],))
-        productos = [{
-            "id": p[0],
-            "producto": p[1],
-            "categoria": p[2],
-            "precio": float(p[3]) if p[3] else 0,
-            "descripcion": p[4],
-            "material": p[5]
-        } for p in cur.fetchall()]
+        productos = [{"producto": prod[0], "categoria": prod[1], "precio": float(prod[2])} for prod in cur.fetchall()]
         
-        # AGRUPAR POR CATEGORÍA
+        # Agrupar productos por categoría - EXACTO
         productos_por_categoria = {}
         for producto in productos:
             categoria = producto["categoria"]
@@ -548,45 +419,38 @@ def get_detalle_tienda_artesania(id_lugar):
         
         return jsonify({
             "tienda": {
-                "id_tienda": tienda[0],
-                "id_lugar": tienda[4],
-                "nombre": tienda[2],
+                "id": tienda[0],
                 "estado": tienda[1],
-                "comunidad": tienda[3],
-                "descripcion": tienda[5],
-                "telefono": tienda[6],
-                "email": tienda[7],
-                "sitio_web": tienda[8]
+                "nombre": tienda[2],
+                "comunidad": tienda[3]
             },
-            "productos": {
-                "total_productos": len(productos),
-                "categorias": list(productos_por_categoria.keys()),
-                "productos_por_categoria": productos_por_categoria,
-                "precio_minimo": min([p["precio"] for p in productos]) if productos else 0,
-                "precio_maximo": max([p["precio"] for p in productos]) if productos else 0
-            }
+            "productos": productos,
+            "productos_por_categoria": productos_por_categoria,
+            "total_productos": len(productos),
+            "categorias": list(productos_por_categoria.keys())
         })
         
     except Exception as e:
+        logger.error(f"❌ Error obteniendo detalle tienda: {e}")
         if conn:
             cur.close()
             conn.close()
-        return jsonify({"error": str(e)}), 200
+        return jsonify({"error": str(e)}), 500
 
-# ✅ DETALLES DE MIRADORES - COMPLETO
+# ✅ ENDPOINT PARA DETALLES DE MIRADORES - EXACTO A TU API LOCAL
 @app.route('/api/detalle/mirador/<id_lugar>')
 def get_detalle_mirador(id_lugar):
+    """Obtiene información detallada de un mirador - IDÉNTICO A LOCAL"""
     conn = get_db_connection()
     if not conn:
-        return jsonify({"error": "Sin conexión BD"}), 200
+        return jsonify({"error": "No se pudo conectar a la base de datos"}), 500
         
     cur = conn.cursor()
     
     try:
         cur.execute("""
             SELECT m.d_acceso, m.estado, m.afluencia, m.p_cercano,
-                   l.nombre, l.comunidad, l.id_lugar,
-                   l.descripcion, l.telefono, l.email, l.sitio_web
+                   l.nombre, l.comunidad
             FROM miradores m
             JOIN lugares l ON m.id_lugar = l.id_lugar
             WHERE m.id_lugar = %s
@@ -601,40 +465,36 @@ def get_detalle_mirador(id_lugar):
         
         return jsonify({
             "mirador": {
-                "id_lugar": mirador[6],
                 "nombre": mirador[4],
                 "dificultad_acceso": mirador[0],
                 "estado": mirador[1],
                 "afluencia": mirador[2],
                 "puntos_cercanos": mirador[3],
-                "comunidad": mirador[5],
-                "descripcion": mirador[7],
-                "telefono": mirador[8],
-                "email": mirador[9],
-                "sitio_web": mirador[10]
+                "comunidad": mirador[5]
             }
         })
         
     except Exception as e:
+        logger.error(f"❌ Error obteniendo detalle mirador: {e}")
         if conn:
             cur.close()
             conn.close()
-        return jsonify({"error": str(e)}), 200
+        return jsonify({"error": str(e)}), 500
 
-# ✅ DETALLES DE PLAYAS - COMPLETO
+# ✅ ENDPOINT PARA DETALLES DE PLAYAS - EXACTO A TU API LOCAL
 @app.route('/api/detalle/playa/<id_lugar>')
 def get_detalle_playa(id_lugar):
+    """Obtiene información detallada de una playa - IDÉNTICO A LOCAL"""
     conn = get_db_connection()
     if not conn:
-        return jsonify({"error": "Sin conexión BD"}), 200
+        return jsonify({"error": "No se pudo conectar a la base de datos"}), 500
         
     cur = conn.cursor()
     
     try:
         cur.execute("""
             SELECT p.acceso, p.d_acceso, p.tipo, p.estado, p.afluencia, p.p_cercano,
-                   l.nombre, l.comunidad, l.id_lugar,
-                   l.descripcion, l.telefono, l.email, l.sitio_web
+                   l.nombre, l.comunidad
             FROM playas p
             JOIN lugares l ON p.id_lugar = l.id_lugar
             WHERE p.id_lugar = %s
@@ -649,7 +509,6 @@ def get_detalle_playa(id_lugar):
         
         return jsonify({
             "playa": {
-                "id_lugar": playa[8],
                 "nombre": playa[6],
                 "acceso": playa[0],
                 "dificultad_acceso": playa[1],
@@ -657,76 +516,25 @@ def get_detalle_playa(id_lugar):
                 "estado": playa[3],
                 "afluencia": playa[4],
                 "puntos_cercanos": playa[5],
-                "comunidad": playa[7],
-                "descripcion": playa[9],
-                "telefono": playa[10],
-                "email": playa[11],
-                "sitio_web": playa[12]
+                "comunidad": playa[7]
             }
         })
         
     except Exception as e:
+        logger.error(f"❌ Error obteniendo detalle playa: {e}")
         if conn:
             cur.close()
             conn.close()
-        return jsonify({"error": str(e)}), 200
+        return jsonify({"error": str(e)}), 500
 
-# ✅ DETALLES DE LUGARES TURÍSTICOS - COMPLETO
-@app.route('/api/detalle/lugar_turistico/<id_lugar>')
-def get_detalle_lugar_turistico(id_lugar):
-    conn = get_db_connection()
-    if not conn:
-        return jsonify({"error": "Sin conexión BD"}), 200
-        
-    cur = conn.cursor()
-    
-    try:
-        cur.execute("""
-            SELECT lt.nombre, lt.tipo, lt.accesibilidad, lt.afluencia, 
-                   lt.descripcion, l.comunidad, l.id_lugar,
-                   l.descripcion as descripcion_lugar, l.telefono, l.email, l.sitio_web
-            FROM lugares_turisticos lt
-            JOIN lugares l ON lt.id_lugar = l.id_lugar
-            WHERE lt.id_lugar = %s
-        """, (id_lugar,))
-        
-        lugar = cur.fetchone()
-        if not lugar:
-            return jsonify({"error": "Lugar turístico no encontrado"}), 404
-        
-        cur.close()
-        conn.close()
-        
-        return jsonify({
-            "lugar_turistico": {
-                "id_lugar": lugar[6],
-                "nombre": lugar[0],
-                "tipo": lugar[1],
-                "accesibilidad": lugar[2],
-                "afluencia": lugar[3],
-                "descripcion_especifica": lugar[4],
-                "comunidad": lugar[5],
-                "descripcion_general": lugar[7],
-                "telefono": lugar[8],
-                "email": lugar[9],
-                "sitio_web": lugar[10]
-            }
-        })
-        
-    except Exception as e:
-        if conn:
-            cur.close()
-            conn.close()
-        return jsonify({"error": str(e)}), 200
-
-# ✅ ENDPOINT GENÉRICO PARA DETALLES
+# ✅ ENDPOINT GENÉRICO PARA DETALLES - EXACTO A TU API LOCAL
 @app.route('/api/detalle/<tipo>/<id_lugar>')
 def get_detalle_generico(tipo, id_lugar):
+    """Endpoint genérico para obtener detalles de cualquier tipo - IDÉNTICO A LOCAL"""
     endpoints = {
         'restaurante': get_detalle_restaurante,
         'hotel': get_detalle_hotel,
         'tienda_artesania': get_detalle_tienda_artesania,
-        'lugar_turistico': get_detalle_lugar_turistico,
         'mirador': get_detalle_mirador,
         'playa': get_detalle_playa
     }
@@ -736,7 +544,7 @@ def get_detalle_generico(tipo, id_lugar):
     else:
         return jsonify({"error": f"Tipo {tipo} no soportado"}), 400
 
-# ✅ RUTAS DE COMPATIBILIDAD PARA EL MAPA
+# ✅ RUTAS DE COMPATIBILIDAD - EXACTAS A TU API LOCAL
 @app.route('/status')
 def status_sin_api():
     return status()
@@ -760,20 +568,15 @@ def serve_static(path):
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    print("🚀 INICIANDO API ISLA DEL SOL - VERSIÓN COMPLETA")
-    print("=" * 70)
-    print("📍 TODAS LAS FUNCIONES IMPLEMENTADAS:")
-    print("   ✅ 16 Capas de mapa diferentes")
-    print("   ✅ 6 Tipos de detalles completos") 
-    print("   ✅ Información completa con relaciones")
-    print("   ✅ Diagnóstico integrado")
-    print("   ✅ Compatibilidad total con frontend")
-    print("=" * 70)
-    print("🎯 Endpoints principales:")
-    print("   • /api/diagnostico - Para verificar datos")
-    print("   • /api/capas/{categoria} - Todas las capas")
-    print("   • /api/detalle/{tipo}/{id} - Todos los detalles")
-    print("=" * 70)
-    print("✅ SISTEMA 100% OPERATIVO - DESPLEGADO EN RENDER")
+    print("🚀 INICIANDO API ISLA DEL SOL - RENDER (IDÉNTICO A LOCAL)")
+    print("=" * 60)
+    print("📍 Web: https://tu-app.onrender.com")
+    print("📊 Status: /api/status")
+    print("🗺️ Capas: /api/capas/puntos_turisticos") 
+    print("🔍 Detalles: /api/detalle/restaurante/1")
+    print("=" * 60)
+    print("✅ ESTRUCTURA IDÉNTICA A TU API LOCAL")
+    print("✅ MISMAS CONSULTAS SQL")
+    print("✅ MISMA ESTRUCTURA DE RESPUESTAS")
     
     app.run(debug=False, port=port, host='0.0.0.0')
