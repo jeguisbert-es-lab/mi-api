@@ -5,6 +5,7 @@ import json
 import os
 from datetime import datetime
 from urllib.parse import urlparse
+import ssl
 
 app = Flask(__name__)
 CORS(app)
@@ -17,20 +18,28 @@ def get_db_connection():
         if database_url:
             # Parsear la URL de la base de datos de Render
             result = urlparse(database_url)
+            
+            # Configuración SSL para Render
+            ssl_context = ssl.create_default_context()
+            ssl_context.check_hostname = False
+            ssl_context.verify_mode = ssl.CERT_NONE
+            
             conn = pg8000.connect(
                 host=result.hostname,
                 database=result.path[1:],
                 user=result.username,
                 password=result.password,
-                port=result.port
+                port=result.port,
+                ssl_context=ssl_context,  # ✅ SSL para Render
+                timeout=30
             )
         else:
-            # Conexión local de respaldo
+            # Conexión local de respaldo (sin SSL)
             conn = pg8000.connect(
-                host=os.environ.get('DB_HOST', 'dpg-d4f2cue3jp1c73av19t0-a.oregon-postgres.render.com'),
+                host=os.environ.get('DB_HOST', 'localhost'),
                 database=os.environ.get('DB_NAME', 'isla_del_sol'),
-                user=os.environ.get('DB_USER', 'isla_user'),
-                password=os.environ.get('DB_PASSWORD', 'aDmsirPiD5afLzjcNvzPASEknt9e7Kf9'),
+                user=os.environ.get('DB_USER', 'postgres'),
+                password=os.environ.get('DB_PASSWORD', 'password'),
                 port=int(os.environ.get('DB_PORT', '5432'))
             )
         
@@ -65,9 +74,10 @@ def capas_sin_api(categoria):
 def status():
     return jsonify({
         "status": "online", 
-        "message": "API Isla del Sol - CON BASURA COMO PUNTOS",
-        "version": "8.0",
+        "message": "API Isla del Sol - CONEXIÓN SSL ACTIVA",
+        "version": "8.1",
         "timestamp": datetime.now().isoformat(),
+        "database": "Render PostgreSQL",
         "capas_disponibles": [
             "puntos_turisticos", "miradores", "playas", "tiendas_artesania",
             "restaurantes", "hoteles", "rutas", "comunidades", "areas_verdes", 
@@ -651,17 +661,17 @@ def get_detalle_generico(tipo, id_lugar):
         return jsonify({"error": f"Tipo {tipo} no soportado"}), 400
 
 if __name__ == '__main__':
-    print("🚀 INICIANDO API ISLA DEL SOL - VERSIÓN COMPLETA 8.0")
+    port = int(os.environ.get('PORT', 5000))
+    print("🚀 INICIANDO API ISLA DEL SOL - VERSIÓN RENDER 8.1")
     print("=" * 60)
-    print("📍 Web: http://localhost:5000")
-    print("📊 Status: http://localhost:5000/api/status")
-    print("🗑️ Capa BASURA: http://localhost:5000/api/capas/basura")
-    print("🗺️ Capas: http://localhost:5000/api/capas/puntos_turisticos")
-    print("🏘️ Comunidades: http://localhost:5000/api/capas/comunidades")
-    print("🔍 Detalles: http://localhost:5000/api/detalle/restaurante/1")
+    print("📍 Con SSL activado para Render PostgreSQL")
+    print("📊 Endpoints disponibles:")
+    print(f"   • Status: /api/status")
+    print(f"   • Capas: /api/capas/[nombre_capa]")
+    print(f"   • Detalles: /api/detalle/[tipo]/[id]")
     print("=" * 60)
 
-    app.run(debug=True, port=5000, host='0.0.0.0')
+    app.run(debug=False, port=port, host='0.0.0.0')
 
 
 
