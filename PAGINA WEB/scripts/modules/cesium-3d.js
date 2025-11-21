@@ -122,36 +122,36 @@ class Cesium3DMap {
                 <div class="layers-list" id="cesiumLayersList">
                     <div class="category-section">
                         <h4>🏞️ Puntos Turísticos</h4>
-                        ${this.createLayerItem('puntos_turisticos', '📍', 'Puntos Turísticos', '#e53e3e')}
-                        ${this.createLayerItem('miradores', '🔭', 'Miradores', '#3182ce')}
-                        ${this.createLayerItem('playas', '🏖️', 'Playas', '#38b2ac')}
+                        ${this.createLayerItem('puntos_turisticos', '📍', 'Puntos Turísticos', '#1fb57a')}
+                        ${this.createLayerItem('miradores', '🔭', 'Miradores', '#1fb57a')}
+                        ${this.createLayerItem('playas', '🏖️', 'Playas', '#1fb57a')}
                     </div>
 
                     <div class="category-section">
                         <h4>🏘️ Servicios</h4>
-                        ${this.createLayerItem('tiendas_artesania', '🎨', 'Artesanía', '#d69e2e')}
-                        ${this.createLayerItem('restaurantes', '🍽️', 'Restaurantes', '#dd6b20')}
-                        ${this.createLayerItem('hoteles', '🏨', 'Hoteles', '#805ad5')}
+                        ${this.createLayerItem('tiendas_artesania', '🎨', 'Artesanía', '#16a34a')}
+                        ${this.createLayerItem('restaurantes', '🍽️', 'Restaurantes', '#16a34a')}
+                        ${this.createLayerItem('hoteles', '🏨', 'Hoteles', '#16a34a')}
                     </div>
 
                     <div class="category-section">
                         <h4>🗺️ Rutas y Comunidades</h4>
-                        ${this.createLayerItem('rutas', '🛣️', 'Rutas Turísticas', '#dd6b20')}
-                        ${this.createLayerItem('comunidades', '🏘️', 'Comunidades', '#4a5568')}
+                        ${this.createLayerItem('rutas', '🛣️', 'Rutas Turísticas', '#16a34a')}
+                        ${this.createLayerItem('comunidades', '🏘️', 'Comunidades', '#16a34a')}
                     </div>
 
                     <div class="category-section">
                         <h4>🌳 Áreas y Viviendas</h4>
-                        ${this.createLayerItem('areas_verdes', '🌳', 'Áreas Verdes', '#38a169')}
-                        ${this.createLayerItem('sembradios', '🌾', 'Sembradíos', '#22543d')}
-                        ${this.createLayerItem('viviendas', '🏠', 'Viviendas', '#2d3748')}
+                        ${this.createLayerItem('areas_verdes', '🌳', 'Áreas Verdes', '#10b981')}
+                        ${this.createLayerItem('sembradios', '🌾', 'Sembradíos', '#10b981')}
+                        ${this.createLayerItem('viviendas', '🏠', 'Viviendas', '#10b981')}
                     </div>
 
                     <div class="category-section">
                         <h4>🗑️ Medio Ambiente</h4>
-                        ${this.createLayerItem('basura', '🗑️', 'Puntos Basura', '#718096')}
-                        ${this.createLayerItem('puntos_basura', '🚯', 'Zonas Basura', '#a0aec0')}
-                        ${this.createLayerItem('aguas_contaminadas', '⚠️', 'Agua Contaminada', '#e53e3e')}
+                        ${this.createLayerItem('basura', '🗑️', 'Puntos Basura', '#94a3b8')}
+                        ${this.createLayerItem('puntos_basura', '🚯', 'Zonas Basura', '#94a3b8')}
+                        ${this.createLayerItem('aguas_contaminadas', '⚠️', 'Agua Contaminada', '#f43f5e')}
                     </div>
                 </div>
 
@@ -209,19 +209,31 @@ class Cesium3DMap {
     addCorrectedStyles() {
         const styles = `
             <style>
-                /* ESTILOS CORREGIDOS - TEXTO COMPLETO VISIBLE */
+                /* ESTILOS PREMIUM - TEMA NEGRO Y VERDE */
+                :root {
+                    --bg-dark: #060606;
+                    --panel-dark: rgba(8, 12, 10, 0.9);
+                    --panel-soft: rgba(12, 18, 15, 0.75);
+                    --emerald-500: #10b981;
+                    --emerald-600: #059669;
+                    --emerald-400: #34d399;
+                    --muted: #9ca3af;
+                    --gold: #c9a84d;
+                    --glass-border: rgba(255,255,255,0.04);
+                }
+
                 .cesium-control-panel {
                     position: absolute;
                     top: 20px;
                     left: 20px;
                     width: 320px;
-                    background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+                    background: linear-gradient(180deg, rgba(4,6,4,0.95) 0%, rgba(10,14,12,0.9) 100%);
                     border-radius: 16px;
-                    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+                    box-shadow: 0 30px 80px rgba(0,0,0,0.75), inset 0 1px 0 rgba(255,255,255,0.02);
                     padding: 0;
-                    color: #f7fafc;
-                    border: 1px solid #4a5568;
-                    backdrop-filter: blur(20px);
+                    color: #e6fffa;
+                    border: 1px solid var(--glass-border);
+                    backdrop-filter: blur(8px) saturate(1.1);
                     z-index: 1000;
                     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
                     transition: all 0.3s ease;
@@ -238,24 +250,26 @@ class Cesium3DMap {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    padding: 20px;
-                    background: rgba(0, 0, 0, 0.4);
-                    border-bottom: 1px solid #4a5568;
+                    padding: 18px;
+                    background: linear-gradient(90deg, rgba(0,0,0,0.25), rgba(20, 24, 22, 0.35));
+                    border-bottom: 1px solid rgba(255,255,255,0.02);
                 }
 
                 .control-header h3 {
                     margin: 0;
                     font-size: 18px;
-                    font-weight: 600;
-                    color: #f7fafc;
+                    font-weight: 700;
+                    color: var(--emerald-400);
+                    text-shadow: 0 2px 12px rgba(16,185,129,0.08);
+                    letter-spacing: 0.2px;
                 }
 
                 .btn-mobile-toggle {
                     display: none;
-                    background: rgba(74, 85, 104, 0.6);
-                    border: 1px solid #4a5568;
-                    color: white;
-                    padding: 10px;
+                    background: transparent;
+                    border: 1px solid rgba(255,255,255,0.04);
+                    color: var(--muted);
+                    padding: 8px;
                     border-radius: 8px;
                     cursor: pointer;
                     font-size: 16px;
@@ -267,13 +281,16 @@ class Cesium3DMap {
                 }
 
                 .btn-control {
-                    background: rgba(74, 85, 104, 0.6);
-                    border: 1px solid #4a5568;
-                    color: white;
+                    background: linear-gradient(180deg, rgba(16,185,129,0.09), rgba(16,185,129,0.03));
+                    border: 1px solid rgba(16,185,129,0.14);
+                    color: var(--emerald-400);
                     padding: 8px 12px;
-                    border-radius: 8px;
+                    border-radius: 10px;
                     cursor: pointer;
                     font-size: 12px;
+                    font-weight: 600;
+                    backdrop-filter: blur(4px);
+                    box-shadow: 0 6px 18px rgba(16,185,129,0.03), inset 0 -1px 0 rgba(255,255,255,0.02);
                 }
 
                 .panel-content {
@@ -285,28 +302,28 @@ class Cesium3DMap {
                 .layers-list {
                     flex: 1;
                     overflow-y: auto;
-                    padding: 0 20px;
+                    padding: 12px 18px 18px 18px;
                     max-height: calc(70vh - 120px);
                 }
 
                 .category-section {
-                    margin-bottom: 20px;
+                    margin-bottom: 16px;
                 }
 
                 .category-section h4 {
                     margin: 0 0 12px 0;
-                    font-size: 14px;
-                    font-weight: 600;
-                    color: #e2e8f0;
+                    font-size: 13px;
+                    font-weight: 700;
+                    color: var(--emerald-400);
                     padding-left: 12px;
-                    border-left: 3px solid #4299e1;
-                    background: rgba(66, 153, 225, 0.15);
+                    border-left: 3px solid rgba(16,185,129,0.12);
+                    background: linear-gradient(90deg, rgba(16,185,129,0.02), transparent);
                     padding: 8px 12px;
                     border-radius: 0 8px 8px 0;
                 }
 
                 .layer-item {
-                    margin-bottom: 8px;
+                    margin-bottom: 10px;
                 }
 
                 .layer-item input[type="checkbox"] {
@@ -317,10 +334,16 @@ class Cesium3DMap {
                     display: flex;
                     align-items: center;
                     padding: 12px;
-                    background: rgba(74, 85, 104, 0.4);
-                    border-radius: 10px;
+                    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.15));
+                    border-radius: 12px;
                     cursor: pointer;
-                    border: 1px solid transparent;
+                    border: 1px solid rgba(255,255,255,0.02);
+                    transition: transform 0.12s ease, box-shadow 0.12s ease;
+                }
+
+                .layer-label:hover {
+                    transform: translateY(-3px);
+                    box-shadow: 0 8px 30px rgba(2,6,2,0.6);
                 }
 
                 .layer-color {
@@ -328,59 +351,66 @@ class Cesium3DMap {
                     height: 14px;
                     border-radius: 50%;
                     margin-right: 12px;
-                    border: 2px solid white;
+                    border: 2px solid rgba(0,0,0,0.5);
+                    box-shadow: 0 2px 8px rgba(16,185,129,0.12);
                 }
 
                 .layer-emoji {
                     font-size: 16px;
                     margin-right: 10px;
-                    width: 24px;
+                    width: 26px;
                     text-align: center;
                 }
 
                 .layer-text {
                     flex: 1;
                     font-size: 14px;
-                    font-weight: 500;
-                    color: #f7fafc;
+                    font-weight: 600;
+                    color: #e6fff5;
                 }
 
                 .layer-count {
-                    background: rgba(26, 32, 44, 0.8);
-                    color: #e2e8f0;
+                    background: rgba(0,0,0,0.5);
+                    color: var(--emerald-400);
                     padding: 6px 10px;
-                    border-radius: 15px;
+                    border-radius: 14px;
                     font-size: 11px;
-                    font-weight: bold;
-                    min-width: 30px;
+                    font-weight: 700;
+                    min-width: 34px;
                     text-align: center;
+                    border: 1px solid rgba(16,185,129,0.08);
                 }
 
                 .panel-footer {
-                    border-top: 1px solid #4a5568;
-                    padding: 15px 20px;
-                    background: rgba(0, 0, 0, 0.3);
+                    border-top: 1px solid rgba(255,255,255,0.02);
+                    padding: 14px 18px;
+                    background: linear-gradient(180deg, rgba(0,0,0,0.14), rgba(0,0,0,0.06));
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
                 }
 
                 .system-stats {
                     display: flex;
                     justify-content: space-between;
+                    gap: 12px;
                     font-size: 12px;
-                    color: #cbd5e0;
+                    color: var(--muted);
+                    width: 100%;
                 }
 
-                /* PANEL DE INFORMACIÓN CORREGIDO - TEXTO COMPLETO */
+                /* PANEL DE INFORMACIÓN PREMIUM */
                 .cesium-info-panel {
                     position: absolute;
                     top: 20px;
                     right: 20px;
                     width: 380px; /* Aumentado para más espacio */
-                    background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+                    background: linear-gradient(180deg, rgba(5,7,5,0.96) 0%, rgba(12,14,12,0.92) 100%);
                     border-radius: 16px;
-                    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-                    color: #f7fafc;
-                    border: 1px solid #4a5568;
-                    backdrop-filter: blur(20px);
+                    box-shadow: 0 30px 90px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.02);
+                    color: #e6fff5;
+                    border: 1px solid var(--glass-border);
+                    backdrop-filter: blur(10px) saturate(1.1);
                     z-index: 1000;
                     transform: translateX(400px);
                     transition: transform 0.3s ease;
@@ -400,54 +430,57 @@ class Cesium3DMap {
                     justify-content: space-between;
                     align-items: center;
                     padding: 20px;
-                    border-bottom: 1px solid #4a5568;
-                    background: rgba(0, 0, 0, 0.4);
+                    border-bottom: 1px solid rgba(255,255,255,0.02);
+                    background: linear-gradient(90deg, rgba(0,0,0,0.25), rgba(0,0,0,0.12));
                 }
 
                 .info-header h3 {
                     margin: 0;
                     font-size: 18px;
-                    font-weight: 600;
-                    color: #f7fafc;
+                    font-weight: 700;
+                    color: var(--emerald-400);
                 }
 
                 .info-header-controls {
                     display: flex;
-                    gap: 8px;
+                    gap: 10px;
                     align-items: center;
                 }
 
                 .btn-close {
-                    background: rgba(239, 68, 68, 0.3);
-                    border: 1px solid rgba(239, 68, 68, 0.4);
-                    color: #fed7d7;
+                    background: linear-gradient(180deg, rgba(196,147,61,0.06), rgba(196,147,61,0.02));
+                    border: 1px solid rgba(201,168,77,0.08);
+                    color: var(--gold);
                     font-size: 18px;
                     cursor: pointer;
                     padding: 0;
-                    width: 32px;
-                    height: 32px;
+                    width: 36px;
+                    height: 36px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     border-radius: 50%;
+                    transition: transform 0.12s ease;
                 }
+
+                .btn-close:hover { transform: scale(1.05); }
 
                 .info-content {
                     flex: 1;
                     overflow-y: auto;
                     padding: 0;
-                    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+                    background: linear-gradient(180deg, rgba(8,10,8,0.6), rgba(4,6,4,0.4));
                 }
 
                 .no-selection {
                     text-align: center;
                     padding: 60px 20px;
-                    color: #cbd5e0;
+                    color: var(--muted);
                 }
 
-                /* CONTENIDO DE INFORMACIÓN - CORREGIDO PARA TEXTO COMPLETO */
+                /* CONTENIDO DE INFORMACIÓN - PREMIUM */
                 .entity-info-detailed {
-                    color: #f7fafc;
+                    color: #e6fff5;
                     padding: 0;
                     background: transparent;
                 }
@@ -457,63 +490,64 @@ class Cesium3DMap {
                     align-items: center;
                     gap: 15px;
                     margin-bottom: 0;
-                    padding: 25px;
-                    border-bottom: 1px solid #4a5568;
-                    background: rgba(0, 0, 0, 0.3);
+                    padding: 22px;
+                    border-bottom: 1px solid rgba(255,255,255,0.02);
+                    background: linear-gradient(90deg, rgba(16,24,20,0.2), transparent);
                 }
 
                 .info-icon {
                     font-size: 28px;
-                    width: 50px;
-                    height: 50px;
+                    width: 54px;
+                    height: 54px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    background: rgba(255, 255, 255, 0.15);
+                    background: linear-gradient(180deg, rgba(16,185,129,0.14), rgba(16,185,129,0.06));
                     border-radius: 12px;
-                    color: #f7fafc;
+                    color: #e6fff5;
+                    border: 1px solid rgba(16,185,129,0.06);
                 }
 
                 .info-header-detailed h3 {
                     margin: 0;
                     font-size: 20px;
-                    font-weight: 600;
-                    color: #f7fafc;
+                    font-weight: 700;
+                    color: #e6fff5;
                     flex: 1;
                     word-wrap: break-word;
-                    line-height: 1.3;
+                    line-height: 1.25;
                 }
 
                 .info-details {
                     font-size: 14px;
-                    padding: 25px;
+                    padding: 20px;
                     background: transparent;
                 }
 
                 .info-section {
-                    margin-bottom: 25px;
-                    background: rgba(45, 55, 72, 0.6);
+                    margin-bottom: 18px;
+                    background: linear-gradient(180deg, rgba(8,10,8,0.35), rgba(12,14,12,0.25));
                     border-radius: 12px;
-                    padding: 20px;
-                    border: 1px solid #4a5568;
+                    padding: 16px;
+                    border: 1px solid rgba(255,255,255,0.02);
                 }
 
                 .info-section h4 {
-                    margin: 0 0 20px 0;
-                    font-size: 16px;
-                    font-weight: 600;
-                    color: #e2e8f0;
+                    margin: 0 0 12px 0;
+                    font-size: 15px;
+                    font-weight: 700;
+                    color: var(--emerald-400);
                     display: flex;
                     align-items: center;
                     gap: 10px;
-                    padding-bottom: 12px;
-                    border-bottom: 2px solid #4a5568;
+                    padding-bottom: 8px;
+                    border-bottom: 1px dashed rgba(255,255,255,0.02);
                 }
 
                 .info-grid {
                     display: grid;
                     grid-template-columns: 1fr 1fr;
-                    gap: 15px;
+                    gap: 12px;
                     margin-bottom: 0;
                 }
 
@@ -529,27 +563,24 @@ class Cesium3DMap {
 
                 .info-label {
                     font-size: 12px;
-                    color: #cbd5e0;
-                    font-weight: 600;
+                    color: var(--muted);
+                    font-weight: 700;
                     margin-bottom: 8px;
                     text-transform: uppercase;
-                    letter-spacing: 0.5px;
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
+                    letter-spacing: 0.6px;
                 }
 
                 .info-value {
                     font-size: 14px;
-                    color: #f7fafc;
-                    font-weight: 500;
+                    color: #e6fff5;
+                    font-weight: 600;
                     line-height: 1.4;
                     word-wrap: break-word;
                     word-break: break-word;
-                    background: rgba(26, 32, 44, 0.4);
+                    background: linear-gradient(180deg, rgba(0,0,0,0.2), rgba(0,0,0,0.12));
                     padding: 10px 12px;
                     border-radius: 8px;
-                    border: 1px solid #4a5568;
+                    border: 1px solid rgba(16,185,129,0.04);
                     min-height: 20px;
                     overflow: visible;
                     white-space: normal;
@@ -562,14 +593,14 @@ class Cesium3DMap {
                 }
 
                 .service-tag {
-                    background: rgba(66, 153, 225, 0.25);
-                    color: #bee3f8;
+                    background: linear-gradient(180deg, rgba(16,185,129,0.06), rgba(16,185,129,0.02));
+                    color: var(--emerald-400);
                     padding: 10px 12px;
                     border-radius: 8px;
                     font-size: 13px;
-                    border: 1px solid rgba(66, 153, 225, 0.4);
+                    border: 1px solid rgba(16,185,129,0.06);
                     text-align: center;
-                    font-weight: 500;
+                    font-weight: 700;
                     word-wrap: break-word;
                 }
 
@@ -578,36 +609,37 @@ class Cesium3DMap {
                     justify-content: space-between;
                     align-items: center;
                     padding: 12px;
-                    background: rgba(74, 85, 104, 0.4);
+                    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.12));
                     border-radius: 8px;
-                    border: 1px solid #4a5568;
+                    border: 1px solid rgba(255,255,255,0.02);
                 }
 
                 .dish-name, .room-type, .product-name {
-                    color: #f7fafc;
-                    font-weight: 500;
+                    color: #e6fff5;
+                    font-weight: 600;
                     flex: 1;
                     word-wrap: break-word;
                 }
 
                 .dish-price, .room-capacity, .product-price {
-                    color: #68d391;
-                    font-weight: bold;
-                    font-size: 14px;
-                    background: rgba(72, 187, 120, 0.2);
+                    color: var(--emerald-400);
+                    font-weight: 800;
+                    font-size: 13px;
+                    background: rgba(16,185,129,0.06);
                     padding: 6px 10px;
                     border-radius: 6px;
                     white-space: nowrap;
                     margin-left: 10px;
+                    border: 1px solid rgba(16,185,129,0.06);
                 }
 
                 .menu-more {
                     text-align: center;
                     padding: 12px;
-                    color: #a0aec0;
+                    color: var(--muted);
                     font-style: italic;
                     font-size: 12px;
-                    background: rgba(74, 85, 104, 0.3);
+                    background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.08));
                     border-radius: 8px;
                 }
 
@@ -615,13 +647,13 @@ class Cesium3DMap {
                     display: flex;
                     align-items: center;
                     gap: 12px;
-                    padding: 15px;
-                    background: rgba(237, 137, 54, 0.15);
+                    padding: 12px;
+                    background: linear-gradient(90deg, rgba(201,168,77,0.06), rgba(0,0,0,0.06));
                     border-radius: 8px;
-                    border: 1px solid rgba(237, 137, 54, 0.4);
-                    color: #fbd38d;
+                    border: 1px solid rgba(201,168,77,0.06);
+                    color: #ffe8b3;
                     font-size: 13px;
-                    margin-top: 20px;
+                    margin-top: 12px;
                 }
 
                 .entity-info-loading {
@@ -631,7 +663,7 @@ class Cesium3DMap {
                 }
 
                 .loading-spinner {
-                    color: #4299e1;
+                    color: var(--emerald-400);
                 }
 
                 .loading-spinner i {
@@ -642,10 +674,10 @@ class Cesium3DMap {
                 .loading-spinner p {
                     margin: 0;
                     font-size: 14px;
-                    color: #cbd5e0;
+                    color: var(--muted);
                 }
 
-                /* ESTILOS RESPONSIVOS CORREGIDOS */
+                /* ESTILOS RESPONSIVOS */
                 @media (max-width: 768px) {
                     .cesium-control-panel {
                         width: 280px !important;
@@ -670,10 +702,10 @@ class Cesium3DMap {
                     }
 
                     .info-header-detailed {
-                        padding: 20px;
+                        padding: 16px;
                         flex-direction: column;
                         text-align: center;
-                        gap: 12px;
+                        gap: 10px;
                     }
 
                     .info-header-detailed h3 {
@@ -682,12 +714,12 @@ class Cesium3DMap {
                     }
 
                     .info-details {
-                        padding: 20px;
+                        padding: 16px;
                     }
 
                     .info-section {
-                        margin-bottom: 20px;
-                        padding: 15px;
+                        margin-bottom: 14px;
+                        padding: 12px;
                     }
                 }
 
@@ -698,11 +730,11 @@ class Cesium3DMap {
                     }
 
                     .info-header-detailed {
-                        padding: 15px;
+                        padding: 12px;
                     }
 
                     .info-details {
-                        padding: 15px;
+                        padding: 12px;
                     }
 
                     .info-value {
@@ -711,21 +743,23 @@ class Cesium3DMap {
                     }
                 }
 
-                /* MEJORAS DE SCROLL Y VISIBILIDAD */
+                /* SCROLL */
                 .info-content::-webkit-scrollbar {
-                    width: 6px;
+                    width: 8px;
                 }
 
                 .info-content::-webkit-scrollbar-track {
-                    background: rgba(255, 255, 255, 0.1);
+                    background: rgba(0,0,0,0.18);
+                    border-radius: 8px;
                 }
 
                 .info-content::-webkit-scrollbar-thumb {
-                    background: #4299e1;
-                    border-radius: 3px;
+                    background: linear-gradient(180deg, var(--emerald-600), var(--emerald-500));
+                    border-radius: 8px;
+                    border: 2px solid rgba(0,0,0,0.2);
                 }
 
-                /* GARANTIZAR QUE EL TEXTO SEA VISIBLE */
+                /* GARANTIZAR VISIBILIDAD */
                 .info-value {
                     overflow: visible !important;
                     white-space: normal !important;
@@ -901,23 +935,23 @@ class Cesium3DMap {
 
     getMarkerConfig(layerName) {
         const configs = {
-            'puntos_turisticos': { emoji: '📍', color: '#e53e3e' },
-            'miradores': { emoji: '🔭', color: '#3182ce' },
-            'playas': { emoji: '🏖️', color: '#38b2ac' },
-            'tiendas_artesania': { emoji: '🎨', color: '#d69e2e' },
-            'restaurantes': { emoji: '🍽️', color: '#dd6b20' },
-            'hoteles': { emoji: '🏨', color: '#805ad5' },
-            'rutas': { emoji: '🛣️', color: '#dd6b20' },
-            'comunidades': { emoji: '🏘️', color: '#4a5568' },
-            'viviendas': { emoji: '🏠', color: '#2d3748' },
-            'areas_verdes': { emoji: '🌳', color: '#38a169' },
-            'sembradios': { emoji: '🌾', color: '#22543d' },
-            'basura': { emoji: '🗑️', color: '#718096' },
-            'puntos_basura': { emoji: '🚯', color: '#a0aec0' },
-            'aguas_contaminadas': { emoji: '⚠️', color: '#e53e3e' }
+            'puntos_turisticos': { emoji: '📍', color: '#1fb57a' },
+            'miradores': { emoji: '🔭', color: '#1fb57a' },
+            'playas': { emoji: '🏖️', color: '#1fb57a' },
+            'tiendas_artesania': { emoji: '🎨', color: '#16a34a' },
+            'restaurantes': { emoji: '🍽️', color: '#16a34a' },
+            'hoteles': { emoji: '🏨', color: '#16a34a' },
+            'rutas': { emoji: '🛣️', color: '#16a34a' },
+            'comunidades': { emoji: '🏘️', color: '#16a34a' },
+            'viviendas': { emoji: '🏠', color: '#10b981' },
+            'areas_verdes': { emoji: '🌳', color: '#10b981' },
+            'sembradios': { emoji: '🌾', color: '#10b981' },
+            'basura': { emoji: '🗑️', color: '#94a3b8' },
+            'puntos_basura': { emoji: '🚯', color: '#94a3b8' },
+            'aguas_contaminadas': { emoji: '⚠️', color: '#f43f5e' }
         };
         
-        return configs[layerName] || { emoji: '📍', color: '#3498DB' };
+        return configs[layerName] || { emoji: '📍', color: '#10b981' };
     }
 
     processEntities(dataSource, layerName) {
@@ -991,7 +1025,7 @@ class Cesium3DMap {
         
         ctx.beginPath();
         ctx.arc(24, 24, 18, 0, Math.PI * 2);
-        ctx.strokeStyle = '#FFFFFF';
+        ctx.strokeStyle = '#0b0b0b';
         ctx.lineWidth = 3;
         ctx.stroke();
         
@@ -1572,3 +1606,4 @@ if (document.readyState === 'loading') {
 } else {
     setTimeout(initCesium3D, 1000);
 }
+
