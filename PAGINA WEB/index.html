@@ -3,31 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Isla del Sol - Lago Titicaca</title>
+  <title>Isla del Sol - Lago Titicaca | Experiencia Premium</title>
   <meta name="theme-color" content="#0a5c36" />
   
-  <!-- CSS MODULAR -->
-  <link rel="stylesheet" href="styles/utils/variables.css">
-  <link rel="stylesheet" href="styles/utils/responsive.css">
-  <link rel="stylesheet" href="styles/main.css">
-  <link rel="stylesheet" href="styles/components/navigation.css">
-  <link rel="stylesheet" href="styles/components/hero.css">
-  <link rel="stylesheet" href="styles/components/map.css">
-  <link rel="stylesheet" href="styles/components/gallery.css">
-  <link rel="stylesheet" href="styles/components/info.css">
-  <link rel="stylesheet" href="styles/components/footer.css">
-  
-  <!-- EXTERNAL CSS -->
+  <!-- CSS EXTERNOS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
-  <!-- CSS DE CESIUM -->
   <link href="https://cesium.com/downloads/cesiumjs/releases/1.95/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
-  
-  <!-- CSS SUPREMO PREMIUM PARA CESIUM -->
+
+  <!-- ESTILOS PREMIUM COMPLETOS -->
   <style>
-    /* ===== VARIABLES PREMIUM VERDE/DORADO/NEGRO ===== */
+    /* ===== VARIABLES PREMIUM ===== */
     :root {
       --primary-emerald: #0a5c36;
       --primary-emerald-light: #0f7a4a;
@@ -49,11 +37,15 @@
       --gold-glow: 0 0 25px rgba(212, 175, 55, 0.4);
     }
 
-    /* ===== RESET Y BASE PREMIUM ===== */
+    /* ===== RESET PREMIUM ===== */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
     }
 
     body {
@@ -66,1284 +58,103 @@
 
     .container {
       width: 100%;
-      max-width: 1200px;
+      max-width: 1400px;
       margin: 0 auto;
       padding: 0 20px;
     }
 
-    /* ===== CONTENEDOR PRINCIPAL CESIUM PREMIUM ===== */
-    .cesium-container {
-      position: relative;
-      border-radius: 25px;
-      overflow: hidden;
-      box-shadow: 
-        var(--glass-shadow),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1),
-        0 0 0 1px rgba(212, 175, 55, 0.1);
-      margin: 40px 0;
-      border: 1px solid var(--glass-border);
-      background: linear-gradient(145deg, var(--black-dark) 0%, var(--black-premium) 50%, var(--black-dark) 100%);
-      position: relative;
-    }
-
-    .cesium-container::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: 
-        radial-gradient(circle at 20% 80%, rgba(10, 92, 54, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(212, 175, 55, 0.05) 0%, transparent 50%);
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    .cesium-frame {
-      width: 100%;
-      height: 800px;
-      position: relative;
-      background: linear-gradient(135deg, var(--black-dark) 0%, var(--black-premium) 100%);
-      border-radius: 24px;
-    }
-
-    /* ===== LOADING SCREEN ANIMADO PREMIUM ===== */
-    .cesium-loading {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-      color: var(--white-premium);
-      z-index: 1000;
-      background: rgba(10, 10, 10, 0.95);
-      backdrop-filter: var(--blur-effect);
-      padding: 50px 40px;
-      border-radius: 25px;
-      border: 1px solid var(--glass-border);
-      box-shadow: var(--glass-shadow), var(--gold-glow);
-      min-width: 320px;
-    }
-
-    .cesium-loading i {
-      font-size: 4.5rem;
-      margin-bottom: 25px;
-      display: block;
-      background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      animation: pulse 2s infinite;
-      filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.3));
-    }
-
-    .cesium-loading p {
-      margin: 0 0 30px 0;
-      font-size: 1.3em;
-      font-weight: 500;
-      color: var(--gold-light);
-    }
-
-    .loading-spinner {
-      border: 3px solid rgba(212, 175, 55, 0.1);
-      border-top: 3px solid var(--gold-primary);
-      border-right: 3px solid var(--primary-emerald);
-      border-bottom: 3px solid var(--gold-light);
-      border-radius: 50%;
-      width: 60px;
-      height: 60px;
-      animation: spin 1.5s linear infinite;
-      margin: 0 auto;
-      box-shadow: var(--neon-glow), var(--gold-glow);
-      position: relative;
-    }
-
-    .loading-spinner::after {
-      content: '';
-      position: absolute;
-      top: -5px;
-      left: -5px;
-      right: -5px;
-      bottom: -5px;
-      border-radius: 50%;
-      background: conic-gradient(transparent, var(--gold-primary), transparent);
-      animation: rotate 3s linear infinite;
-      z-index: -1;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    @keyframes rotate {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    @keyframes pulse {
-      0%, 100% { 
-        opacity: 1; 
-        transform: scale(1) rotate(0deg);
-        filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.3));
-      }
-      50% { 
-        opacity: 0.8; 
-        transform: scale(1.1) rotate(5deg);
-        filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.6));
-      }
-    }
-
-    /* ===== PANEL DE CONTROL SUPREMO PREMIUM ===== */
-    .cesium-control-panel {
-      position: absolute;
-      top: 30px;
-      left: 30px;
-      width: 380px;
-      background: var(--glass-bg);
-      backdrop-filter: var(--blur-effect);
-      border: 1px solid var(--glass-border);
-      border-radius: 30px;
-      box-shadow: var(--glass-shadow), var(--gold-glow);
-      z-index: 1000;
-      overflow: hidden;
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      border: 1px solid rgba(212, 175, 55, 0.2);
-    }
-
-    .cesium-control-panel:hover {
-      transform: translateY(-5px) scale(1.02);
-      box-shadow: 
-        0 35px 60px rgba(0, 0, 0, 0.7),
-        0 0 40px rgba(10, 92, 54, 0.3),
-        var(--gold-glow);
-    }
-
-    /* Header del Panel Premium */
-    .control-header {
-      background: linear-gradient(135deg, var(--primary-emerald), var(--primary-emerald-light));
-      padding: 30px;
-      color: var(--white-premium);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .control-header::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(45deg, transparent, rgba(212, 175, 55, 0.1), transparent);
-      transform: rotate(45deg);
-      animation: shimmer 8s infinite linear;
-    }
-
-    @keyframes shimmer {
-      0% { transform: rotate(45deg) translateX(-100%); }
-      100% { transform: rotate(45deg) translateX(100%); }
-    }
-
-    .control-header h3 {
-      margin: 0;
-      font-size: 1.6em;
-      font-weight: 800;
-      text-shadow: 0 4px 12px rgba(0,0,0,0.5);
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      position: relative;
-      z-index: 2;
-      letter-spacing: 0.5px;
-    }
-
-    .control-header h3 i {
-      color: var(--gold-primary);
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-    }
-
-    .control-buttons {
-      display: flex;
-      gap: 15px;
-      margin-top: 20px;
-      position: relative;
-      z-index: 2;
-    }
-
-    .btn-control {
-      flex: 1;
-      padding: 14px 20px;
-      border: none;
-      border-radius: 18px;
-      background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(10, 92, 54, 0.2));
-      color: var(--white-premium);
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.4s ease;
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(212, 175, 55, 0.3);
-      font-size: 0.95em;
-      position: relative;
-      overflow: hidden;
-      letter-spacing: 0.5px;
-    }
-
-    .btn-control::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.2), transparent);
-      transition: left 0.6s;
-    }
-
-    .btn-control:hover::before {
-      left: 100%;
-    }
-
-    .btn-control:hover {
-      background: linear-gradient(135deg, rgba(212, 175, 55, 0.3), rgba(10, 92, 54, 0.3));
-      transform: translateY(-3px);
-      box-shadow: 
-        0 8px 25px rgba(0,0,0,0.4),
-        0 0 15px rgba(212, 175, 55, 0.3);
-      border-color: rgba(212, 175, 55, 0.5);
-    }
-
-    /* Lista de Capas Premium */
-    .layers-list {
-      max-height: 65vh;
-      overflow-y: auto;
-      padding: 25px;
-      background: linear-gradient(135deg, rgba(10, 10, 10, 0.8), rgba(26, 26, 26, 0.9));
-    }
-
-    .layers-list::-webkit-scrollbar {
-      width: 10px;
-    }
-
-    .layers-list::-webkit-scrollbar-track {
-      background: rgba(212, 175, 55, 0.1);
-      border-radius: 8px;
-    }
-
-    .layers-list::-webkit-scrollbar-thumb {
-      background: linear-gradient(var(--primary-emerald), var(--gold-primary));
-      border-radius: 8px;
-      border: 2px solid rgba(10, 10, 10, 0.8);
-    }
-
-    .layers-list::-webkit-scrollbar-thumb:hover {
-      background: linear-gradient(var(--gold-primary), var(--primary-emerald-light));
-    }
-
-    /* Secciones de Categoría Premium */
-    .category-section {
-      margin-bottom: 30px;
-      position: relative;
-    }
-
-    .category-section:last-child {
-      margin-bottom: 0;
-    }
-
-    .category-section::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -10px;
-      width: 4px;
-      height: 100%;
-      background: linear-gradient(to bottom, var(--gold-primary), var(--primary-emerald));
-      border-radius: 4px;
-      opacity: 0.7;
-    }
-
-    .category-section h4 {
-      color: var(--gold-light);
-      margin: 0 0 18px 0;
-      padding: 15px 20px;
-      background: linear-gradient(135deg, rgba(10, 92, 54, 0.2), rgba(212, 175, 55, 0.1));
-      border-radius: 15px;
-      font-size: 1em;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      border-left: 4px solid var(--gold-primary);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(212, 175, 55, 0.2);
-    }
-
-    /* Items de Capa Premium */
-    .layer-item {
-      display: flex;
-      align-items: center;
-      padding: 16px;
-      margin: 10px 0;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
-      border-radius: 18px;
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      border: 1px solid transparent;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .layer-item::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.1), transparent);
-      transition: left 0.8s;
-    }
-
-    .layer-item:hover::before {
-      left: 100%;
-    }
-
-    .layer-item:hover {
-      background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(10, 92, 54, 0.1));
-      border-color: rgba(212, 175, 55, 0.3);
-      transform: translateX(12px) scale(1.03);
-      box-shadow: 
-        0 10px 30px rgba(0,0,0,0.3),
-        0 0 20px rgba(10, 92, 54, 0.2);
-    }
-
-    .layer-item input[type="checkbox"] {
-      display: none;
-    }
-
-    .layer-label {
-      display: flex;
-      align-items: center;
-      width: 100%;
-      cursor: pointer;
-      gap: 18px;
-      font-weight: 600;
-      color: var(--white-premium);
-      position: relative;
-      z-index: 2;
-    }
-
-    /* Indicador de Color Premium */
-    .layer-color {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      border: 2px solid rgba(255, 255, 255, 0.4);
-      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 
-        0 4px 15px rgba(0,0,0,0.4),
-        inset 0 1px 0 rgba(255, 255, 255, 0.2);
-      position: relative;
-    }
-
-    .layer-color::after {
-      content: '';
-      position: absolute;
-      top: -6px;
-      left: -6px;
-      right: -6px;
-      bottom: -6px;
-      border-radius: 50%;
-      background: inherit;
-      opacity: 0.4;
-      filter: blur(12px);
-      z-index: -1;
-    }
-
-    .layer-item:hover .layer-color {
-      transform: scale(1.4) rotate(15deg);
-      box-shadow: 
-        0 6px 25px rgba(0,0,0,0.5),
-        0 0 15px currentColor;
-    }
-
-    /* Emoji Estilizado Premium */
-    .layer-emoji {
-      font-size: 1.4em;
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
-      transition: all 0.4s ease;
-    }
-
-    .layer-item:hover .layer-emoji {
-      transform: scale(1.3) rotate(-8deg);
-      filter: drop-shadow(0 6px 12px rgba(0,0,0,0.5));
-    }
-
-    /* Texto Premium */
-    .layer-text {
-      flex: 1;
-      font-size: 1.05em;
-      transition: all 0.4s ease;
-      font-weight: 500;
-    }
-
-    /* Contador Premium */
-    .layer-count {
-      background: linear-gradient(135deg, rgba(26, 26, 26, 0.9), rgba(10, 10, 10, 0.9));
-      color: var(--gold-light);
-      padding: 8px 14px;
-      border-radius: 15px;
-      font-size: 0.9em;
-      font-weight: 800;
-      min-width: 36px;
-      text-align: center;
-      border: 1px solid rgba(212, 175, 55, 0.3);
-      transition: all 0.4s ease;
-      backdrop-filter: blur(15px);
-      letter-spacing: 0.5px;
-    }
-
-    .layer-item:hover .layer-count {
-      background: linear-gradient(135deg, var(--primary-emerald), var(--primary-emerald-light));
-      color: var(--white-premium);
-      transform: scale(1.2);
-      box-shadow: 
-        0 4px 20px rgba(10, 92, 54, 0.5),
-        var(--gold-glow);
-    }
-
-    /* Estado Checked Premium */
-    .layer-item input[type="checkbox"]:checked + .layer-label .layer-color {
-      border-color: rgba(255, 255, 255, 0.9);
-      box-shadow: 
-        0 0 0 4px currentColor,
-        0 6px 25px currentColor,
-        var(--gold-glow);
-      animation: pulse-glow 2s infinite;
-    }
-
-    @keyframes pulse-glow {
-      0%, 100% { 
-        box-shadow: 
-          0 0 0 4px currentColor,
-          0 6px 25px currentColor,
-          var(--gold-glow);
-      }
-      50% { 
-        box-shadow: 
-          0 0 0 6px currentColor,
-          0 8px 30px currentColor,
-          0 0 40px currentColor;
-      }
-    }
-
-    .layer-item input[type="checkbox"]:checked + .layer-label .layer-text {
-      color: var(--gold-light);
-      text-shadow: 0 2px 12px rgba(212, 175, 55, 0.4);
-      font-weight: 700;
-    }
-
-    .layer-item input[type="checkbox"]:checked + .layer-label .layer-count {
-      background: linear-gradient(135deg, var(--gold-primary), var(--gold-dark));
-      color: var(--black-premium);
-      font-weight: 900;
-    }
-
-    /* Footer del Panel Premium */
-    .panel-footer {
-      padding: 25px;
-      background: linear-gradient(135deg, rgba(10, 10, 10, 0.95), rgba(26, 26, 26, 0.9));
-      border-top: 1px solid rgba(212, 175, 55, 0.2);
-      backdrop-filter: blur(20px);
-    }
-
-    .system-stats {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.95em;
-      color: var(--gold-light);
-      gap: 12px;
-    }
-
-    .system-stats span {
-      background: linear-gradient(135deg, rgba(10, 92, 54, 0.2), rgba(212, 175, 55, 0.1));
-      padding: 10px 16px;
-      border-radius: 12px;
-      font-weight: 700;
-      flex: 1;
-      text-align: center;
-      border: 1px solid rgba(212, 175, 55, 0.2);
-      transition: all 0.4s ease;
-      backdrop-filter: blur(15px);
-    }
-
-    .system-stats span:hover {
-      background: linear-gradient(135deg, rgba(10, 92, 54, 0.3), rgba(212, 175, 55, 0.2));
-      transform: translateY(-3px);
-      box-shadow: 
-        0 5px 20px rgba(0,0,0,0.3),
-        var(--gold-glow);
-    }
-
-    /* ===== PANEL DE INFORMACIÓN SUPREMO PREMIUM ===== */
-    .cesium-info-panel {
-      position: absolute;
-      top: 30px;
-      right: 30px;
-      width: 420px;
-      background: var(--glass-bg);
-      backdrop-filter: var(--blur-effect);
-      border: 1px solid var(--glass-border);
-      border-radius: 30px;
-      box-shadow: var(--glass-shadow), var(--gold-glow);
-      z-index: 1000;
-      transform: translateX(480px);
-      opacity: 0;
-      transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-      border: 1px solid rgba(212, 175, 55, 0.25);
-      max-height: 85vh;
-      overflow: hidden;
-    }
-
-    .cesium-info-panel.visible {
-      transform: translateX(0);
-      opacity: 1;
-    }
-
-    /* Header del Info Panel Premium */
-    .info-header {
-      background: linear-gradient(135deg, var(--primary-emerald), var(--gold-primary));
-      padding: 30px;
-      color: var(--white-premium);
-      border-radius: 30px 30px 0 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .info-header::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.15) 50%, transparent 70%);
-      animation: shine 4s infinite linear;
-    }
-
-    @keyframes shine {
-      0% { transform: translateX(-100%); }
-      100% { transform: translateX(100%); }
-    }
-
-    .info-header h3 {
-      margin: 0;
-      font-size: 1.5em;
-      font-weight: 800;
-      flex: 1;
-      position: relative;
-      z-index: 2;
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.4);
-    }
-
-    .btn-close {
-      background: rgba(255, 255, 255, 0.25);
-      border: none;
-      color: var(--white-premium);
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      cursor: pointer;
-      font-size: 1.4em;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.4s ease;
-      position: relative;
-      z-index: 2;
-      backdrop-filter: blur(15px);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-    }
-
-    .btn-close:hover {
-      background: rgba(255, 255, 255, 0.4);
-      transform: rotate(90deg) scale(1.15);
-      box-shadow: 
-        0 4px 20px rgba(0,0,0,0.4),
-        var(--gold-glow);
-    }
-
-    /* Contenido del Info Panel Premium */
-    .info-content {
-      padding: 30px;
-      background: linear-gradient(135deg, rgba(10, 10, 10, 0.9), rgba(26, 26, 26, 0.95));
-      max-height: calc(85vh - 120px);
-      overflow-y: auto;
-    }
-
-    .info-content::-webkit-scrollbar {
-      width: 8px;
-    }
-
-    .info-content::-webkit-scrollbar-track {
-      background: rgba(212, 175, 55, 0.1);
-      border-radius: 6px;
-    }
-
-    .info-content::-webkit-scrollbar-thumb {
-      background: linear-gradient(var(--gold-primary), var(--primary-emerald));
-      border-radius: 6px;
-      border: 2px solid rgba(10, 10, 10, 0.9);
-    }
-
-    /* Estado sin selección Premium */
-    .no-selection {
-      text-align: center;
-      color: var(--gold-light);
-      padding: 60px 30px;
-    }
-
-    .no-selection i {
-      font-size: 5rem;
-      margin-bottom: 25px;
-      display: block;
-      opacity: 0.8;
-      background: linear-gradient(135deg, var(--gold-primary), var(--primary-emerald));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
-    }
-
-    .no-selection p {
-      margin: 0;
-      font-size: 1.2em;
-      line-height: 1.7;
-      opacity: 0.9;
-      font-weight: 500;
-    }
-
-    /* Información de Entidad Premium */
-    .entity-info {
-      color: var(--white-premium);
-    }
-
-    .info-header .info-icon {
-      font-size: 2em;
-      margin-right: 15px;
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
-    }
-
-    .entity-info h3 {
-      margin: 0 0 25px 0;
-      font-size: 1.6em;
-      color: var(--gold-light);
-      text-shadow: 0 2px 12px rgba(212, 175, 55, 0.4);
-      background: linear-gradient(135deg, var(--gold-light), var(--gold-primary));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      font-weight: 800;
-    }
-
-    .info-details {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04));
-      border-radius: 20px;
-      padding: 25px;
-      border: 1px solid rgba(212, 175, 55, 0.2);
-      backdrop-filter: blur(15px);
-      box-shadow: 
-        inset 0 1px 0 rgba(255, 255, 255, 0.1),
-        0 5px 20px rgba(0,0,0,0.2);
-    }
-
-    .info-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 20px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-      transition: all 0.4s ease;
-    }
-
-    .info-row:hover {
-      border-bottom-color: var(--gold-primary);
-      transform: translateX(8px);
-    }
-
-    .info-row:last-child {
-      margin-bottom: 0;
-      padding-bottom: 0;
-      border-bottom: none;
-    }
-
-    .info-label {
-      font-weight: 700;
-      color: var(--gold-primary);
-      flex: 1;
-      font-size: 1em;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-    }
-
-    .info-value {
-      flex: 2;
-      text-align: right;
-      color: var(--white-premium);
-      font-weight: 600;
-      font-size: 1.05em;
-      line-height: 1.5;
-    }
-
-    /* ===== CONTROLES INFERIORES PREMIUM ===== */
-    .cesium-controls {
-      position: absolute;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 15px;
-      z-index: 1000;
-      background: var(--glass-bg);
-      backdrop-filter: var(--blur-effect);
-      padding: 20px;
-      border-radius: 25px;
-      border: 1px solid var(--glass-border);
-      box-shadow: var(--glass-shadow), var(--gold-glow);
-    }
-
-    .btn-cesium {
-      background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(10, 92, 54, 0.15));
-      color: var(--white-premium);
-      border: 1px solid rgba(212, 175, 55, 0.3);
-      padding: 14px 24px;
-      border-radius: 15px;
-      cursor: pointer;
-      backdrop-filter: blur(20px);
-      transition: all 0.4s ease;
-      font-weight: 700;
-      font-size: 0.95em;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      min-width: 140px;
-      justify-content: center;
-      position: relative;
-      overflow: hidden;
-      letter-spacing: 0.5px;
-    }
-
-    .btn-cesium::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.2), transparent);
-      transition: left 0.6s;
-    }
-
-    .btn-cesium:hover::before {
-      left: 100%;
-    }
-
-    .btn-cesium:hover {
-      background: linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(10, 92, 54, 0.25));
-      transform: translateY(-4px);
-      box-shadow: 
-        0 8px 30px rgba(0,0,0,0.4),
-        0 0 20px rgba(212, 175, 55, 0.3);
-      border-color: rgba(212, 175, 55, 0.5);
-    }
-
-    .btn-cesium i {
-      font-size: 1.2em;
-    }
-
-    /* ===== LEYENDA PREMIUM ===== */
-    .cesium-legend {
-      position: absolute;
-      bottom: 30px;
-      right: 30px;
-      background: var(--glass-bg);
-      backdrop-filter: var(--blur-effect);
-      color: var(--white-premium);
-      padding: 25px;
-      border-radius: 20px;
-      border: 1px solid var(--glass-border);
-      box-shadow: var(--glass-shadow), var(--gold-glow);
-      min-width: 220px;
-    }
-
-    .cesium-legend h4 {
-      margin: 0 0 18px 0;
-      font-size: 1.15em;
-      font-weight: 700;
-      color: var(--gold-light);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    }
-
-    .cesium-legend ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    .cesium-legend li {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
-      padding: 8px 0;
-      font-size: 0.95em;
-      transition: all 0.3s ease;
-      font-weight: 500;
-    }
-
-    .cesium-legend li:hover {
-      transform: translateX(8px);
-      color: var(--gold-primary);
-    }
-
-    .cesium-legend li:last-child {
-      margin-bottom: 0;
-    }
-
-    .legend-color {
-      width: 16px;
-      height: 16px;
-      border-radius: 4px;
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-    }
-
-    /* ===== RESPONSIVE COMPLETO ===== */
-    @media (max-width: 1200px) {
-      .cesium-frame {
-        height: 700px;
-      }
-      
-      .cesium-control-panel {
-        width: 350px;
-      }
-      
-      .cesium-info-panel {
-        width: 380px;
-      }
-    }
-
-    @media (max-width: 992px) {
-      .cesium-frame {
-        height: 600px;
-      }
-      
-      .cesium-control-panel {
-        width: 320px;
-        left: 20px;
-        top: 20px;
-      }
-      
-      .cesium-info-panel {
-        width: 340px;
-        right: 20px;
-      }
-      
-      .cesium-controls {
-        flex-wrap: wrap;
-        justify-content: center;
-        max-width: 90%;
-        padding: 15px;
-      }
-      
-      .btn-cesium {
-        min-width: 120px;
-        font-size: 0.9em;
-        padding: 12px 18px;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .cesium-container {
-        margin: 30px 0;
-        border-radius: 20px;
-      }
-      
-      .cesium-frame {
-        height: 500px;
-        border-radius: 18px;
-      }
-      
-      .cesium-control-panel {
-        width: 300px;
-        left: 15px;
-        top: 15px;
-        border-radius: 25px;
-      }
-      
-      .cesium-info-panel {
-        width: 300px;
-        right: 15px;
-        border-radius: 25px;
-      }
-      
-      .control-header,
-      .info-header {
-        padding: 20px;
-      }
-      
-      .layers-list,
-      .info-content {
-        padding: 20px;
-      }
-      
-      .cesium-controls {
-        bottom: 20px;
-        padding: 12px;
-        border-radius: 20px;
-      }
-      
-      .btn-cesium {
-        min-width: 110px;
-        padding: 10px 15px;
-        font-size: 0.85em;
-      }
-      
-      .cesium-legend {
-        bottom: 20px;
-        right: 20px;
-        padding: 20px;
-      }
-    }
-
-    @media (max-width: 576px) {
-      .cesium-frame {
-        height: 400px;
-      }
-      
-      .cesium-control-panel,
-      .cesium-info-panel {
-        width: calc(100% - 30px);
-        left: 15px;
-        right: 15px;
-        position: relative;
-        margin-bottom: 15px;
-      }
-      
-      .cesium-control-panel {
-        top: 15px;
-      }
-      
-      .cesium-info-panel {
-        top: 15px;
-        transform: none;
-        opacity: 1;
-        position: relative;
-      }
-      
-      .cesium-controls {
-        position: relative;
-        bottom: auto;
-        left: auto;
-        transform: none;
-        margin: 20px auto;
-        width: calc(100% - 30px);
-      }
-      
-      .cesium-legend {
-        position: relative;
-        bottom: auto;
-        right: auto;
-        margin: 20px auto;
-        width: calc(100% - 30px);
-      }
-      
-      .control-buttons {
-        flex-direction: column;
-      }
-      
-      .btn-control {
-        width: 100%;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .cesium-frame {
-        height: 350px;
-      }
-      
-      .cesium-loading {
-        min-width: 280px;
-        padding: 30px 25px;
-      }
-      
-      .cesium-loading i {
-        font-size: 3.5rem;
-      }
-      
-      .cesium-loading p {
-        font-size: 1.1em;
-      }
-      
-      .loading-spinner {
-        width: 50px;
-        height: 50px;
-      }
-      
-      .layer-item {
-        padding: 12px;
-      }
-      
-      .layer-label {
-        gap: 12px;
-      }
-      
-      .layer-text {
-        font-size: 0.95em;
-      }
-    }
-
-    /* ===== EFECTOS DE PARTÍCULAS PREMIUM ===== */
-    .cesium-particles {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: -1;
-    }
-
-    .particle {
-      position: absolute;
-      border-radius: 50%;
-      opacity: 0.6;
-      animation: float 10s infinite ease-in-out;
-    }
-
-    .particle:nth-child(odd) {
-      background: var(--gold-primary);
-      box-shadow: 0 0 20px var(--gold-primary);
-    }
-
-    .particle:nth-child(even) {
-      background: var(--primary-emerald);
-      box-shadow: 0 0 20px var(--primary-emerald);
-    }
-
-    @keyframes float {
-      0%, 100% { 
-        transform: translateY(0px) rotate(0deg) scale(1); 
-        opacity: 0.4;
-      }
-      33% { 
-        transform: translateY(-30px) rotate(120deg) scale(1.2);
-        opacity: 0.8;
-      }
-      66% { 
-        transform: translateY(15px) rotate(240deg) scale(0.8);
-        opacity: 0.6;
-      }
-    }
-
-    /* ===== ANIMACIONES ESPECIALES PREMIUM ===== */
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(50px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes glow {
-      0%, 100% { 
-        box-shadow: 
-          0 0 10px currentColor,
-          var(--gold-glow);
-      }
-      50% { 
-        box-shadow: 
-          0 0 25px currentColor,
-          0 0 40px currentColor,
-          var(--neon-glow);
-      }
-    }
-
-    .glow {
-      animation: glow 3s ease-in-out infinite;
-    }
-
-    /* ===== MEJORAS PARA LOS CONTROLES NATIVOS DE CESIUM ===== */
-    .cesium-viewer-toolbar {
-      background: var(--glass-bg) !important;
-      backdrop-filter: var(--blur-effect) !important;
-      border: 1px solid var(--glass-border) !important;
-      border-radius: 20px !important;
-      box-shadow: var(--glass-shadow), var(--gold-glow) !important;
-    }
-
-    .cesium-button {
-      background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(10, 92, 54, 0.1)) !important;
-      border: 1px solid var(--glass-border) !important;
-      border-radius: 12px !important;
-      transition: all 0.4s ease !important;
-      color: var(--white-premium) !important;
-    }
-
-    .cesium-button:hover {
-      background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(10, 92, 54, 0.2)) !important;
-      transform: translateY(-3px) !important;
-      box-shadow: 
-        0 6px 25px rgba(0,0,0,0.4),
-        var(--gold-glow) !important;
-    }
-
-    /* ===== SECCIONES GENERALES RESPONSIVE ===== */
-    .section-title {
-      font-size: 3em;
-      font-weight: 800;
-      text-align: center;
-      margin-bottom: 20px;
-      background: linear-gradient(135deg, var(--gold-primary), var(--primary-emerald-light));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      text-shadow: 0 4px 8px rgba(0,0,0,0.3);
-    }
-
-    .section-description {
-      font-size: 1.2em;
-      text-align: center;
-      margin-bottom: 40px;
-      color: var(--gold-light);
-      max-width: 800px;
-      margin-left: auto;
-      margin-right: auto;
-      line-height: 1.6;
-    }
-
-    @media (max-width: 768px) {
-      .section-title {
-        font-size: 2.5em;
-      }
-      
-      .section-description {
-        font-size: 1.1em;
-        padding: 0 20px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .section-title {
-        font-size: 2em;
-      }
-      
-      .section-description {
-        font-size: 1em;
-      }
-    }
-
-    /* ===== NAVEGACIÓN RESPONSIVE ===== */
+    /* ===== NAVEGACIÓN PREMIUM ===== */
     .navbar {
       background: rgba(10, 10, 10, 0.95);
-      backdrop-filter: blur(20px);
+      backdrop-filter: blur(30px);
       border-bottom: 1px solid var(--glass-border);
-      padding: 15px 0;
+      padding: 20px 0;
       position: fixed;
       width: 100%;
       top: 0;
       z-index: 10000;
+      transition: all 0.4s ease;
+    }
+
+    .navbar.scrolled {
+      padding: 15px 0;
+      background: rgba(10, 10, 10, 0.98);
     }
 
     .nav-container {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      max-width: 1200px;
+      max-width: 1400px;
       margin: 0 auto;
-      padding: 0 20px;
+      padding: 0 30px;
     }
 
     .nav-logo {
-      font-size: 1.8em;
-      font-weight: 800;
+      font-size: 2.2em;
+      font-weight: 900;
       color: var(--gold-primary);
       text-decoration: none;
+      background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 4px 8px rgba(0,0,0,0.3);
     }
 
     .nav-menu {
       display: flex;
       list-style: none;
-      gap: 30px;
+      gap: 40px;
     }
 
     .nav-link {
       color: var(--white-premium);
       text-decoration: none;
       font-weight: 600;
-      transition: all 0.3s ease;
-      padding: 8px 16px;
-      border-radius: 10px;
+      transition: all 0.4s ease;
+      padding: 12px 24px;
+      border-radius: 15px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nav-link::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.2), transparent);
+      transition: left 0.6s;
+    }
+
+    .nav-link:hover::before {
+      left: 100%;
     }
 
     .nav-link:hover,
     .nav-link.active {
       background: linear-gradient(135deg, var(--primary-emerald), var(--gold-primary));
       color: var(--black-premium);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
     }
 
     .nav-toggle {
       display: none;
-      font-size: 1.5em;
+      font-size: 1.8em;
       color: var(--gold-primary);
       cursor: pointer;
+      transition: all 0.3s ease;
     }
 
-    @media (max-width: 768px) {
-      .nav-menu {
-        position: fixed;
-        top: 70px;
-        left: -100%;
-        width: 100%;
-        background: rgba(10, 10, 10, 0.98);
-        backdrop-filter: blur(30px);
-        flex-direction: column;
-        align-items: center;
-        padding: 40px 0;
-        transition: left 0.3s ease;
-        border-top: 1px solid var(--glass-border);
-      }
-      
-      .nav-menu.active {
-        left: 0;
-      }
-      
-      .nav-toggle {
-        display: block;
-      }
-      
-      .nav-link {
-        padding: 15px 30px;
-        font-size: 1.1em;
-      }
+    .nav-toggle:hover {
+      transform: scale(1.1);
     }
 
-    /* ===== HERO SECTION RESPONSIVE ===== */
+    /* ===== HERO SECTION PREMIUM ===== */
     .hero {
       height: 100vh;
       position: relative;
@@ -1351,7 +162,7 @@
       align-items: center;
       justify-content: center;
       overflow: hidden;
-      margin-top: 70px;
+      margin-top: 80px;
     }
 
     .hero-video-bg {
@@ -1367,6 +178,7 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
+      filter: brightness(0.7);
     }
 
     .hero-overlay {
@@ -1375,7 +187,10 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(135deg, rgba(10, 10, 10, 0.7), rgba(10, 92, 54, 0.3));
+      background: linear-gradient(135deg, 
+        rgba(10, 10, 10, 0.8) 0%, 
+        rgba(10, 92, 54, 0.4) 50%, 
+        rgba(212, 175, 55, 0.2) 100%);
       z-index: -1;
     }
 
@@ -1383,57 +198,654 @@
       text-align: center;
       color: var(--white-premium);
       z-index: 1;
-      padding: 0 20px;
+      padding: 0 30px;
+      max-width: 900px;
     }
 
     .hero-title {
-      font-size: 4.5em;
+      font-size: 5.5em;
       font-weight: 900;
-      margin-bottom: 20px;
-      background: linear-gradient(135deg, var(--gold-primary), var(--white-premium));
+      margin-bottom: 30px;
+      background: linear-gradient(135deg, var(--gold-primary), var(--white-premium), var(--gold-light));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      text-shadow: 0 4px 8px rgba(0,0,0,0.5);
+      text-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      line-height: 1.1;
     }
 
-    @media (max-width: 768px) {
-      .hero-title {
-        font-size: 3em;
+    .hero-subtitle {
+      font-size: 1.8em;
+      color: var(--gold-light);
+      margin-bottom: 40px;
+      font-weight: 500;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+
+    .hero-cta {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--primary-emerald), var(--gold-primary));
+      color: var(--black-premium);
+      text-decoration: none;
+      padding: 18px 45px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 1.2em;
+      transition: all 0.4s ease;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-cta::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.6s;
+    }
+
+    .hero-cta:hover::before {
+      left: 100%;
+    }
+
+    .hero-cta:hover {
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.5), 0 0 30px rgba(212, 175, 55, 0.4);
+    }
+
+    .hero-scroll-indicator {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      color: var(--gold-light);
+      animation: bounce 2s infinite;
+    }
+
+    .scroll-icon {
+      width: 40px;
+      height: 40px;
+      border: 2px solid var(--gold-primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px;
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0) translateX(-50%);
+      }
+      40% {
+        transform: translateY(-10px) translateX(-50%);
+      }
+      60% {
+        transform: translateY(-5px) translateX(-50%);
       }
     }
 
-    @media (max-width: 480px) {
-      .hero-title {
-        font-size: 2.5em;
-      }
+    /* ===== SECCIONES GENERALES ===== */
+    section {
+      padding: 100px 0;
+      position: relative;
     }
 
-    /* ===== FOOTER RESPONSIVE ===== */
+    .section-title {
+      font-size: 3.5em;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 30px;
+      background: linear-gradient(135deg, var(--gold-primary), var(--primary-emerald-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      position: relative;
+    }
+
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 4px;
+      background: linear-gradient(135deg, var(--gold-primary), var(--primary-emerald));
+      border-radius: 2px;
+    }
+
+    .section-description {
+      font-size: 1.3em;
+      text-align: center;
+      margin-bottom: 60px;
+      color: var(--gold-light);
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.7;
+    }
+
+    /* ===== MAPA 2D PREMIUM ===== */
+    .map-section {
+      background: linear-gradient(135deg, var(--black-dark) 0%, var(--black-premium) 100%);
+      position: relative;
+    }
+
+    .map-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 80%, rgba(10, 92, 54, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(212, 175, 55, 0.05) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .map-container {
+      position: relative;
+      border-radius: 25px;
+      overflow: hidden;
+      box-shadow: 
+        var(--glass-shadow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        0 0 0 1px rgba(212, 175, 55, 0.1);
+      border: 1px solid var(--glass-border);
+    }
+
+    .map-frame {
+      width: 100%;
+      height: 600px;
+      position: relative;
+      background: linear-gradient(135deg, var(--black-dark) 0%, var(--black-premium) 100%);
+    }
+
+    .map-loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: var(--white-premium);
+      z-index: 1000;
+    }
+
+    .map-loading i {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      display: block;
+      background: linear-gradient(135deg, var(--gold-primary), var(--primary-emerald));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ===== CESIUM 3D PREMIUM ===== */
+    .map3d-section {
+      background: linear-gradient(135deg, var(--black-premium) 0%, var(--black-dark) 100%);
+      position: relative;
+    }
+
+    .cesium-container {
+      position: relative;
+      border-radius: 30px;
+      overflow: hidden;
+      box-shadow: 
+        var(--glass-shadow),
+        var(--neon-glow),
+        var(--gold-glow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      margin: 40px 0;
+      border: 2px solid var(--glass-border);
+      background: linear-gradient(145deg, var(--black-dark) 0%, var(--black-premium) 50%, var(--black-dark) 100%);
+    }
+
+    .cesium-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 80%, rgba(10, 92, 54, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(212, 175, 55, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .cesium-frame {
+      width: 100%;
+      height: 800px;
+      position: relative;
+      background: linear-gradient(135deg, var(--black-dark) 0%, var(--black-premium) 100%);
+      border-radius: 28px;
+    }
+
+    /* Loading Screen Premium */
+    .cesium-loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: var(--white-premium);
+      z-index: 1000;
+      background: rgba(10, 10, 10, 0.95);
+      backdrop-filter: var(--blur-effect);
+      padding: 60px 50px;
+      border-radius: 30px;
+      border: 2px solid var(--glass-border);
+      box-shadow: var(--glass-shadow), var(--gold-glow);
+      min-width: 350px;
+    }
+
+    .cesium-loading i {
+      font-size: 5rem;
+      margin-bottom: 30px;
+      display: block;
+      background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: pulse 2s infinite;
+      filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.4));
+    }
+
+    .cesium-loading p {
+      margin: 0 0 35px 0;
+      font-size: 1.4em;
+      font-weight: 600;
+      color: var(--gold-light);
+    }
+
+    .loading-spinner {
+      border: 4px solid rgba(212, 175, 55, 0.1);
+      border-top: 4px solid var(--gold-primary);
+      border-right: 4px solid var(--primary-emerald);
+      border-bottom: 4px solid var(--gold-light);
+      border-radius: 50%;
+      width: 70px;
+      height: 70px;
+      animation: spin 1.5s linear infinite;
+      margin: 0 auto;
+      box-shadow: var(--neon-glow), var(--gold-glow);
+      position: relative;
+    }
+
+    .loading-spinner::after {
+      content: '';
+      position: absolute;
+      top: -8px;
+      left: -8px;
+      right: -8px;
+      bottom: -8px;
+      border-radius: 50%;
+      background: conic-gradient(transparent, var(--gold-primary), transparent);
+      animation: rotate 3s linear infinite;
+      z-index: -1;
+    }
+
+    /* Panel de Control Premium */
+    .cesium-control-panel {
+      position: absolute;
+      top: 35px;
+      left: 35px;
+      width: 420px;
+      background: var(--glass-bg);
+      backdrop-filter: var(--blur-effect);
+      border: 2px solid var(--glass-border);
+      border-radius: 35px;
+      box-shadow: var(--glass-shadow), var(--gold-glow);
+      z-index: 1000;
+      overflow: hidden;
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .cesium-control-panel:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 
+        0 40px 70px rgba(0, 0, 0, 0.7),
+        0 0 50px rgba(10, 92, 54, 0.4),
+        var(--gold-glow);
+    }
+
+    .control-header {
+      background: linear-gradient(135deg, var(--primary-emerald), var(--primary-emerald-light));
+      padding: 35px;
+      color: var(--white-premium);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .control-header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(212, 175, 55, 0.15), transparent);
+      transform: rotate(45deg);
+      animation: shimmer 10s infinite linear;
+    }
+
+    .control-header h3 {
+      margin: 0;
+      font-size: 1.8em;
+      font-weight: 800;
+      text-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      position: relative;
+      z-index: 2;
+      letter-spacing: 0.8px;
+    }
+
+    .control-buttons {
+      display: flex;
+      gap: 18px;
+      margin-top: 25px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .btn-control {
+      flex: 1;
+      padding: 16px 24px;
+      border: none;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(10, 92, 54, 0.25));
+      color: var(--white-premium);
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.4s ease;
+      backdrop-filter: blur(25px);
+      border: 2px solid rgba(212, 175, 55, 0.4);
+      font-size: 1em;
+      position: relative;
+      overflow: hidden;
+      letter-spacing: 0.8px;
+    }
+
+    .btn-control::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.7s;
+    }
+
+    .btn-control:hover::before {
+      left: 100%;
+    }
+
+    .btn-control:hover {
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.35), rgba(10, 92, 54, 0.35));
+      transform: translateY(-4px);
+      box-shadow: 
+        0 10px 30px rgba(0,0,0,0.5),
+        0 0 20px rgba(212, 175, 55, 0.4);
+      border-color: rgba(212, 175, 55, 0.6);
+    }
+
+    /* Lista de Capas Premium */
+    .layers-list {
+      max-height: 65vh;
+      overflow-y: auto;
+      padding: 30px;
+      background: linear-gradient(135deg, rgba(10, 10, 10, 0.85), rgba(26, 26, 26, 0.95));
+    }
+
+    .layers-list::-webkit-scrollbar {
+      width: 12px;
+    }
+
+    .layers-list::-webkit-scrollbar-track {
+      background: rgba(212, 175, 55, 0.15);
+      border-radius: 10px;
+    }
+
+    .layers-list::-webkit-scrollbar-thumb {
+      background: linear-gradient(var(--primary-emerald), var(--gold-primary));
+      border-radius: 10px;
+      border: 3px solid rgba(10, 10, 10, 0.9);
+    }
+
+    /* Items de Capa Ultra Premium */
+    .layer-item {
+      display: flex;
+      align-items: center;
+      padding: 20px;
+      margin: 12px 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+      border-radius: 20px;
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 2px solid transparent;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .layer-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.15), transparent);
+      transition: left 1s;
+    }
+
+    .layer-item:hover::before {
+      left: 100%;
+    }
+
+    .layer-item:hover {
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(10, 92, 54, 0.15));
+      border-color: rgba(212, 175, 55, 0.4);
+      transform: translateX(15px) scale(1.04);
+      box-shadow: 
+        0 12px 35px rgba(0,0,0,0.4),
+        0 0 25px rgba(10, 92, 54, 0.3);
+    }
+
+    .layer-label {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      cursor: pointer;
+      gap: 20px;
+      font-weight: 600;
+      color: var(--white-premium);
+      position: relative;
+      z-index: 2;
+    }
+
+    .layer-color {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 3px solid rgba(255, 255, 255, 0.5);
+      transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 
+        0 6px 20px rgba(0,0,0,0.5),
+        inset 0 2px 0 rgba(255, 255, 255, 0.3);
+      position: relative;
+    }
+
+    .layer-color::after {
+      content: '';
+      position: absolute;
+      top: -8px;
+      left: -8px;
+      right: -8px;
+      bottom: -8px;
+      border-radius: 50%;
+      background: inherit;
+      opacity: 0.5;
+      filter: blur(15px);
+      z-index: -1;
+    }
+
+    .layer-item:hover .layer-color {
+      transform: scale(1.5) rotate(20deg);
+      box-shadow: 
+        0 8px 30px rgba(0,0,0,0.6),
+        0 0 20px currentColor;
+    }
+
+    .layer-emoji {
+      font-size: 1.6em;
+      filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
+      transition: all 0.5s ease;
+    }
+
+    .layer-item:hover .layer-emoji {
+      transform: scale(1.4) rotate(-10deg);
+      filter: drop-shadow(0 8px 15px rgba(0,0,0,0.6));
+    }
+
+    .layer-text {
+      flex: 1;
+      font-size: 1.1em;
+      transition: all 0.5s ease;
+      font-weight: 500;
+    }
+
+    .layer-count {
+      background: linear-gradient(135deg, rgba(26, 26, 26, 0.95), rgba(10, 10, 10, 0.95));
+      color: var(--gold-light);
+      padding: 10px 16px;
+      border-radius: 18px;
+      font-size: 1em;
+      font-weight: 800;
+      min-width: 40px;
+      text-align: center;
+      border: 2px solid rgba(212, 175, 55, 0.4);
+      transition: all 0.5s ease;
+      backdrop-filter: blur(20px);
+      letter-spacing: 0.8px;
+    }
+
+    .layer-item:hover .layer-count {
+      background: linear-gradient(135deg, var(--primary-emerald), var(--primary-emerald-light));
+      color: var(--white-premium);
+      transform: scale(1.25);
+      box-shadow: 
+        0 6px 25px rgba(10, 92, 54, 0.6),
+        var(--gold-glow);
+    }
+
+    /* ===== GALERÍA PREMIUM ===== */
+    .gallery-section {
+      background: linear-gradient(135deg, var(--black-premium) 0%, var(--black-light) 100%);
+      position: relative;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 30px;
+      margin-bottom: 50px;
+    }
+
+    .gallery-item {
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--glass-shadow);
+      transition: all 0.4s ease;
+      border: 2px solid var(--glass-border);
+    }
+
+    .gallery-item:hover {
+      transform: translateY(-10px) scale(1.02);
+      box-shadow: 
+        0 25px 50px rgba(0,0,0,0.6),
+        var(--gold-glow);
+    }
+
+    .gallery-item img {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+      transition: all 0.4s ease;
+    }
+
+    .gallery-item:hover img {
+      transform: scale(1.1);
+    }
+
+    .gallery-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(transparent, rgba(10, 10, 10, 0.9));
+      padding: 30px;
+      transform: translateY(100%);
+      transition: all 0.4s ease;
+    }
+
+    .gallery-item:hover .gallery-overlay {
+      transform: translateY(0);
+    }
+
+    .gallery-overlay h3 {
+      color: var(--gold-primary);
+      margin-bottom: 10px;
+      font-size: 1.4em;
+      font-weight: 700;
+    }
+
+    .gallery-overlay p {
+      color: var(--white-premium);
+      font-size: 1em;
+      line-height: 1.5;
+    }
+
+    /* ===== FOOTER PREMIUM ===== */
     footer {
       background: linear-gradient(135deg, var(--black-premium), var(--black-dark));
       color: var(--gold-light);
       text-align: center;
-      padding: 40px 20px;
-      border-top: 1px solid var(--glass-border);
-      margin-top: 60px;
+      padding: 60px 30px;
+      border-top: 2px solid var(--glass-border);
+      margin-top: 80px;
       font-weight: 600;
+      font-size: 1.1em;
     }
 
     /* ===== BOTÓN BACK TO TOP ===== */
     #backToTop {
       position: fixed;
-      bottom: 30px;
-      right: 30px;
+      bottom: 40px;
+      right: 40px;
       background: linear-gradient(135deg, var(--primary-emerald), var(--gold-primary));
       color: var(--black-premium);
       border: none;
-      width: 60px;
-      height: 60px;
+      width: 70px;
+      height: 70px;
       border-radius: 50%;
       cursor: pointer;
-      font-size: 1.5em;
-      font-weight: 800;
+      font-size: 1.8em;
+      font-weight: 900;
       box-shadow: var(--glass-shadow), var(--gold-glow);
       transition: all 0.4s ease;
       z-index: 1000;
@@ -1441,25 +853,258 @@
     }
 
     #backToTop:hover {
-      transform: translateY(-5px) scale(1.1);
+      transform: translateY(-8px) scale(1.15);
       box-shadow: 
-        0 10px 30px rgba(0,0,0,0.5),
-        0 0 30px rgba(212, 175, 55, 0.6);
+        0 15px 40px rgba(0,0,0,0.6),
+        0 0 40px rgba(212, 175, 55, 0.7);
+    }
+
+    /* ===== RESPONSIVE COMPLETO ===== */
+    @media (max-width: 1200px) {
+      .container {
+        max-width: 1140px;
+        padding: 0 25px;
+      }
+      
+      .hero-title {
+        font-size: 4.5em;
+      }
+      
+      .cesium-frame {
+        height: 700px;
+      }
+    }
+
+    @media (max-width: 992px) {
+      .container {
+        max-width: 960px;
+      }
+      
+      .hero-title {
+        font-size: 4em;
+      }
+      
+      .section-title {
+        font-size: 3em;
+      }
+      
+      .cesium-frame {
+        height: 600px;
+      }
+      
+      .cesium-control-panel {
+        width: 380px;
+      }
+      
+      .nav-menu {
+        gap: 25px;
+      }
     }
 
     @media (max-width: 768px) {
-      #backToTop {
-        bottom: 20px;
-        right: 20px;
-        width: 50px;
-        height: 50px;
-        font-size: 1.3em;
+      .container {
+        padding: 0 20px;
       }
+      
+      section {
+        padding: 80px 0;
+      }
+      
+      .hero {
+        margin-top: 70px;
+      }
+      
+      .hero-title {
+        font-size: 3.2em;
+      }
+      
+      .hero-subtitle {
+        font-size: 1.4em;
+      }
+      
+      .section-title {
+        font-size: 2.5em;
+      }
+      
+      .section-description {
+        font-size: 1.1em;
+        padding: 0 15px;
+      }
+      
+      .cesium-frame {
+        height: 500px;
+      }
+      
+      .cesium-control-panel {
+        width: 340px;
+        left: 20px;
+        top: 20px;
+      }
+      
+      .nav-menu {
+        position: fixed;
+        top: 80px;
+        left: -100%;
+        width: 100%;
+        background: rgba(10, 10, 10, 0.98);
+        backdrop-filter: blur(40px);
+        flex-direction: column;
+        align-items: center;
+        padding: 50px 0;
+        transition: left 0.4s ease;
+        border-top: 2px solid var(--glass-border);
+        gap: 0;
+      }
+      
+      .nav-menu.active {
+        left: 0;
+      }
+      
+      .nav-link {
+        padding: 20px 40px;
+        font-size: 1.2em;
+        width: 100%;
+        text-align: center;
+        border-radius: 0;
+        border-bottom: 1px solid var(--glass-border);
+      }
+      
+      .nav-toggle {
+        display: block;
+      }
+      
+      .gallery-grid {
+        grid-template-columns: 1fr;
+        gap: 25px;
+      }
+      
+      #backToTop {
+        bottom: 25px;
+        right: 25px;
+        width: 60px;
+        height: 60px;
+        font-size: 1.5em;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .container {
+        padding: 0 15px;
+      }
+      
+      section {
+        padding: 60px 0;
+      }
+      
+      .hero-title {
+        font-size: 2.5em;
+      }
+      
+      .hero-subtitle {
+        font-size: 1.2em;
+      }
+      
+      .section-title {
+        font-size: 2em;
+      }
+      
+      .cesium-frame {
+        height: 400px;
+      }
+      
+      .cesium-control-panel {
+        width: calc(100% - 30px);
+        left: 15px;
+        top: 15px;
+        position: relative;
+        margin-bottom: 20px;
+      }
+      
+      .cesium-loading {
+        min-width: 300px;
+        padding: 40px 30px;
+      }
+      
+      .control-header {
+        padding: 25px;
+      }
+      
+      .control-buttons {
+        flex-direction: column;
+      }
+      
+      .btn-control {
+        width: 100%;
+      }
+      
+      .nav-container {
+        padding: 0 20px;
+      }
+      
+      .nav-logo {
+        font-size: 1.8em;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero-title {
+        font-size: 2.2em;
+      }
+      
+      .section-title {
+        font-size: 1.8em;
+      }
+      
+      .cesium-frame {
+        height: 350px;
+      }
+      
+      .cesium-loading {
+        min-width: 280px;
+        padding: 30px 25px;
+      }
+      
+      .cesium-loading i {
+        font-size: 4rem;
+      }
+      
+      .gallery-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ===== ANIMACIONES ===== */
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { 
+        opacity: 1; 
+        transform: scale(1) rotate(0deg);
+        filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.4));
+      }
+      50% { 
+        opacity: 0.8; 
+        transform: scale(1.1) rotate(5deg);
+        filter: drop-shadow(0 0 25px rgba(212, 175, 55, 0.7));
+      }
+    }
+
+    @keyframes shimmer {
+      0% { transform: rotate(45deg) translateX(-100%); }
+      100% { transform: rotate(45deg) translateX(100%); }
     }
   </style>
 </head>
 <body>
-  <!-- Navigation -->
+  <!-- Navigation Premium -->
   <nav class="navbar">
     <div class="nav-container">
       <a href="#" class="nav-logo">Isla del Sol</a>
@@ -1468,51 +1113,53 @@
       </div>
       <ul class="nav-menu">
         <li><a href="#inicio" class="nav-link active">Inicio</a></li>
-        <li><a href="#mapSection" class="nav-link">Mapa Turístico</a></li>
-        <li><a href="#map3dSection" class="nav-link">3D</a></li>
+        <li><a href="#mapSection" class="nav-link">Mapa 2D</a></li>
+        <li><a href="#map3dSection" class="nav-link">Experiencia 3D</a></li>
         <li><a href="#gallery" class="nav-link">Galería</a></li>
-        <li><a href="gestion-ambiental.html" class="nav-link">Gestión Ambiental</a></li>
-        <li><a href="mapas-informacion.html" class="nav-link">Capas de Información</a></li>
+        <li><a href="#about" class="nav-link">Nosotros</a></li>
+        <li><a href="#contact" class="nav-link">Contacto</a></li>
       </ul>
     </div>
   </nav>
 
-  <!-- Hero Section -->
+  <!-- Hero Section Premium -->
   <section id="inicio" class="hero">
     <div class="hero-video-bg">
       <video autoplay muted loop playsinline id="heroVideo">
-        <source src="assets/videos/videoplayback.webm" type="video/webm">
-        Tu navegador no soporta videos WebM.
+        <source src="assets/videos/hero-premium.mp4" type="video/mp4">
+        <source src="assets/videos/hero-premium.webm" type="video/webm">
+        Tu navegador no soporta el video.
       </video>
     </div>
     <div class="hero-overlay"></div>
     <div class="hero-content">
       <h1 class="hero-title">Isla del Sol</h1>
-      <p class="hero-subtitle">Lago Titicaca - Bolivia</p>
+      <p class="hero-subtitle">Descubre la magia del Lago Titicaca en una experiencia visual única</p>
+      <button class="hero-cta" id="exploreBtn">
+        <i class="fas fa-compass"></i> Explorar Ahora
+      </button>
     </div>
     <div class="hero-scroll-indicator">
       <div class="scroll-icon">
         <i class="fas fa-chevron-down"></i>
       </div>
-      <span>Desplaza para explorar</span>
+      <span>Desplázate para descubrir</span>
     </div>
   </section>
 
-  <button id="backToTop" title="Volver arriba">↑</button>
-
-  <!-- 2. MAPA INTERACTIVO MEJORADO -->
-  <section id="mapSection" class="map-section fade-in">
+  <!-- Mapa 2D Section -->
+  <section id="mapSection" class="map-section">
     <div class="container">
-      <h2 class="section-title">Mapa Turístico Interactivo</h2>
+      <h2 class="section-title">Mapa Interactivo 2D</h2>
       <p class="section-description">
-        Explora todos los puntos de interés, rutas y servicios de la Isla del Sol en nuestro mapa 2D interactivo
+        Navega por todos los puntos de interés, rutas turísticas y servicios de la Isla del Sol con nuestro mapa interactivo de última generación
       </p>
       
       <div class="map-container">
         <div id="map" class="map-frame">
           <div class="map-loading">
             <i class="fas fa-map-marked-alt"></i>
-            <p>Inicializando mapa interactivo...</p>
+            <p>Cargando mapa interactivo...</p>
             <div class="loading-spinner"></div>
           </div>
         </div>
@@ -1520,32 +1167,33 @@
     </div>
   </section>
 
-  <!-- 3. ✅ MAPA 3D SUPREMO CON CESIUM PREMIUM -->
+  <!-- Cesium 3D Section Premium -->
   <section id="map3dSection" class="map3d-section">
     <div class="container">
-      <h2 class="section-title">Isla del Sol - Vista 3D Premium</h2>
+      <h2 class="section-title">Experiencia 3D Inmersiva</h2>
       <p class="section-description">
-        Explora la isla en una experiencia 3D inmersiva con terreno real, efectos visuales avanzados y controles intuitivos
+        Sumérgete en la belleza de la Isla del Sol con nuestra tecnología 3D de vanguardia. Explora el terreno, sitios arqueológicos y paisajes como nunca antes.
       </p>
       
       <div class="cesium-container">
         <div id="cesiumContainer" class="cesium-frame">
+          <!-- Loading Screen -->
           <div class="cesium-loading">
             <i class="fas fa-globe-americas"></i>
-            <p>Inicializando mundo 3D premium...</p>
+            <p>Inicializando experiencia 3D premium...</p>
             <div class="loading-spinner"></div>
           </div>
           
-          <!-- Panel de Control Premium -->
+          <!-- Panel de Control -->
           <div class="cesium-control-panel">
             <div class="control-header">
               <h3><i class="fas fa-layer-group"></i> Capas de Visualización</h3>
               <div class="control-buttons">
                 <button class="btn-control" id="btn-all-layers">
-                  <i class="fas fa-eye"></i> Todas
+                  <i class="fas fa-eye"></i> Activar Todas
                 </button>
                 <button class="btn-control" id="btn-none-layers">
-                  <i class="fas fa-eye-slash"></i> Ninguna
+                  <i class="fas fa-eye-slash"></i> Desactivar Todas
                 </button>
               </div>
             </div>
@@ -1553,7 +1201,7 @@
             <div class="layers-list">
               <!-- Categoría: Infraestructura -->
               <div class="category-section">
-                <h4><i class="fas fa-road"></i> Infraestructura</h4>
+                <h4><i class="fas fa-road"></i> Infraestructura y Rutas</h4>
                 
                 <div class="layer-item">
                   <input type="checkbox" id="layer-roads" checked>
@@ -1588,7 +1236,7 @@
               
               <!-- Categoría: Sitios Arqueológicos -->
               <div class="category-section">
-                <h4><i class="fas fa-landmark"></i> Sitios Arqueológicos</h4>
+                <h4><i class="fas fa-landmark"></i> Patrimonio Cultural</h4>
                 
                 <div class="layer-item">
                   <input type="checkbox" id="layer-ruins" checked>
@@ -1635,149 +1283,51 @@
                   </label>
                 </div>
               </div>
-              
-              <!-- Categoría: Natural -->
-              <div class="category-section">
-                <h4><i class="fas fa-mountain"></i> Recursos Naturales</h4>
-                
-                <div class="layer-item">
-                  <input type="checkbox" id="layer-water">
-                  <label for="layer-water" class="layer-label">
-                    <span class="layer-color" style="background: #06b6d4;"></span>
-                    <span class="layer-emoji">💧</span>
-                    <span class="layer-text">Fuentes de Agua</span>
-                    <span class="layer-count">9</span>
-                  </label>
-                </div>
-                
-                <div class="layer-item">
-                  <input type="checkbox" id="layer-views">
-                  <label for="layer-views" class="layer-label">
-                    <span class="layer-color" style="background: #10b981;"></span>
-                    <span class="layer-emoji">👁️</span>
-                    <span class="layer-text">Miradores Naturales</span>
-                    <span class="layer-count">6</span>
-                  </label>
-                </div>
-              </div>
             </div>
             
             <div class="panel-footer">
               <div class="system-stats">
                 <span><i class="fas fa-layer-group"></i> 8 Capas</span>
-                <span><i class="fas fa-database"></i> 2.4MB</span>
-                <span><i class="fas fa-memory"></i> 64%</span>
+                <span><i class="fas fa-database"></i> 3.2MB</span>
+                <span><i class="fas fa-memory"></i> 72%</span>
               </div>
             </div>
-          </div>
-          
-          <!-- Panel de Información Premium -->
-          <div class="cesium-info-panel">
-            <div class="info-header">
-              <h3><i class="fas fa-info-circle"></i> Información del Punto</h3>
-              <button class="btn-close" id="info-close">
-                <i class="fas fa-times"></i>
-              </button>
-            </div>
-            <div class="info-content">
-              <div class="no-selection">
-                <i class="fas fa-mouse-pointer"></i>
-                <p>Selecciona un punto en el mapa para ver información detallada</p>
-              </div>
-              <div class="entity-info" style="display: none;">
-                <h3>Templo del Sol Inca</h3>
-                <div class="info-details">
-                  <div class="info-row">
-                    <span class="info-label">Tipo:</span>
-                    <span class="info-value">Sitio Arqueológico</span>
-                  </div>
-                  <div class="info-row">
-                    <span class="info-label">Altitud:</span>
-                    <span class="info-value">3,812 msnm</span>
-                  </div>
-                  <div class="info-row">
-                    <span class="info-label">Época:</span>
-                    <span class="info-value">Periodo Incaico (1438-1533)</span>
-                  </div>
-                  <div class="info-row">
-                    <span class="info-label">Estado:</span>
-                    <span class="info-value">Buen estado de conservación</span>
-                  </div>
-                  <div class="info-row">
-                    <span class="info-label">Descripción:</span>
-                    <span class="info-value">Templo ceremonial dedicado al dios Inti, construido con piedra labrada y orientado hacia el amanecer.</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Controles Inferiores Premium -->
-          <div class="cesium-controls">
-            <button class="btn-cesium" id="btn-reset-view">
-              <i class="fas fa-crosshairs"></i> Vista Inicial
-            </button>
-            <button class="btn-cesium" id="btn-day-night">
-              <i class="fas fa-moon"></i> Modo Noche
-            </button>
-            <button class="btn-cesium" id="btn-terrain">
-              <i class="fas fa-mountain"></i> Terreno 3D
-            </button>
-            <button class="btn-cesium" id="btn-screenshot">
-              <i class="fas fa-camera"></i> Capturar
-            </button>
-          </div>
-          
-          <!-- Leyenda Premium -->
-          <div class="cesium-legend">
-            <h4><i class="fas fa-map"></i> Leyenda</h4>
-            <ul>
-              <li>
-                <span class="legend-color" style="background: #d4af37;"></span>
-                <span>Infraestructura</span>
-              </li>
-              <li>
-                <span class="legend-color" style="background: #b8941f;"></span>
-                <span>Arqueología</span>
-              </li>
-              <li>
-                <span class="legend-color" style="background: #0a5c36;"></span>
-                <span>Natural</span>
-              </li>
-              <li>
-                <span class="legend-color" style="background: #f4e4a6;"></span>
-                <span>Servicios</span>
-              </li>
-            </ul>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- GALERÍA MEJORADA -->
+  <!-- Galería Premium -->
   <section id="gallery" class="gallery-section">
     <div class="container">
-      <h2 class="section-title">Galería de la Isla del Sol</h2>
+      <h2 class="section-title">Galería Premium</h2>
       <p class="section-description">
-        Descubre la belleza, cultura y paisajes únicos de este lugar sagrado a través de nuestra colección fotográfica
+        Descubre la belleza única de la Isla del Sol a través de nuestra exclusiva colección fotográfica en alta definición
       </p>
       
-      <!-- Grid de Galería simplificado para el ejemplo -->
       <div class="gallery-grid">
         <div class="gallery-item">
-          <img src="assets/images/paisaje1.jpg" alt="Amanecer en la Isla del Sol">
+          <img src="assets/images/amanecer-premium.jpg" alt="Amanecer en la Isla del Sol" loading="lazy">
           <div class="gallery-overlay">
-            <h3>Amanecer en la Isla</h3>
-            <p>Primeros rayos del sol iluminando el Lago Titicaca</p>
+            <h3>Amanecer Dorado</h3>
+            <p>Primeros rayos del sol iluminando las aguas sagradas del Titicaca</p>
           </div>
         </div>
         
         <div class="gallery-item">
-          <img src="assets/images/paisaje2.jpg" alt="Atardecer desde Palla Khasa">
+          <img src="assets/images/ruinas-premium.jpg" alt="Ruinas del Templo del Sol" loading="lazy">
           <div class="gallery-overlay">
-            <h3>Atardecer Místico</h3>
-            <p>Vista panorámica desde el mirador Palla Khasa</p>
+            <h3>Templo del Sol</h3>
+            <p>Antiguas ruinas incas con vista panorámica al lago sagrado</p>
+          </div>
+        </div>
+        
+        <div class="gallery-item">
+          <img src="assets/images/cultura-premium.jpg" alt="Cultura local Aymara" loading="lazy">
+          <div class="gallery-overlay">
+            <h3>Tradición Viva</h3>
+            <p>Comunidad local preservando sus costumbres y tradiciones ancestrales</p>
           </div>
         </div>
       </div>
@@ -1785,72 +1335,62 @@
   </section>
 
   <footer>
-    PROYECTO UNIVERSITARIO/AQUINO-UDABOL - SIG | Isla del Sol © 2025
+    PROYECTO UNIVERSITARIO | AQUINO-UDABOL - SIG<br>
+    Isla del Sol © 2025 - Experiencia Visual Premium
   </footer>
 
-  <!-- JavaScript -->
+  <button id="backToTop" title="Volver al inicio">↑</button>
+
+  <!-- SCRIPTS -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <!-- SCRIPT DE CESIUM -->
   <script src="https://cesium.com/downloads/cesiumjs/releases/1.95/Build/Cesium/Cesium.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 
-  <!-- Script de inicialización premium -->
+  <!-- SCRIPT PREMIUM -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       console.log('🚀 Iniciando experiencia premium...');
       
-      // Inicializar animaciones
+      // Inicializar AOS
       AOS.init({
         duration: 1200,
         once: true,
         offset: 100
       });
       
-      // Inicializar ScrollTrigger
-      gsap.registerPlugin(ScrollTrigger);
-      
-      // Animaciones del hero
-      gsap.from('.hero-title', {
-        duration: 1.8,
-        y: 100,
-        opacity: 0,
-        ease: 'power4.out'
-      });
-      
-      gsap.from('.hero-subtitle', {
-        duration: 1.8,
-        y: 50,
-        opacity: 0,
-        delay: 0.5,
-        ease: 'power4.out'
-      });
-      
-      // Animaciones al scroll
-      gsap.utils.toArray('.section-title').forEach(title => {
-        gsap.from(title, {
-          scrollTrigger: {
-            trigger: title,
-            start: 'top 80%'
-          },
-          duration: 1.2,
-          y: 60,
-          opacity: 0,
-          ease: 'power3.out'
-        });
-      });
-      
       // Navegación móvil
       const navToggle = document.getElementById('navToggle');
       const navMenu = document.querySelector('.nav-menu');
+      const navLinks = document.querySelectorAll('.nav-link');
       
       if (navToggle) {
         navToggle.addEventListener('click', () => {
           navMenu.classList.toggle('active');
+          navToggle.innerHTML = navMenu.classList.contains('active') ? 
+            '<i class="fas fa-times"></i>' : '<i class="fas fa-bars"></i>';
         });
       }
+      
+      // Cerrar menú al hacer click en un link
+      navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+          navMenu.classList.remove('active');
+          navToggle.innerHTML = '<i class="fas fa-bars"></i>';
+        });
+      });
+      
+      // Navbar scroll effect
+      window.addEventListener('scroll', () => {
+        const navbar = document.querySelector('.navbar');
+        if (window.scrollY > 100) {
+          navbar.classList.add('scrolled');
+        } else {
+          navbar.classList.remove('scrolled');
+        }
+      });
       
       // Botón back to top
       const backToTop = document.getElementById('backToTop');
@@ -1875,53 +1415,151 @@
         });
       });
       
-      // Interactividad del panel Cesium
-      const infoPanel = document.querySelector('.cesium-info-panel');
-      const infoClose = document.getElementById('info-close');
-      const layerItems = document.querySelectorAll('.layer-item input[type="checkbox"]');
-      
-      if (infoClose) {
-        infoClose.addEventListener('click', () => {
-          infoPanel.classList.remove('visible');
+      // Botón explorar
+      const exploreBtn = document.getElementById('exploreBtn');
+      if (exploreBtn) {
+        exploreBtn.addEventListener('click', () => {
+          document.getElementById('map3dSection').scrollIntoView({
+            behavior: 'smooth'
+          });
         });
       }
       
-      // Simular selección de entidad
+      // Animaciones GSAP
+      gsap.registerPlugin(ScrollTrigger);
+      
+      // Hero animations
+      gsap.from('.hero-title', {
+        duration: 1.8,
+        y: 100,
+        opacity: 0,
+        ease: 'power4.out'
+      });
+      
+      gsap.from('.hero-subtitle', {
+        duration: 1.8,
+        y: 50,
+        opacity: 0,
+        delay: 0.5,
+        ease: 'power4.out'
+      });
+      
+      gsap.from('.hero-cta', {
+        duration: 1.5,
+        y: 30,
+        opacity: 0,
+        delay: 1,
+        ease: 'back.out(1.7)'
+      });
+      
+      // Section animations
+      gsap.utils.toArray('.section-title').forEach(title => {
+        gsap.from(title, {
+          scrollTrigger: {
+            trigger: title,
+            start: 'top 80%'
+          },
+          duration: 1.2,
+          y: 60,
+          opacity: 0,
+          ease: 'power3.out'
+        });
+      });
+      
+      // Gallery animations
+      gsap.utils.toArray('.gallery-item').forEach((item, i) => {
+        gsap.from(item, {
+          scrollTrigger: {
+            trigger: item,
+            start: 'top 85%'
+          },
+          duration: 1,
+          y: 50,
+          opacity: 0,
+          delay: i * 0.1,
+          ease: 'power3.out'
+        });
+      });
+      
+      // Cesium loading simulation
       setTimeout(() => {
-        // Esto simularía la selección de una entidad en el mapa
-        // En una implementación real, esto se conectaría con Cesium
-        const entityInfo = document.querySelector('.entity-info');
-        const noSelection = document.querySelector('.no-selection');
-        
-        if (entityInfo && noSelection) {
-          // Simular click en un layer para mostrar info
-          layerItems.forEach(item => {
-            item.addEventListener('change', function() {
-              if (this.checked) {
-                noSelection.style.display = 'none';
-                entityInfo.style.display = 'block';
-                infoPanel.classList.add('visible');
-              }
-            });
+        const cesiumLoading = document.querySelector('.cesium-loading');
+        if (cesiumLoading) {
+          gsap.to(cesiumLoading, {
+            opacity: 0,
+            duration: 0.8,
+            onComplete: () => {
+              cesiumLoading.style.display = 'none';
+            }
           });
         }
-      }, 2000);
+      }, 4000);
       
-      // Efectos de partículas para Cesium container
-      function createParticles() {
-        const container = document.querySelector('.cesium-container');
-        if (!container) return;
-        
-        for (let i = 0; i < 15; i++) {
+      // Layer interactions
+      const layerItems = document.querySelectorAll('.layer-item input[type="checkbox"]');
+      layerItems.forEach(item => {
+        item.addEventListener('change', function() {
+          const layerItem = this.closest('.layer-item');
+          if (this.checked) {
+            gsap.to(layerItem, {
+              scale: 1.05,
+              duration: 0.3,
+              yoyo: true,
+              repeat: 1
+            });
+          }
+        });
+      });
+      
+      // Control buttons
+      const btnAllLayers = document.getElementById('btn-all-layers');
+      const btnNoneLayers = document.getElementById('btn-none-layers');
+      
+      if (btnAllLayers) {
+        btnAllLayers.addEventListener('click', () => {
+          layerItems.forEach(item => {
+            item.checked = true;
+          });
+          gsap.to(btnAllLayers, {
+            scale: 1.1,
+            duration: 0.2,
+            yoyo: true,
+            repeat: 1
+          });
+        });
+      }
+      
+      if (btnNoneLayers) {
+        btnNoneLayers.addEventListener('click', () => {
+          layerItems.forEach(item => {
+            item.checked = false;
+          });
+          gsap.to(btnNoneLayers, {
+            scale: 1.1,
+            duration: 0.2,
+            yoyo: true,
+            repeat: 1
+          });
+        });
+      }
+      
+      console.log('🎯 Experiencia premium completamente inicializada');
+    });
+    
+    // Efectos de partículas para fondo
+    function createParticles() {
+      const sections = document.querySelectorAll('.map3d-section, .map-section');
+      
+      sections.forEach(section => {
+        for (let i = 0; i < 8; i++) {
           const particle = document.createElement('div');
           particle.className = 'particle';
           
-          // Posición aleatoria
-          const size = Math.random() * 8 + 4;
+          const size = Math.random() * 6 + 3;
           const posX = Math.random() * 100;
           const posY = Math.random() * 100;
-          const delay = Math.random() * 10;
-          const duration = Math.random() * 10 + 10;
+          const delay = Math.random() * 5;
+          const duration = Math.random() * 8 + 8;
           
           particle.style.width = `${size}px`;
           particle.style.height = `${size}px`;
@@ -1930,27 +1568,13 @@
           particle.style.animationDelay = `${delay}s`;
           particle.style.animationDuration = `${duration}s`;
           
-          container.appendChild(particle);
+          section.appendChild(particle);
         }
-      }
-      
-      createParticles();
-      
-      console.log('🎯 Experiencia premium inicializada correctamente');
-    });
+      });
+    }
     
-    // Simular carga de Cesium
-    window.addEventListener('load', function() {
-      const cesiumLoading = document.querySelector('.cesium-loading');
-      if (cesiumLoading) {
-        setTimeout(() => {
-          cesiumLoading.style.opacity = '0';
-          setTimeout(() => {
-            cesiumLoading.style.display = 'none';
-          }, 500);
-        }, 3000);
-      }
-    });
+    window.addEventListener('load', createParticles);
   </script>
 </body>
 </html>
+
