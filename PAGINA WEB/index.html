@@ -1348,29 +1348,31 @@
     </div>
   </nav>
 
-  <!-- Hero Section -->
-  <section id="inicio" class="hero">
+<!-- Hero Section CON TU VIDEO -->
+<section id="inicio" class="hero">
     <div class="hero-video-bg">
-      <video autoplay muted loop playsinline id="heroVideo">
-        <source src="assets/videos/videoplayback.webm" type="video/webm">
-        Tu navegador no soporta videos WebM.
-      </video>
+        <video autoplay muted loop playsinline id="heroVideo">
+            <!-- TU VIDEO MP4 -->
+            <source src="MP4.VIDEO.mp4" type="video/mp4">
+            <!-- Fallback por si hay problemas -->
+            <source src="assets/videos/videoplayback.webm" type="video/webm">
+            Tu navegador no soporta el video.
+        </video>
     </div>
     <div class="hero-overlay"></div>
     <div class="hero-content">
-      <h1 class="hero-title" aria-label="Isla del Sol">
-        <span class="hero-title-line" aria-hidden="true"></span>
-      </h1>
+        <h1 class="hero-title" aria-label="Isla del Sol">
+            <span class="hero-title-line">Isla del Sol</span>
+            <span class="hero-subtitle">Lago Titicaca - Bolivia</span>
+        </h1>
     </div>
     <div class="hero-scroll-indicator">
-      <div class="scroll-icon">
-        <i class="fas fa-chevron-down"></i>
-      </div>
-      <span>Desplaza para explorar</span>
+        <div class="scroll-icon">
+            <i class="fas fa-chevron-down"></i>
+        </div>
+        <span>Desplaza para explorar</span>
     </div>
-  </section>
-
-  <button id="backToTop" title="Volver arriba">↑</button>
+</section>
 
  <!-- 2. MAPA INTERACTIVO MEJORADO -->
 <section id="mapSection" class="map-section fade-in">
@@ -2044,3 +2046,4 @@
   </script>
 </body>
 </html>
+
