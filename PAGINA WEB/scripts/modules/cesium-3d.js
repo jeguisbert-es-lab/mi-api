@@ -1,4 +1,4 @@
-// assets/scripts/modules/cesium-3d-simple.js - VERSIÓN COMPLETA MEJORADA
+// assets/scripts/modules/cesium-3d-simple.js - VERSIÓN COMPLETA MEJORADA CON COLORES CORREGIDOS
 class Cesium3DMap {
     constructor() {
         this.viewer = null;
@@ -7,7 +7,6 @@ class Cesium3DMap {
         this.infoPanel = null;
         this.isMobile = window.innerWidth <= 768;
         
-        // ✅ URL CORREGIDA - IGUAL QUE EN MAP.JS
         this.API_BASE_URL = 'https://mi-api-6jmx.onrender.com/api';
         
         this.init();
@@ -210,16 +209,17 @@ class Cesium3DMap {
     addImprovedResponsiveStyles() {
         const styles = `
             <style>
+                /* ESTILOS BASE MEJORADOS CON MEJOR CONTRASTE */
                 .cesium-control-panel {
                     position: absolute;
                     top: 20px;
                     left: 20px;
                     width: 320px;
-                    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+                    background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
                     border-radius: 16px;
-                    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+                    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
                     padding: 0;
-                    color: white;
+                    color: #f7fafc;
                     border: 1px solid #4a5568;
                     backdrop-filter: blur(20px);
                     z-index: 1000;
@@ -253,7 +253,7 @@ class Cesium3DMap {
                     justify-content: space-between;
                     align-items: center;
                     padding: 20px;
-                    background: rgba(0, 0, 0, 0.3);
+                    background: rgba(0, 0, 0, 0.4);
                     border-bottom: 1px solid #4a5568;
                     position: relative;
                 }
@@ -267,7 +267,7 @@ class Cesium3DMap {
 
                 .btn-mobile-toggle {
                     display: none;
-                    background: rgba(74, 85, 104, 0.5);
+                    background: rgba(74, 85, 104, 0.6);
                     border: 1px solid #4a5568;
                     color: white;
                     padding: 10px;
@@ -283,7 +283,7 @@ class Cesium3DMap {
                 }
 
                 .btn-control {
-                    background: rgba(74, 85, 104, 0.5);
+                    background: rgba(74, 85, 104, 0.6);
                     border: 1px solid #4a5568;
                     color: white;
                     padding: 8px 12px;
@@ -333,10 +333,10 @@ class Cesium3DMap {
                     margin: 0 0 12px 0;
                     font-size: 14px;
                     font-weight: 600;
-                    color: #cbd5e0;
+                    color: #e2e8f0;
                     padding-left: 12px;
                     border-left: 3px solid #4299e1;
-                    background: rgba(66, 153, 225, 0.1);
+                    background: rgba(66, 153, 225, 0.15);
                     padding: 8px 12px;
                     border-radius: 0 8px 8px 0;
                 }
@@ -353,7 +353,7 @@ class Cesium3DMap {
                     display: flex;
                     align-items: center;
                     padding: 12px;
-                    background: rgba(74, 85, 104, 0.3);
+                    background: rgba(74, 85, 104, 0.4);
                     border-radius: 10px;
                     cursor: pointer;
                     transition: all 0.3s ease;
@@ -361,13 +361,13 @@ class Cesium3DMap {
                 }
 
                 .layer-label:hover {
-                    background: rgba(74, 85, 104, 0.5);
+                    background: rgba(74, 85, 104, 0.6);
                     border-color: #4299e1;
                     transform: translateY(-1px);
                 }
 
                 input[type="checkbox"]:checked + .layer-label {
-                    background: rgba(66, 153, 225, 0.2);
+                    background: rgba(66, 153, 225, 0.25);
                     border-color: #4299e1;
                     box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
                 }
@@ -396,8 +396,8 @@ class Cesium3DMap {
                 }
 
                 .layer-count {
-                    background: rgba(26, 32, 44, 0.7);
-                    color: #cbd5e0;
+                    background: rgba(26, 32, 44, 0.8);
+                    color: #e2e8f0;
                     padding: 6px 10px;
                     border-radius: 15px;
                     font-size: 11px;
@@ -416,7 +416,7 @@ class Cesium3DMap {
                 .panel-footer {
                     border-top: 1px solid #4a5568;
                     padding: 15px 20px;
-                    background: rgba(0, 0, 0, 0.2);
+                    background: rgba(0, 0, 0, 0.3);
                 }
 
                 .system-stats {
@@ -426,15 +426,16 @@ class Cesium3DMap {
                     color: #cbd5e0;
                 }
 
+                /* PANEL DE INFORMACIÓN MEJORADO CON MEJOR CONTRASTE */
                 .cesium-info-panel {
                     position: absolute;
                     top: 20px;
                     right: 20px;
                     width: 350px;
-                    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+                    background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
                     border-radius: 16px;
-                    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-                    color: white;
+                    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+                    color: #f7fafc;
                     border: 1px solid #4a5568;
                     backdrop-filter: blur(20px);
                     z-index: 1000;
@@ -470,7 +471,7 @@ class Cesium3DMap {
                     align-items: center;
                     padding: 20px;
                     border-bottom: 1px solid #4a5568;
-                    background: rgba(0, 0, 0, 0.3);
+                    background: rgba(0, 0, 0, 0.4);
                 }
 
                 .info-header h3 {
@@ -487,9 +488,9 @@ class Cesium3DMap {
                 }
 
                 .btn-close {
-                    background: rgba(239, 68, 68, 0.2);
-                    border: 1px solid rgba(239, 68, 68, 0.3);
-                    color: #feb2b2;
+                    background: rgba(239, 68, 68, 0.3);
+                    border: 1px solid rgba(239, 68, 68, 0.4);
+                    color: #fed7d7;
                     font-size: 18px;
                     cursor: pointer;
                     padding: 0;
@@ -503,7 +504,7 @@ class Cesium3DMap {
                 }
 
                 .btn-close:hover {
-                    background: rgba(239, 68, 68, 0.4);
+                    background: rgba(239, 68, 68, 0.5);
                     color: #fed7d7;
                     transform: scale(1.1);
                 }
@@ -512,6 +513,7 @@ class Cesium3DMap {
                     flex: 1;
                     overflow-y: auto;
                     padding: 0;
+                    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
                 }
 
                 .no-selection {
@@ -533,9 +535,11 @@ class Cesium3DMap {
                     color: #a0aec0;
                 }
 
+                /* CONTENIDO DE INFORMACIÓN DETALLADA - COLORES CORREGIDOS */
                 .entity-info-detailed {
                     color: #f7fafc;
                     padding: 0;
+                    background: transparent;
                 }
 
                 .info-header-detailed {
@@ -545,7 +549,7 @@ class Cesium3DMap {
                     margin-bottom: 0;
                     padding: 25px;
                     border-bottom: 1px solid #4a5568;
-                    background: rgba(0, 0, 0, 0.2);
+                    background: rgba(0, 0, 0, 0.3);
                 }
 
                 .info-icon {
@@ -555,8 +559,9 @@ class Cesium3DMap {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    background: rgba(255, 255, 255, 0.1);
+                    background: rgba(255, 255, 255, 0.15);
                     border-radius: 12px;
+                    color: #f7fafc;
                 }
 
                 .info-header-detailed h3 {
@@ -566,22 +571,28 @@ class Cesium3DMap {
                     color: #f7fafc;
                     flex: 1;
                     word-wrap: break-word;
+                    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
                 }
 
                 .info-details {
                     font-size: 14px;
                     padding: 25px;
+                    background: transparent;
                 }
 
                 .info-section {
                     margin-bottom: 25px;
+                    background: rgba(45, 55, 72, 0.6);
+                    border-radius: 12px;
+                    padding: 20px;
+                    border: 1px solid #4a5568;
                 }
 
                 .info-section h4 {
                     margin: 0 0 15px 0;
                     font-size: 16px;
                     font-weight: 600;
-                    color: #cbd5e0;
+                    color: #e2e8f0;
                     display: flex;
                     align-items: center;
                     gap: 10px;
@@ -607,7 +618,7 @@ class Cesium3DMap {
 
                 .info-label {
                     font-size: 12px;
-                    color: #a0aec0;
+                    color: #cbd5e0;
                     font-weight: 600;
                     margin-bottom: 6px;
                     text-transform: uppercase;
@@ -620,6 +631,10 @@ class Cesium3DMap {
                     font-weight: 500;
                     line-height: 1.4;
                     word-wrap: break-word;
+                    background: rgba(26, 32, 44, 0.4);
+                    padding: 8px 12px;
+                    border-radius: 6px;
+                    border: 1px solid #4a5568;
                 }
 
                 .services-list, .menu-list, .rooms-list, .products-list {
@@ -629,13 +644,14 @@ class Cesium3DMap {
                 }
 
                 .service-tag {
-                    background: rgba(66, 153, 225, 0.2);
-                    color: #90cdf4;
+                    background: rgba(66, 153, 225, 0.25);
+                    color: #bee3f8;
                     padding: 8px 12px;
                     border-radius: 8px;
                     font-size: 12px;
-                    border: 1px solid rgba(66, 153, 225, 0.3);
+                    border: 1px solid rgba(66, 153, 225, 0.4);
                     text-align: center;
+                    font-weight: 500;
                 }
 
                 .menu-item, .room-item, .product-item {
@@ -643,14 +659,14 @@ class Cesium3DMap {
                     justify-content: space-between;
                     align-items: center;
                     padding: 12px;
-                    background: rgba(74, 85, 104, 0.3);
+                    background: rgba(74, 85, 104, 0.4);
                     border-radius: 8px;
                     border: 1px solid #4a5568;
                     transition: all 0.3s ease;
                 }
 
                 .menu-item:hover, .room-item:hover, .product-item:hover {
-                    background: rgba(74, 85, 104, 0.5);
+                    background: rgba(74, 85, 104, 0.6);
                     transform: translateX(4px);
                 }
 
@@ -661,9 +677,12 @@ class Cesium3DMap {
                 }
 
                 .dish-price, .room-capacity, .product-price {
-                    color: #48bb78;
+                    color: #68d391;
                     font-weight: bold;
                     font-size: 14px;
+                    background: rgba(72, 187, 120, 0.2);
+                    padding: 4px 8px;
+                    border-radius: 4px;
                 }
 
                 .menu-more {
@@ -672,17 +691,20 @@ class Cesium3DMap {
                     color: #a0aec0;
                     font-style: italic;
                     font-size: 12px;
-                    background: rgba(74, 85, 104, 0.2);
+                    background: rgba(74, 85, 104, 0.3);
                     border-radius: 8px;
                 }
 
                 .category-section h5 {
                     margin: 15px 0 10px 0;
                     font-size: 14px;
-                    color: #e53e3e;
+                    color: #fed7d7;
                     font-weight: 600;
                     padding-left: 8px;
                     border-left: 3px solid #e53e3e;
+                    background: rgba(229, 62, 62, 0.1);
+                    padding: 8px 12px;
+                    border-radius: 0 6px 6px 0;
                 }
 
                 .info-note {
@@ -690,9 +712,9 @@ class Cesium3DMap {
                     align-items: center;
                     gap: 12px;
                     padding: 15px;
-                    background: rgba(237, 137, 54, 0.1);
+                    background: rgba(237, 137, 54, 0.15);
                     border-radius: 8px;
-                    border: 1px solid rgba(237, 137, 54, 0.3);
+                    border: 1px solid rgba(237, 137, 54, 0.4);
                     color: #fbd38d;
                     font-size: 13px;
                     margin-top: 20px;
@@ -701,6 +723,7 @@ class Cesium3DMap {
                 .entity-info-loading {
                     text-align: center;
                     padding: 60px 20px;
+                    background: transparent;
                 }
 
                 .loading-details {
@@ -722,6 +745,7 @@ class Cesium3DMap {
                     color: #cbd5e0;
                 }
 
+                /* ESTILOS RESPONSIVOS */
                 @media (max-width: 768px) {
                     .cesium-control-panel {
                         width: 280px !important;
@@ -784,6 +808,7 @@ class Cesium3DMap {
 
                     .info-section {
                         margin-bottom: 20px;
+                        padding: 15px;
                     }
                     
                     .info-section h4 {
