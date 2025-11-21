@@ -1,5 +1,4 @@
-// scripts/modules/map.js - VERSIÓN COMPLETA CORREGIDA PARA DESPLAZAMIENTO TÁCTIL
-
+// scripts/modules/map.js - VERSIÓN COMPLETA OPTIMIZADA PARA CELULAR CON GESTOS TÁCTILES MEJORADOS
 class InteractiveMap {
     constructor() {
         this.map = null;
@@ -10,20 +9,23 @@ class InteractiveMap {
         this.API_BASE_URL = 'https://mi-api-6jmx.onrender.com/api';
         this.isMobile = window.innerWidth <= 768;
         
-        // Configuración específica para móviles
-        this.configurarTouch();
+        // Variables para gestos táctiles
+        this.touchStartX = 0;
+        this.touchStartY = 0;
+        this.panelOpen = false;
+        this.swipeThreshold = 50;
+        
         this.init();
     }
 
-    configurarTouch() {
-        // Habilitar eventos táctiles
-        if (this.isMobile) {
-            L.Map.addInitHook(function () {
-                this.options.tap = true;
-                this.options.tapTolerance = 10;
-                this.options.dragging = true;
-            });
-        }
+    init() {
+        console.log('🗺️ Inicializando mapa interactivo para celular...');
+        this.inicializarMapa();
+        this.crearInterfazMovil();
+        this.configurarEventosInterfaz();
+        this.configurarGestosTactiles();
+        this.inicializarCluster();
+        this.cargarTodasLasCapas();
     }
 
     inicializarMapa() {
@@ -35,82 +37,28 @@ class InteractiveMap {
 
         this.ocultarLoading();
 
-        // CONFIGURACIÓN MEJORADA PARA MÓVIL
         this.map = L.map('map', {
             center: [-16.0167, -69.1833],
             zoom: 13,
             zoomControl: false,
             attributionControl: true,
-            // CONFIGURACIÓN CRÍTICA PARA TÁCTIL
-            dragging: true,
-            tap: true,
-            touchZoom: true,
-            scrollWheelZoom: false,
-            boxZoom: false,
-            keyboard: false,
-            doubleClickZoom: true,
-            zoomSnap: 0.5,
-            zoomDelta: 0.5,
-            trackResize: true,
-            worldCopyJump: false,
-            maxBoundsViscosity: 1.0
+            // Configuración para mejor rendimiento en móviles
+            preferCanvas: true,
+            fadeAnimation: true,
+            zoomAnimation: true,
+            markerZoomAnimation: true
         });
 
-        // TileLayer con mejor compatibilidad móvil
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors',
-            maxZoom: 18,
-            minZoom: 10,
-            subdomains: ['a', 'b', 'c']
+            maxZoom: 18
         }).addTo(this.map);
 
-        // Control de zoom optimizado para móvil
         L.control.zoom({
             position: this.isMobile ? 'bottomright' : 'topright'
         }).addTo(this.map);
 
-        // HABILITAR GESTOS TÁCTILES ADICIONALES
-        this.habilitarGestosTactiles();
-
-        console.log('✅ Mapa base inicializado con soporte táctil');
-    }
-
-    habilitarGestosTactiles() {
-        // Asegurar que el contenedor del mapa permita gestos táctiles
-        const mapContainer = document.getElementById('map');
-        if (mapContainer) {
-            mapContainer.style.touchAction = 'pan-x pan-y';
-            mapContainer.style.webkitUserSelect = 'none';
-            mapContainer.style.userSelect = 'none';
-            mapContainer.style.webkitTapHighlightColor = 'transparent';
-        }
-
-        // Prevenir comportamientos por defecto que interfieran
-        this.map.getContainer().addEventListener('touchstart', (e) => {
-            if (e.touches.length > 1) {
-                e.preventDefault();
-            }
-        }, { passive: false });
-
-        this.map.getContainer().addEventListener('touchmove', (e) => {
-            if (e.touches.length > 1) {
-                e.preventDefault();
-            }
-        }, { passive: false });
-
-        // Mejorar la respuesta táctil
-        this.map.whenReady(() => {
-            const container = this.map.getContainer();
-            container.style.cursor = 'grab';
-            
-            container.addEventListener('touchstart', () => {
-                container.style.cursor = 'grabbing';
-            });
-            
-            container.addEventListener('touchend', () => {
-                container.style.cursor = 'grab';
-            });
-        });
+        console.log('✅ Mapa base inicializado');
     }
 
     crearInterfazMovil() {
@@ -159,6 +107,10 @@ class InteractiveMap {
                         <i class="fas fa-location-crosshairs"></i>
                         Mi Ubicación
                     </button>
+                    <button class="quick-btn" id="btnRefresh">
+                        <i class="fas fa-sync-alt"></i>
+                        Actualizar
+                    </button>
                 </div>
 
                 <div class="mobile-layers-container">
@@ -200,6 +152,12 @@ class InteractiveMap {
 
             <!-- OVERLAY -->
             <div class="mobile-overlay" id="mobileOverlay"></div>
+
+            <!-- INDICADOR DE DESLIZAMIENTO -->
+            <div class="swipe-indicator" id="swipeIndicator">
+                <div class="swipe-arrow">←</div>
+                <span>Desliza para cerrar</span>
+            </div>
         `;
 
         mapContainer.insertAdjacentHTML('beforeend', controlesHTML);
@@ -209,7 +167,6 @@ class InteractiveMap {
     agregarEstilosMovil() {
         const styles = `
             <style>
-                /* ESTILOS PREVIOS MANTENIDOS... */
                 .mobile-main-control {
                     position: absolute;
                     top: 15px;
@@ -232,8 +189,6 @@ class InteractiveMap {
                     justify-content: center;
                     transition: all 0.3s ease;
                     position: relative;
-                    -webkit-tap-highlight-color: transparent;
-                    touch-action: manipulation;
                 }
 
                 .mobile-menu-btn:hover {
@@ -269,14 +224,19 @@ class InteractiveMap {
                     background: rgba(15, 23, 42, 0.95);
                     backdrop-filter: blur(20px);
                     z-index: 2000;
-                    transition: left 0.3s ease;
+                    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                     overflow-y: auto;
                     border-right: 1px solid rgba(255,255,255,0.1);
-                    -webkit-overflow-scrolling: touch;
+                    transform: translateX(-100%);
                 }
 
                 .mobile-panel.active {
+                    transform: translateX(0);
                     left: 0;
+                }
+
+                .mobile-panel.swiping {
+                    transition: none;
                 }
 
                 .mobile-panel-header {
@@ -286,6 +246,8 @@ class InteractiveMap {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
+                    position: relative;
+                    touch-action: pan-y;
                 }
 
                 .mobile-panel-header h3 {
@@ -306,7 +268,7 @@ class InteractiveMap {
                     align-items: center;
                     justify-content: center;
                     transition: all 0.3s ease;
-                    -webkit-tap-highlight-color: transparent;
+                    touch-action: manipulation;
                 }
 
                 .mobile-close-btn:hover {
@@ -358,7 +320,6 @@ class InteractiveMap {
                     align-items: center;
                     gap: 5px;
                     transition: all 0.3s ease;
-                    -webkit-tap-highlight-color: transparent;
                     touch-action: manipulation;
                 }
 
@@ -392,8 +353,8 @@ class InteractiveMap {
                     cursor: pointer;
                     transition: all 0.3s ease;
                     position: relative;
-                    -webkit-tap-highlight-color: transparent;
                     touch-action: manipulation;
+                    user-select: none;
                 }
 
                 .mobile-layer-item.active {
@@ -497,7 +458,6 @@ class InteractiveMap {
                     gap: 8px;
                     box-shadow: 0 8px 25px rgba(6, 182, 212, 0.4);
                     transition: all 0.3s ease;
-                    -webkit-tap-highlight-color: transparent;
                     touch-action: manipulation;
                 }
 
@@ -525,40 +485,53 @@ class InteractiveMap {
                     visibility: visible;
                 }
 
-                /* ESTILOS CRÍTICOS PARA EL MAPA TÁCTIL */
-                #map {
-                    touch-action: pan-x pan-y;
-                    -webkit-user-select: none;
-                    user-select: none;
-                    -webkit-tap-highlight-color: transparent;
-                    cursor: grab;
+                .swipe-indicator {
+                    position: absolute;
+                    top: 50%;
+                    right: 10px;
+                    transform: translateY(-50%);
+                    background: rgba(255,255,255,0.9);
+                    padding: 8px 12px;
+                    border-radius: 20px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-size: 12px;
+                    color: #4a5568;
+                    opacity: 0;
+                    transition: opacity 0.3s ease;
+                    z-index: 2001;
+                    pointer-events: none;
                 }
 
-                #map:active {
-                    cursor: grabbing;
+                .swipe-indicator.show {
+                    opacity: 1;
                 }
 
-                .leaflet-container {
-                    background: #a4b0be;
-                    touch-action: pan-x pan-y;
-                    -webkit-tap-highlight-color: transparent;
-                }
-
-                .leaflet-marker-icon {
-                    touch-action: pan-x pan-y;
-                }
-
-                .leaflet-popup {
-                    touch-action: pan-x pan-y;
-                }
-
-                .leaflet-control-container {
-                    touch-action: pan-x pan-y;
+                .swipe-arrow {
+                    animation: swipeArrow 1.5s infinite;
+                    font-size: 14px;
+                    font-weight: bold;
                 }
 
                 @keyframes pulse {
                     0%, 100% { transform: scale(1); }
                     50% { transform: scale(1.1); }
+                }
+
+                @keyframes swipeArrow {
+                    0%, 100% { transform: translateX(0); }
+                    50% { transform: translateX(-5px); }
+                }
+
+                @keyframes slideInLeft {
+                    from { transform: translateX(-100%); }
+                    to { transform: translateX(0); }
+                }
+
+                @keyframes slideOutLeft {
+                    from { transform: translateX(0); }
+                    to { transform: translateX(-100%); }
                 }
 
                 @media (max-width: 480px) {
@@ -577,6 +550,11 @@ class InteractiveMap {
                     }
                     .legend-grid-mobile {
                         grid-template-columns: 1fr;
+                    }
+                    .swipe-indicator {
+                        right: 5px;
+                        font-size: 10px;
+                        padding: 6px 10px;
                     }
                 }
 
@@ -597,7 +575,6 @@ class InteractiveMap {
                     }
                 }
 
-                /* MEJORAS ESPECÍFICAS PARA DISPOSITIVOS TÁCTILES */
                 @media (hover: none) and (pointer: coarse) {
                     .mobile-menu-btn,
                     .quick-btn,
@@ -608,19 +585,8 @@ class InteractiveMap {
                     .mobile-layer-item {
                         padding: 15px 12px;
                     }
-                    
-                    /* Mejorar respuesta táctil en marcadores */
-                    .leaflet-marker-icon {
-                        min-width: 44px;
-                        min-height: 44px;
-                    }
-                    
-                    /* Prevenir zoom en botones */
-                    .mobile-menu-btn:active,
-                    .quick-btn:active,
-                    .mobile-layer-item:active,
-                    .btn-3d-mobile:active {
-                        transform: scale(0.95);
+                    .mobile-panel-header {
+                        padding: 20px 15px;
                     }
                 }
 
@@ -634,6 +600,22 @@ class InteractiveMap {
                 .mobile-layers-container::-webkit-scrollbar-thumb {
                     background: #6366f1;
                     border-radius: 2px;
+                }
+
+                /* Mejoras de rendimiento para móviles */
+                .mobile-panel * {
+                    -webkit-tap-highlight-color: transparent;
+                    -webkit-touch-callout: none;
+                    -webkit-user-select: none;
+                    user-select: none;
+                }
+
+                .mobile-layer-item:active {
+                    transform: scale(0.98);
+                }
+
+                .quick-btn:active {
+                    transform: scale(0.95);
                 }
             </style>
         `;
@@ -668,6 +650,10 @@ class InteractiveMap {
             this.buscarMiUbicacion();
         });
 
+        document.getElementById('btnRefresh')?.addEventListener('click', () => {
+            this.recargarCapas();
+        });
+
         document.getElementById('btn3DMobile')?.addEventListener('click', () => {
             this.irAVista3D();
         });
@@ -683,71 +669,172 @@ class InteractiveMap {
             }
         });
 
-        this.configurarGestosTactiles();
+        // Prevenir scroll cuando el panel está abierto
+        document.addEventListener('touchmove', (e) => {
+            if (this.panelOpen) {
+                e.preventDefault();
+            }
+        }, { passive: false });
     }
 
     configurarGestosTactiles() {
-        let startX = 0;
         const panel = document.getElementById('mobilePanel');
+        const panelHeader = document.querySelector('.mobile-panel-header');
+        const swipeIndicator = document.getElementById('swipeIndicator');
         
-        panel?.addEventListener('touchstart', (e) => {
-            startX = e.touches[0].clientX;
-            e.preventDefault();
+        if (!panel || !panelHeader) return;
+
+        // Gesto de deslizar en el header del panel
+        panelHeader.addEventListener('touchstart', (e) => {
+            this.touchStartX = e.touches[0].clientX;
+            this.touchStartY = e.touches[0].clientY;
+            panel.classList.add('swiping');
+            
+            // Mostrar indicador de deslizamiento
+            if (swipeIndicator) {
+                swipeIndicator.classList.add('show');
+            }
+        }, { passive: true });
+
+        panelHeader.addEventListener('touchmove', (e) => {
+            if (!this.touchStartX || !this.panelOpen) return;
+            
+            const touchX = e.touches[0].clientX;
+            const touchY = e.touches[0].clientY;
+            const diffX = this.touchStartX - touchX;
+            const diffY = this.touchStartY - touchY;
+            
+            // Solo procesar si el movimiento horizontal es mayor que el vertical
+            if (Math.abs(diffX) > Math.abs(diffY)) {
+                e.preventDefault();
+                
+                if (diffX > 0) {
+                    // Deslizando hacia la izquierda - calcular transformación
+                    const translateX = Math.max(-100, -Math.min(diffX, 100));
+                    panel.style.transform = `translateX(${translateX}px)`;
+                    
+                    // Actualizar opacidad del overlay
+                    const overlay = document.getElementById('mobileOverlay');
+                    if (overlay) {
+                        const opacity = 1 - (Math.abs(translateX) / 100);
+                        overlay.style.opacity = opacity.toString();
+                    }
+                }
+            }
         }, { passive: false });
 
-        panel?.addEventListener('touchmove', (e) => {
-            if (!startX) return;
+        panelHeader.addEventListener('touchend', (e) => {
+            if (!this.touchStartX) return;
             
-            const currentX = e.touches[0].clientX;
-            const diff = startX - currentX;
+            const touchX = e.changedTouches[0].clientX;
+            const diffX = this.touchStartX - touchX;
             
-            if (diff > 50) {
-                this.cerrarPanelMovil();
-                startX = 0;
+            panel.classList.remove('swiping');
+            panel.style.transform = '';
+            
+            // Ocultar indicador de deslizamiento
+            if (swipeIndicator) {
+                swipeIndicator.classList.remove('show');
             }
-        });
+            
+            // Si el deslizamiento supera el umbral, cerrar el panel
+            if (diffX > this.swipeThreshold) {
+                this.cerrarPanelMovil();
+            } else {
+                // Si no supera el umbral, restaurar el panel
+                this.abrirPanelMovil();
+            }
+            
+            this.touchStartX = 0;
+            this.touchStartY = 0;
+        }, { passive: true });
 
-        // Gesto de deslizar para cerrar en el overlay
+        // Gesto de deslizar en el overlay para cerrar
         const overlay = document.getElementById('mobileOverlay');
-        overlay?.addEventListener('touchstart', (e) => {
-            startX = e.touches[0].clientX;
-        });
+        if (overlay) {
+            overlay.addEventListener('touchstart', (e) => {
+                this.touchStartX = e.touches[0].clientX;
+            }, { passive: true });
 
-        overlay?.addEventListener('touchmove', (e) => {
-            if (!startX) return;
-            
-            const currentX = e.touches[0].clientX;
-            const diff = startX - currentX;
-            
-            if (diff > 30) {
-                this.cerrarPanelMovil();
-                startX = 0;
+            overlay.addEventListener('touchmove', (e) => {
+                if (!this.touchStartX || !this.panelOpen) return;
+                
+                const touchX = e.touches[0].clientX;
+                const diffX = touchX - this.touchStartX;
+                
+                if (diffX < -this.swipeThreshold) {
+                    this.cerrarPanelMovil();
+                }
+            }, { passive: true });
+
+            overlay.addEventListener('touchend', () => {
+                this.touchStartX = 0;
+            }, { passive: true });
+        }
+
+        // Gesto de deslizar desde el borde izquierdo para abrir
+        let edgeStartX = 0;
+        document.addEventListener('touchstart', (e) => {
+            if (e.touches[0].clientX < 50) { // 50px desde el borde izquierdo
+                edgeStartX = e.touches[0].clientX;
             }
-        });
+        }, { passive: true });
+
+        document.addEventListener('touchmove', (e) => {
+            if (!edgeStartX || this.panelOpen) return;
+            
+            const touchX = e.touches[0].clientX;
+            const diffX = touchX - edgeStartX;
+            
+            if (diffX > this.swipeThreshold) {
+                this.abrirPanelMovil();
+                edgeStartX = 0;
+            }
+        }, { passive: true });
+
+        document.addEventListener('touchend', () => {
+            edgeStartX = 0;
+        }, { passive: true });
+
+        console.log('✅ Gestos táctiles configurados');
     }
 
     abrirPanelMovil() {
         const panel = document.getElementById('mobilePanel');
         const overlay = document.getElementById('mobileOverlay');
         
-        panel?.classList.add('active');
-        overlay?.classList.add('active');
-        document.body.style.overflow = 'hidden';
-        
-        // Deshabilitar temporalmente el mapa para evitar interferencias
-        this.map.dragging.disable();
+        if (panel && overlay) {
+            panel.classList.add('active');
+            overlay.classList.add('active');
+            this.panelOpen = true;
+            
+            // Prevenir scroll del body
+            document.body.style.overflow = 'hidden';
+            
+            console.log('📱 Panel móvil abierto');
+        }
     }
 
     cerrarPanelMovil() {
         const panel = document.getElementById('mobilePanel');
         const overlay = document.getElementById('mobileOverlay');
+        const swipeIndicator = document.getElementById('swipeIndicator');
         
-        panel?.classList.remove('active');
-        overlay?.classList.remove('active');
-        document.body.style.overflow = '';
-        
-        // Rehabilitar el mapa
-        this.map.dragging.enable();
+        if (panel && overlay) {
+            panel.classList.remove('active');
+            overlay.classList.remove('active');
+            this.panelOpen = false;
+            
+            // Ocultar indicador de deslizamiento
+            if (swipeIndicator) {
+                swipeIndicator.classList.remove('show');
+            }
+            
+            // Restaurar scroll del body
+            document.body.style.overflow = '';
+            
+            console.log('📱 Panel móvil cerrado');
+        }
     }
 
     generarListaCapasMovil() {
@@ -788,17 +875,18 @@ class InteractiveMap {
                     this.toggleCapaMovil(capa.id, elemento);
                 });
                 
-                // Soporte táctil mejorado
-                elemento.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
+                // Agregar feedback táctil
+                elemento.addEventListener('touchstart', () => {
                     elemento.style.transform = 'scale(0.95)';
-                }, { passive: false });
-
+                }, { passive: true });
+                
                 elemento.addEventListener('touchend', () => {
                     elemento.style.transform = '';
-                });
+                }, { passive: true });
             }
         });
+
+        console.log('✅ Lista de capas móvil generada');
     }
 
     toggleCapaMovil(nombreCapa, elemento) {
@@ -851,7 +939,7 @@ class InteractiveMap {
         notificacion.className = `mobile-notification ${tipo}`;
         notificacion.innerHTML = `
             <div class="notification-content">
-                <i class="fas fa-${tipo === 'success' ? 'check' : 'info'}-circle"></i>
+                <i class="fas fa-${tipo === 'success' ? 'check' : tipo === 'error' ? 'exclamation' : 'info'}-circle"></i>
                 <span>${mensaje}</span>
             </div>
         `;
@@ -872,7 +960,7 @@ class InteractiveMap {
             text-align: center;
             font-size: 14px;
             font-weight: 500;
-            touch-action: none;
+            backdrop-filter: blur(10px);
         `;
 
         document.body.appendChild(notificacion);
@@ -903,7 +991,16 @@ class InteractiveMap {
         this.cerrarPanelMovil();
     }
 
-    // MÉTODOS EXISTENTES DEL MAPA (MANTENIDOS)
+    recargarCapas() {
+        this.mostrarMensajeMovil('Actualizando capas...', 'info');
+        this.limpiarCapas();
+        
+        setTimeout(() => {
+            this.cargarTodasLasCapas();
+        }, 1000);
+    }
+
+    // MÉTODOS EXISTENTES DEL MAPA (se mantienen igual)
     ocultarLoading() {
         const loading = document.querySelector('.map-loading');
         if (loading) {
@@ -1007,18 +1104,7 @@ class InteractiveMap {
             pointToLayer: (feature, latlng) => {
                 if (feature.geometry.type === 'Point') {
                     const icono = this.crearIconoPersonalizado(nombreCapa);
-                    const marker = L.marker(latlng, { 
-                        icon: icono,
-                        // Mejorar interactividad táctil en marcadores
-                        keyboard: false
-                    });
-                    
-                    // Optimizar para touch
-                    marker.on('click', (e) => {
-                        L.DomEvent.stopPropagation(e);
-                    });
-                    
-                    return marker;
+                    return L.marker(latlng, { icon: icono });
                 } else if (estilo.radius) {
                     return L.circleMarker(latlng, estilo);
                 }
@@ -1026,11 +1112,6 @@ class InteractiveMap {
             },
             onEachFeature: (feature, layer) => {
                 this.agregarPopup(feature, layer, nombreCapa);
-                
-                // Mejorar respuesta táctil
-                layer.on('touchstart', (e) => {
-                    L.DomEvent.stopPropagation(e);
-                });
             }
         });
 
@@ -1060,25 +1141,24 @@ class InteractiveMap {
             html: `
                 <div style="
                     background: ${config.color};
-                    width: 44px;
-                    height: 44px;
+                    width: 36px;
+                    height: 36px;
                     border-radius: 50%;
                     border: 3px solid white;
                     box-shadow: 0 4px 15px rgba(0,0,0,0.4);
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    font-size: 18px;
+                    font-size: 16px;
                     color: white;
                     text-shadow: 0 2px 4px rgba(0,0,0,0.3);
                     transition: all 0.3s ease;
                     cursor: pointer;
-                    touch-action: manipulation;
                 ">${config.emoji}</div>
             `,
             className: 'custom-marker',
-            iconSize: [44, 44],
-            iconAnchor: [22, 22]
+            iconSize: [36, 36],
+            iconAnchor: [18, 18]
         });
     }
 
@@ -1256,14 +1336,7 @@ class InteractiveMap {
             
             contenido += `</div>`;
             
-            layer.bindPopup(contenido, {
-                // Optimizar popups para móvil
-                maxWidth: 300,
-                className: 'mobile-popup',
-                closeOnEscapeKey: false,
-                autoPan: true,
-                autoPanPadding: [50, 50]
-            });
+            layer.bindPopup(contenido);
             
             layer.on('popupopen', async () => {
                 await this.cargarInformacionDetallada(tipoCapa, idLugar, nombre);
@@ -1789,267 +1862,90 @@ mobileAnimationStyles.textContent = `
         }
     }
     
-    /* MEJORAS ESPECÍFICAS PARA EL MAPA EN MÓVIL */
-    .leaflet-container {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
-    
-    .leaflet-popup-content-wrapper {
-        border-radius: 12px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    }
-    
-    .leaflet-popup-tip {
-        box-shadow: none;
-    }
-    
-    .mobile-popup .leaflet-popup-content {
-        margin: 15px;
-        font-size: 14px;
-        line-height: 1.4;
-    }
-    
-       /* PREVENIR SELECTION EN MÓVIL */
-    .leaflet-container * {
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        user-select: none;
-    }
-    
-    /* MEJORAR BOTONES DE CONTROL */
-    .leaflet-control-zoom a {
-        -webkit-tap-highlight-color: transparent;
-        min-width: 44px;
-        min-height: 44px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 18px;
-    }
-    
-    /* OPTIMIZAR PARA PANTALLAS PEQUEÑAS */
-    @media (max-width: 480px) {
-        .leaflet-popup-content {
-            max-width: 280px !important;
+    @keyframes slideOutLeft {
+        from {
+            transform: translateX(0);
         }
-        
-        .leaflet-control-zoom {
-            margin-bottom: 70px !important;
+        to {
+            transform: translateX(-100%);
         }
     }
     
-    @media (max-width: 360px) {
-        .leaflet-popup-content {
-            max-width: 250px !important;
-        }
+    /* Mejoras de rendimiento para animaciones */
+    .mobile-panel {
+        will-change: transform;
+    }
+    
+    .mobile-notification {
+        will-change: transform, opacity;
+    }
+    
+    .swipe-indicator {
+        will-change: opacity;
     }
 `;
 document.head.appendChild(mobileAnimationStyles);
 
-// ✅ INICIALIZACIÓN MEJORADA PARA MÓVIL
+// ✅ FORZAR CARGA SIN CACHE MEJORADO
+if (performance.navigation.type === 1 || performance.getEntriesByType("navigation")[0]?.type === 'reload') {
+    console.log('🔄 Página recargada - limpiando cache móvil');
+    sessionStorage.setItem('mobileForceReload', Date.now());
+}
+
+// DETECCIÓN MEJORADA DE DISPOSITIVOS TÁCTILES
+function isTouchDevice() {
+    return (('ontouchstart' in window) ||
+        (navigator.maxTouchPoints > 0) ||
+        (navigator.msMaxTouchPoints > 0));
+}
+
+// INICIALIZACIÓN MEJORADA
 document.addEventListener('DOMContentLoaded', function() {
-    // Detectar si es móvil y aplicar configuraciones específicas
-    const isMobile = window.innerWidth <= 768;
-    
-    if (isMobile) {
-        console.log('📱 Dispositivo móvil detectado - aplicando optimizaciones táctiles');
-        
-        // Prevenir zoom con doble toque en el mapa
-        document.addEventListener('touchstart', function(e) {
-            if (e.touches.length > 1) {
-                e.preventDefault();
-            }
-        }, { passive: false });
-
-        let lastTouchEnd = 0;
-        document.addEventListener('touchend', function(e) {
-            const now = (new Date()).getTime();
-            if (now - lastTouchEnd <= 300) {
-                e.preventDefault();
-            }
-            lastTouchEnd = now;
-        }, false);
-
-        // Mejorar el rendimiento táctil
-        document.documentElement.style.setProperty('--touch-action', 'pan-x pan-y');
-    }
-
-    // ✅ FORZAR CARGA SIN CACHE MEJORADO
-    if (performance.navigation.type === 1 || performance.getEntriesByType("navigation")[0]?.type === 'reload') {
-        console.log('🔄 Página recargada - aplicando optimizaciones móviles');
-        const cacheBuster = Date.now();
-        localStorage.setItem('mobileMapCacheBuster', cacheBuster);
-        
-        // Limpiar cache de Leaflet
-        if (window.L) {
-            try {
-                // Forzar recreación de tiles
-                L.gridLayer.prototype._removeTilesAtZoom = function () {};
-            } catch (e) {
-                console.log('✅ Cache de mapa limpiado');
-            }
-        }
-    }
-
-    // Verificar si necesitamos forzar recarga
-    const lastMobileLoad = localStorage.getItem('mobileMapCacheBuster');
+    const lastMobileLoad = sessionStorage.getItem('mobileForceReload');
     const currentTime = Date.now();
     
     if (lastMobileLoad && (currentTime - parseInt(lastMobileLoad)) < 5000) {
         console.log('🔥 Forzando carga móvil sin cache');
-        window.location.href = window.location.href.split('?')[0] + '?t=' + Date.now();
+        window.location.reload();
         return;
     }
     
-    console.log('🚀 Inicializando mapa móvil optimizado con soporte táctil completo...');
+    console.log('🚀 Inicializando mapa móvil optimizado con gestos táctiles...');
+    console.log('📱 Dispositivo táctil detectado:', isTouchDevice());
     
-    // Pequeño delay para asegurar que el DOM esté listo
-    setTimeout(() => {
-        try {
-            window.interactiveMap = new InteractiveMap();
-            console.log('✅ Mapa móvil inicializado correctamente');
-            
-            // Guardar timestamp de carga exitosa
-            localStorage.setItem('mobileMapCacheBuster', Date.now());
-            
-            // Mostrar indicador de carga completada
-            const loadingIndicator = document.createElement('div');
-            loadingIndicator.style.cssText = `
-                position: fixed;
-                top: 10px;
-                right: 10px;
-                background: #10b981;
-                color: white;
-                padding: 8px 12px;
-                border-radius: 6px;
-                font-size: 12px;
-                font-weight: bold;
-                z-index: 10000;
-                animation: slideInRight 0.3s ease;
-            `;
-            loadingIndicator.textContent = '🗺️ Mapa Listo';
-            document.body.appendChild(loadingIndicator);
-            
-            setTimeout(() => {
-                if (loadingIndicator.parentNode) {
-                    loadingIndicator.parentNode.removeChild(loadingIndicator);
-                }
-            }, 3000);
-            
-        } catch (error) {
-            console.error('❌ Error inicializando el mapa móvil:', error);
-            
-            // Mostrar error amigable
-            const errorMsg = document.createElement('div');
-            errorMsg.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: #ef4444;
-                color: white;
-                padding: 20px;
-                border-radius: 10px;
-                text-align: center;
-                z-index: 10000;
-                max-width: 300px;
-            `;
-            errorMsg.innerHTML = `
-                <h3>😕 Error al cargar el mapa</h3>
-                <p>Recarga la página o intenta más tarde</p>
-                <button onclick="window.location.reload()" style="
-                    background: white;
-                    color: #ef4444;
-                    border: none;
-                    padding: 10px 20px;
-                    border-radius: 5px;
-                    margin-top: 10px;
-                    cursor: pointer;
-                    font-weight: bold;
-                ">Reintentar</button>
-            `;
-            document.body.appendChild(errorMsg);
-        }
-    }, 100);
+    // Configuración específica para dispositivos táctiles
+    if (isTouchDevice()) {
+        document.documentElement.style.setProperty('--touch-optimized', 'true');
+    }
+    
+    window.interactiveMap = new InteractiveMap();
+    
+    sessionStorage.setItem('mobileForceReload', Date.now());
 });
 
-// ✅ POLYFILLS PARA MEJOR COMPATIBILIDAD MÓVIL
-if (!Element.prototype.matches) {
-    Element.prototype.matches = Element.prototype.msMatchesSelector || 
-                                Element.prototype.webkitMatchesSelector;
-}
-
-if (!Element.prototype.closest) {
-    Element.prototype.closest = function(s) {
-        var el = this;
-        if (!document.documentElement.contains(el)) return null;
-        do {
-            if (el.matches(s)) return el;
-            el = el.parentElement || el.parentNode;
-        } while (el !== null && el.nodeType === 1);
-        return null;
-    };
-}
-
-// ✅ OPTIMIZACIONES DE RENDIMIENTO PARA MÓVIL
-if (window.innerWidth <= 768) {
-    // Reducir el uso de memoria en móviles
-    const originalTimeout = window.setTimeout;
-    window.setTimeout = function(callback, delay) {
-        return originalTimeout(callback, Math.max(delay, 16)); // Limitar a 60fps
-    };
-
-    // Optimizar event listeners
-    const originalAddEventListener = EventTarget.prototype.addEventListener;
-    EventTarget.prototype.addEventListener = function(type, listener, options) {
-        // Usar passive para eventos táctiles cuando sea posible
-        if (['touchstart', 'touchmove', 'touchend'].includes(type)) {
-            options = Object.assign({ passive: true }, options);
-        }
-        return originalAddEventListener.call(this, type, listener, options);
-    };
-}
-
-// ✅ DETECCIÓN DE GESTOS TÁCTILES ADICIONALES
-document.addEventListener('DOMContentLoaded', function() {
-    // Detectar gesto de pellizco para zoom
-    let initialDistance = null;
+// Manejo de errores global para móviles
+window.addEventListener('error', function(e) {
+    console.error('❌ Error global capturado:', e.error);
     
-    document.addEventListener('touchstart', function(e) {
-        if (e.touches.length === 2) {
-            initialDistance = Math.hypot(
-                e.touches[0].clientX - e.touches[1].clientX,
-                e.touches[0].clientY - e.touches[1].clientY
-            );
-        }
-    });
-    
-    document.addEventListener('touchmove', function(e) {
-        if (e.touches.length === 2 && initialDistance !== null) {
-            e.preventDefault();
-            
-            const currentDistance = Math.hypot(
-                e.touches[0].clientX - e.touches[1].clientX,
-                e.touches[0].clientY - e.touches[1].clientY
-            );
-            
-            if (window.interactiveMap && window.interactiveMap.map) {
-                const zoomDiff = (currentDistance - initialDistance) * 0.01;
-                const currentZoom = window.interactiveMap.map.getZoom();
-                const newZoom = Math.max(10, Math.min(18, currentZoom + zoomDiff));
-                
-                if (Math.abs(newZoom - currentZoom) > 0.5) {
-                    window.interactiveMap.map.setZoom(newZoom);
-                    initialDistance = currentDistance;
-                }
-            }
-        }
-    }, { passive: false });
-    
-    document.addEventListener('touchend', function() {
-        initialDistance = null;
-    });
+    if (window.interactiveMap && window.interactiveMap.mostrarMensajeMovil) {
+        window.interactiveMap.mostrarMensajeMovil('Error en la aplicación', 'error');
+    }
 });
 
-console.log('🎯 Mapa móvil optimizado cargado - listo para uso táctil');
+// Prevenir zoom no deseado en dispositivos móviles
+document.addEventListener('touchstart', function(e) {
+    if (e.touches.length > 1) {
+        e.preventDefault();
+    }
+}, { passive: false });
+
+let lastTouchEnd = 0;
+document.addEventListener('touchend', function(e) {
+    const now = (new Date()).getTime();
+    if (now - lastTouchEnd <= 300) {
+        e.preventDefault();
+    }
+    lastTouchEnd = now;
+}, false);
+
 
