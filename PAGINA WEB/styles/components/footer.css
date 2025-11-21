@@ -1,0 +1,8 @@
+/* ---------- PIE ---------- */
+footer {
+  background-color: #6B8E23; /* Olive green footer to match navbar */
+  color: var(--accent-white);
+  padding: 2rem 0;
+  font-size: 1rem;
+  box-shadow: 0 -2px 12px rgba(43,56,17,0.12);
+}

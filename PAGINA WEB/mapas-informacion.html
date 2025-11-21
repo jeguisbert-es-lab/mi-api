@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mapas de Información - Isla del Sol</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* VARIABLES CSS - TEMA OLIVA PREMIUM */
+    :root {
+      --olive: #6B8E23;
+      --olive-dark: #556B2F;
+      --olive-light: #9AB973;
+      --olive-bright: #B5C98E;
+      --gold: #D4AF37;
+      --accent-white: #ffffff;
+      --accent-gray: #f8f9fa;
+      --accent-dark: #2c3e50;
+      --text-dark: #2b3a1a;
+      --shadow: 0 8px 32px rgba(107, 142, 35, 0.15);
+      --shadow-hover: 0 12px 40px rgba(107, 142, 35, 0.25);
+    }
+
+    /* ESTILOS GENERALES PREMIUM */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: var(--text-dark);
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* NAVEGACIÓN PREMIUM */
+    .navbar {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      box-shadow: var(--shadow);
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 1000;
+      border-bottom: 2px solid var(--olive-light);
+    }
+
+    .nav-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+    }
+
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--olive);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-logo i {
+      color: var(--gold);
+    }
+
+    .nav-menu {
+      display: flex;
+      list-style: none;
+      gap: 2rem;
+    }
+
+    .nav-link {
+      text-decoration: none;
+      color: var(--text-dark);
+      font-weight: 600;
+      transition: all 0.3s ease;
+      padding: 8px 16px;
+      border-radius: 25px;
+    }
+
+    .nav-link:hover {
+      color: var(--olive);
+      background: rgba(107, 142, 35, 0.1);
+    }
+
+    .nav-link.active {
+      color: white;
+      background: var(--olive);
+      box-shadow: 0 4px 15px rgba(107, 142, 35, 0.3);
+    }
+
+    .nav-toggle {
+      display: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--olive);
+    }
+
+    /* HERO SECTION PREMIUM */
+    .hero-section {
+      background: linear-gradient(135deg, var(--olive) 0%, var(--olive-dark) 100%);
+      color: white;
+      padding: 140px 0 80px;
+      text-align: center;
+      margin-top: 60px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="%23ffffff10"><polygon points="0,0 1000,50 1000,100 0,100"/></svg>');
+      background-size: cover;
+    }
+
+    .hero-content h1 {
+      font-size: 3.5rem;
+      margin-bottom: 1rem;
+      font-weight: 700;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .hero-content p {
+      font-size: 1.3rem;
+      opacity: 0.95;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.2);
+      padding: 8px 20px;
+      border-radius: 25px;
+      margin-top: 20px;
+      font-size: 0.9rem;
+      backdrop-filter: blur(10px);
+    }
+
+    /* CONTROLES QGIS CLOUD PREMIUM */
+    .qgis-controls {
+      background: var(--accent-white);
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      margin: 60px auto;
+      border: 2px solid var(--olive-light);
+      position: relative;
+    }
+
+    .qgis-controls::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(135deg, var(--olive), var(--gold));
+      border-radius: 22px;
+      z-index: -1;
+      opacity: 0.1;
+    }
+
+    .controls-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .controls-title {
+      color: var(--olive-dark);
+      font-size: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .controls-title i {
+      color: var(--gold);
+    }
+
+    .connection-status {
+      background: linear-gradient(135deg, #4CAF50, #45a049);
+      color: white;
+      padding: 8px 20px;
+      border-radius: 25px;
+      font-size: 0.9em;
+      font-weight: 600;
+      box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 25px;
+      margin-top: 20px;
+    }
+
+    .control-group {
+      background: linear-gradient(135deg, var(--accent-gray), var(--accent-white));
+      padding: 25px;
+      border-radius: 15px;
+      border-left: 5px solid var(--olive);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .control-group::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--olive), var(--gold));
+    }
+
+    .control-group:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .control-group h3 {
+      color: var(--olive-dark);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.3rem;
+    }
+
+    .control-group h3 i {
+      color: var(--gold);
+      font-size: 1.1em;
+    }
+
+    .layer-toggle {
+      display: flex;
+      align-items: center;
+      margin: 15px 0;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      padding: 8px 12px;
+      border-radius: 8px;
+    }
+
+    .layer-toggle:hover {
+      background: rgba(107, 142, 35, 0.08);
+      transform: translateX(8px);
+    }
+
+    .layer-toggle input {
+      margin-right: 15px;
+      transform: scale(1.3);
+      accent-color: var(--olive);
+    }
+
+    .layer-toggle label {
+      font-weight: 600;
+      cursor: pointer;
+      flex: 1;
+      font-size: 1.05rem;
+    }
+
+    .layer-info {
+      font-size: 0.85em;
+      color: #666;
+      margin-left: 42px;
+      margin-top: -8px;
+      font-style: italic;
+    }
+
+    /* MAPA PREMIUM */
+    .map-container {
+      height: 700px;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      margin: 40px 0;
+      position: relative;
+      background: linear-gradient(135deg, #e8f5e8, #f0f8f0);
+      border: 3px solid var(--olive-light);
+    }
+
+    #qgisMap {
+      height: 100%;
+      width: 100%;
+      background: transparent;
+    }
+
+    /* LEYENDA PREMIUM */
+    .map-legend {
+      position: absolute;
+      top: 25px;
+      right: 25px;
+      background: rgba(255, 255, 255, 0.98);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: var(--shadow);
+      z-index: 1000;
+      min-width: 250px;
+      backdrop-filter: blur(20px);
+      border: 2px solid var(--olive-light);
+    }
+
+    .map-legend h4 {
+      color: var(--olive-dark);
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.2rem;
+    }
+
+    .legend-items {
+      margin-top: 10px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin: 10px 0;
+      padding: 5px 0;
+    }
+
+    .legend-color {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      margin-right: 12px;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    /* BOTONES DE ACCIÓN PREMIUM */
+    .action-buttons {
+      display: flex;
+      gap: 15px;
+      margin: 25px 0;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      background: linear-gradient(135deg, var(--olive), var(--olive-dark));
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 1em;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 15px rgba(107, 142, 35, 0.3);
+    }
+
+    .action-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(107, 142, 35, 0.4);
+      background: linear-gradient(135deg, var(--olive-dark), var(--olive));
+    }
+
+    .action-btn.secondary {
+      background: linear-gradient(135deg, #6c757d, #5a6268);
+    }
+
+    .action-btn.secondary:hover {
+      background: linear-gradient(135deg, #5a6268, #6c757d);
+    }
+
+    .action-btn.success {
+      background: linear-gradient(135deg, #28a745, #20c997);
+    }
+
+    /* BOTÓN VOLVER ARRIBA PREMIUM */
+    #backToTop {
+      position: fixed;
+      bottom: 40px;
+      right: 40px;
+      background: linear-gradient(135deg, var(--olive), var(--gold));
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      box-shadow: var(--shadow-hover);
+      transition: all 0.3s ease;
+      z-index: 1000;
+      display: none;
+    }
+
+    #backToTop:hover {
+      transform: translateY(-5px) scale(1.1);
+      box-shadow: 0 15px 35px rgba(107, 142, 35, 0.5);
+    }
+
+    /* LOADING STATE */
+    .map-loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: var(--olive);
+      z-index: 1000;
+    }
+
+    .loading-spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid var(--olive);
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 2s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* RESPONSIVE PREMIUM */
+    @media (max-width: 768px) {
+      .nav-menu {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(20px);
+        box-shadow: var(--shadow);
+        padding: 20px;
+      }
+
+      .nav-menu.active {
+        display: flex;
+      }
+
+      .nav-toggle {
+        display: block;
+      }
+
+      .hero-content h1 {
+        font-size: 2.5rem;
+      }
+
+      .controls-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .map-container {
+        height: 500px;
+      }
+
+      .map-legend {
+        position: relative;
+        top: auto;
+        right: auto;
+        margin-top: 20px;
+      }
+
+      .qgis-controls {
+        padding: 25px;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+      }
+
+      .controls-header {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+
+    /* ANIMACIONES */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-in {
+      animation: fadeInUp 0.6s ease-out;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo">
+        <i class="fas fa-map-marked-alt"></i> Isla del Sol SIG
+      </a>
+      <div class="nav-toggle" id="navToggle">
+        <i class="fas fa-bars"></i>
+      </div>
+      <ul class="nav-menu" id="navMenu">
+        <li><a href="index.html" class="nav-link">Inicio</a></li>
+        <li><a href="index.html#mapSection" class="nav-link">Mapa Turístico</a></li>
+        <li><a href="index.html#map3dSection" class="nav-link">3D</a></li>
+        <li><a href="gestion-ambiental.html" class="nav-link">Gestión Ambiental</a></li>
+        <li><a href="mapas-informacion.html" class="nav-link active">Capas de Información</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="container">
+      <div class="hero-content fade-in">
+        <h1>Capas de Información QGIS Cloud</h1>
+        <p>Visualización profesional de capas geoespaciales en alta definición</p>
+        <div class="hero-badge">
+          <i class="fas fa-cloud-upload-alt"></i> Proyecto: EDUARD/CAPAS
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Controles QGIS Cloud -->
+  <section class="container">
+    <div class="qgis-controls fade-in">
+      <div class="controls-header">
+        <h2 class="controls-title">
+          <i class="fas fa-cloud"></i> Control de Capas QGIS Cloud
+        </h2>
+        <span class="connection-status">
+          <i class="fas fa-check-circle"></i> Conectado & Listo
+        </span>
+      </div>
+      
+      <p style="color: #666; margin-bottom: 20px; font-size: 1.1rem;">
+        Gestiona y visualiza todas tus capas geoespaciales en tiempo real desde QGIS Cloud
+      </p>
+      
+      <div class="action-buttons">
+        <button class="action-btn success" onclick="activateAllLayers()">
+          <i class="fas fa-layer-group"></i> Activar Todas
+        </button>
+        <button class="action-btn secondary" onclick="deactivateAllLayers()">
+          <i class="fas fa-eye-slash"></i> Desactivar Todas
+        </button>
+        <button class="action-btn" onclick="resetView()">
+          <i class="fas fa-crosshairs"></i> Centrar Mapa
+        </button>
+      </div>
+      
+      <div class="controls-grid">
+        <!-- Grupo Turismo -->
+        <div class="control-group">
+          <h3><i class="fas fa-camera"></i> Turismo</h3>
+          <div class="layer-toggle">
+            <input type="checkbox" id="layer-turismo" checked data-layer="lugares">
+            <label for="layer-turismo">Puntos Turísticos</label>
+          </div>
+          <div class="layer-info">Lugares turísticos principales</div>
+          
+          <div class="layer-toggle">
+            <input type="checkbox" id="layer-rutas" checked data-layer="RUTA TURISTICA">
+            <label for="layer-rutas">Rutas Turísticas</label>
+          </div>
+          <div class="layer-info">Caminos y rutas de acceso</div>
+
+          <div class="layer-toggle">
+            <input type="checkbox" id="layer-sitios" checked data-layer="SITIOS TURISTICOS">
+            <label for="layer-sitios">Sitios Turísticos</label>
+          </div>
+          <div class="layer-info">Sitios específicos de interés</div>
+        </div>
+
+        <!-- Grupo Comunidades -->
+        <div class="control-group">
+          <h3><i class="fas fa-users"></i> Comunidades</h3>
+          <div class="layer-toggle">
+            <input type="checkbox" id="layer-comunidad1" checked data-layer="COMUNIDAD CHALLA">
+            <label for="layer-comunidad1">Comunidad Challa</label>
+          </div>
+          <div class="layer-info">Límites comunidad Challa</div>
+          
+          <div class="layer-toggle">
+            <input type="checkbox" id="layer-comunidad2" checked data-layer="COMUNIDAD CHALLAPAMPA">
+            <label for="layer-comunidad2">Comunidad Challapampa</label>
+          </div>
+          <div class="layer-info">Límites comunidad Challapampa</div>
+
+          <div class="layer-toggle">
+            <input type="checkbox" id="layer-comunidad3" checked data-layer="COMUNIDAD YUMANI">
+            <label for="layer-comunidad3">Comunidad Yumani</label>
+          </div>
+          <div class="layer-info">Límites comunidad Yumani</div>
+        </div>
+
+        <!-- Grupo Ambiental -->
+        <div class="control-group">
+          <h3><i class="fas fa-leaf"></i> Ambiental</h3>
+          <div class="layer-toggle">
+            <input type="checkbox" id="layer-areas-verdes" checked data-layer="AREAS VERDES">
+            <label for="layer-areas-verdes">Áreas Verdes</label>
+          </div>
+          <div class="layer-info">Zonas de vegetación</div>
+          
+          <div class="layer-toggle">
+            <input type="checkbox" id="layer-sembradios" checked data-layer="SEMBRADIOS">
+            <label for="layer-sembradios">Zonas Agrícolas</label>
+          </div>
+          <div class="layer-info">Sembradíos y cultivos</div>
+
+          <div class="layer-toggle">
+            <input type="checkbox" id="layer-aguas" checked data-layer="AGUAS CONTAMINDAS">
+            <label for="layer-aguas">Calidad del Agua</label>
+          </div>
+          <div class="layer-info">Zonas de agua contaminada</div>
+        </div>
+
+        <!-- Grupo Infraestructura -->
+        <div class="control-group">
+          <h3><i class="fas fa-building"></i> Infraestructura</h3>
+          <div class="layer-toggle">
+            <input type="checkbox" id="layer-viviendas" checked data-layer="VIVIENDAS">
+            <label for="layer-viviendas">Viviendas</label>
+          </div>
+          <div class="layer-info">Viviendas locales</div>
+          
+          <div class="layer-toggle">
+            <input type="checkbox" id="layer-muelles" checked data-layer="MUELLES">
+            <label for="layer-muelles">Muelles</label>
+          </div>
+          <div class="layer-info">Puntos de embarcadero</div>
+
+          <div class="layer-toggle">
+            <input type="checkbox" id="layer-basura" checked data-layer="PUNTOS DE BASURA">
+            <label for="layer-basura">Puntos de Basura</label>
+          </div>
+          <div class="layer-info">Recolección de residuos</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Mapa Principal -->
+  <section class="container">
+    <div class="map-container fade-in">
+      <div id="qgisMap">
+        <div class="map-loading" id="mapLoading">
+          <div class="loading-spinner"></div>
+          <p>Cargando capas QGIS Cloud...</p>
+        </div>
+      </div>
+      <div class="map-legend">
+        <h4><i class="fas fa-layer-group"></i> Capas Activas</h4>
+        <div class="legend-items" id="dynamicLegend">
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: #FF6B6B"></div>
+            <span>Puntos Turísticos</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: #4ECDC4"></div>
+            <span>Comunidades</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <button id="backToTop" title="Volver arriba">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+
+  <!-- SCRIPTS -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    // CONFIGURACIÓN QGIS CLOUD CORREGIDA
+    const QGIS_CONFIG = {
+      // URL CORRECTA para WMS
+      baseUrl: 'https://wms.qgiscloud.com/EDUARD/CAPAS/wms',
+      project: 'EDUARD/CAPAS',
+      layers: {
+        'lugares': 'lugares',
+        'RUTA TURISTICA': 'RUTA TURISTICA', 
+        'SITIOS TURISTICOS': 'SITIOS TURISTICOS',
+        'COMUNIDAD CHALLA': 'COMUNIDAD CHALLA',
+        'COMUNIDAD CHALLAPAMPA': 'COMUNIDAD CHALLAPAMPA',
+        'COMUNIDAD YUMANI': 'COMUNIDAD YUMANI',
+        'AREAS VERDES': 'AREAS VERDES',
+        'SEMBRADIOS': 'SEMBRADIOS',
+        'AGUAS CONTAMINDAS': 'AGUAS CONTAMINDAS',
+        'VIVIENDAS': 'VIVIENDAS',
+        'MUELLES': 'MUELLES',
+        'PUNTOS DE BASURA': 'PUNTOS DE BASURA'
+      }
+    };
+
+    let map;
+    const qgisLayers = {};
+    const activeLayers = new Set();
+
+    // Colores premium para la leyenda
+    const layerColors = {
+      'lugares': '#FF6B6B',
+      'RUTA TURISTICA': '#45B7D1', 
+      'SITIOS TURISTICOS': '#FFA726',
+      'COMUNIDAD CHALLA': '#4ECDC4',
+      'COMUNIDAD CHALLAPAMPA': '#26C6DA',
+      'COMUNIDAD YUMANI': '#00ACC1',
+      'AREAS VERDES': '#66BB6A',
+      'SEMBRADIOS': '#9CCC65',
+      'AGUAS CONTAMINDAS': '#EF5350',
+      'VIVIENDAS': '#8D6E63',
+      'MUELLES': '#5C6BC0',
+      'PUNTOS DE BASURA': '#78909C'
+    };
+
+    // Nombres amigables
+    const layerNames = {
+      'lugares': 'Puntos Turísticos',
+      'RUTA TURISTICA': 'Rutas Turísticas', 
+      'SITIOS TURISTICOS': 'Sitios Turísticos',
+      'COMUNIDAD CHALLA': 'Comunidad Challa',
+      'COMUNIDAD CHALLAPAMPA': 'Comunidad Challapampa',
+      'COMUNIDAD YUMANI': 'Comunidad Yumani',
+      'AREAS VERDES': 'Áreas Verdes',
+      'SEMBRADIOS': 'Zonas Agrícolas',
+      'AGUAS CONTAMINDAS': 'Calidad del Agua',
+      'VIVIENDAS': 'Viviendas',
+      'MUELLES': 'Muelles',
+      'PUNTOS DE BASURA': 'Puntos de Basura'
+    };
+
+    // Inicializar mapa CON capa base para referencia
+    function initMap() {
+      map = L.map('qgisMap', {
+        center: [-15.995, -69.18],
+        zoom: 13,
+        zoomControl: true,
+        attributionControl: true
+      });
+
+      // Capa base para referencia (se puede quitar después)
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
+
+      // Cargar capas QGIS
+      loadQGISLayers();
+    }
+
+    // Función mejorada para cargar capas WMS
+    function loadQGISLayers() {
+      const loadingElement = document.getElementById('mapLoading');
+      
+      Object.entries(QGIS_CONFIG.layers).forEach(([key, layerName]) => {
+        try {
+          // Crear capa WMS con parámetros correctos
+          qgisLayers[key] = L.tileLayer.wms(QGIS_CONFIG.baseUrl, {
+            layers: layerName,
+            format: 'image/png',
+            transparent: true,
+            version: '1.3.0',
+            crs: L.CRS.EPSG4326,
+            styles: ''
+          });
+
+          // Activar capas por defecto
+          qgisLayers[key].addTo(map);
+          activeLayers.add(key);
+          
+          // Marcar checkboxes
+          const checkbox = document.querySelector(`input[data-layer="${key}"]`);
+          if (checkbox) checkbox.checked = true;
+
+          console.log(`✅ Capa cargada: ${layerName}`);
+
+        } catch (error) {
+          console.error(`❌ Error cargando capa ${layerName}:`, error);
+        }
+      });
+
+      // Ocultar loading
+      if (loadingElement) {
+        loadingElement.style.display = 'none';
+      }
+
+      updateLegend();
+    }
+
+    // Control de capas
+    function setupLayerControls() {
+      const checkboxes = document.querySelectorAll('.layer-toggle input');
+      
+      checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+          const layerKey = this.getAttribute('data-layer');
+          
+          if (this.checked) {
+            if (qgisLayers[layerKey]) {
+              map.addLayer(qgisLayers[layerKey]);
+              activeLayers.add(layerKey);
+            }
+          } else {
+            if (qgisLayers[layerKey]) {
+              map.removeLayer(qgisLayers[layerKey]);
+              activeLayers.delete(layerKey);
+            }
+          }
+          updateLegend();
+        });
+      });
+    }
+
+    function updateLegend() {
+      const legendContainer = document.getElementById('dynamicLegend');
+      if (!legendContainer) return;
+      
+      legendContainer.innerHTML = '';
+      
+      activeLayers.forEach(layerKey => {
+        const legendItem = document.createElement('div');
+        legendItem.className = 'legend-item';
+        legendItem.innerHTML = `
+          <div class="legend-color" style="background-color: ${layerColors[layerKey]}"></div>
+          <span>${layerNames[layerKey]}</span>
+        `;
+        legendContainer.appendChild(legendItem);
+      });
+
+      if (activeLayers.size === 0) {
+        legendContainer.innerHTML = '<div style="color: #666; font-style: italic;">No hay capas activas</div>';
+      }
+    }
+
+    function activateAllLayers() {
+      Object.keys(QGIS_CONFIG.layers).forEach(layerKey => {
+        if (qgisLayers[layerKey]) {
+          map.addLayer(qgisLayers[layerKey]);
+          activeLayers.add(layerKey);
+        }
+        const checkbox = document.querySelector(`input[data-layer="${layerKey}"]`);
+        if (checkbox) checkbox.checked = true;
+      });
+      updateLegend();
+    }
+
+    function deactivateAllLayers() {
+      Object.keys(QGIS_CONFIG.layers).forEach(layerKey => {
+        if (qgisLayers[layerKey]) {
+          map.removeLayer(qgisLayers[layerKey]);
+          activeLayers.delete(layerKey);
+        }
+        const checkbox = document.querySelector(`input[data-layer="${layerKey}"]`);
+        if (checkbox) checkbox.checked = false;
+      });
+      updateLegend();
+    }
+
+    function resetView() {
+      map.setView([-15.995, -69.18], 13);
+    }
+
+    // Navegación
+    function setupNavigation() {
+      const navToggle = document.getElementById('navToggle');
+      const navMenu = document.getElementById('navMenu');
+      
+      if (navToggle && navMenu) {
+        navToggle.addEventListener('click', () => {
+          navMenu.classList.toggle('active');
+        });
+
+        document.querySelectorAll('.nav-link').forEach(link => {
+          link.addEventListener('click', () => {
+            navMenu.classList.remove('active');
+          });
+        });
+      }
+    }
+
+    function setupBackToTop() {
+      const backToTop = document.getElementById('backToTop');
+      
+      window.addEventListener('scroll', () => {
+        backToTop.style.display = window.pageYOffset > 300 ? 'block' : 'none';
+      });
+
+      backToTop.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+
+    // Inicializar cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', function() {
+      initMap();
+      setupLayerControls();
+      setupNavigation();
+      setupBackToTop();
+      
+      console.log('🚀 Mapa inicializado con QGIS Cloud');
+    });
+  </script>
+</body>
+</html>

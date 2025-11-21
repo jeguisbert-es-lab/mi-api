@@ -1,0 +1,36 @@
+:root {
+  /* Colores principales */
+  /* Primary palette (olive-based) - reuse existing variable names for compatibility */
+  --primary-blue: #6B8E23; /* primary color (mapped to olive) */
+  --secondary-blue: #394B22; /* darker olive/neutral for text */
+  --accent-blue: #9bb85a; /* lighter olive accent */
+  --accent-white: #ffffff;
+  --accent-gray: #f3f4f6;
+  --text-dark: #2b3a1a;
+  --text-light: #ffffff;
+  --card-bg: #f8fafc;
+  --main-bg: #ffffff;
+  /* Hero-specific variables (keep blue hero look) */
+  --hero-gradient: linear-gradient(90deg, rgba(35,45,12,0.92), rgba(107,142,35,0.9));
+  --hero-overlay: linear-gradient(rgba(255,255,255,0.02), rgba(107,142,35,0.06));
+
+  /* Additional olive aliases for direct replacements */
+  --olive: #6B8E23;
+  --olive-dark: #4b6f11;
+  --olive-light: #bcd77b;
+
+  /* Sombras */
+  --shadow-card: 0 5px 15px rgba(0, 0, 0, 0.08);
+  --shadow-hover: 0 10px 20px rgba(37,99,235,0.08);
+  
+  /* Espaciado */
+  --section-padding: 4rem 2rem;
+  --border-radius: 15px;
+  
+  /* Transiciones */
+  --transition-fast: 0.3s;
+  --transition-slow: 0.5s;
+  
+  /* Tipografía */
+  --font-primary: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}

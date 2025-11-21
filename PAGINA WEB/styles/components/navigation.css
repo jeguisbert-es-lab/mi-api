@@ -1,0 +1,181 @@
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  /* Transparent header by default; becomes olive when scrolled */
+  background: transparent;
+  color: var(--accent-white);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.navbar.scrolled {
+  /* Olive background when scrolled */
+  background: #6B8E23;
+  box-shadow: 0 2px 12px rgba(43,56,17,0.18);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+
+.navbar.scrolled .nav-logo {
+  color: var(--accent-white);
+  background: rgba(107,142,35,0.95);
+  border-color: rgba(107,142,35,1);
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--olive-dark);
+  text-decoration: none;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  /* Keep olive framing for the logo */
+  padding: 0.35rem 0.9rem;
+  border-radius: 8px;
+  background: rgba(107,142,35,0.14);
+  border: 1px solid rgba(107,142,35,0.9);
+  margin-right: 1rem; /* separate logo from first menu item */
+  line-height: 1; /* normalize vertical rhythm */
+}
+
+.nav-menu {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 1.5rem; /* uniform horizontal spacing between all links */
+  align-items: center;
+}
+
+.nav-link {
+  display: inline-block;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: rgba(107,142,35,0.14);
+  color: var(--olive-dark);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  position: relative; /* needed for ::after underline */
+  line-height: 1; /* match logo */
+  padding-top: 0.35rem;
+  padding-bottom: 0.35rem;
+  margin: 0; /* remove any side margin for uniform gap */
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  position: relative; /* needed for ::after underline */
+  line-height: 1; /* match logo */
+}
+
+/* Ensure logo text is clearly readable when navbar is transparent (over hero video) */
+.navbar:not(.scrolled) .nav-logo {
+  /* darker olive/near-black for strong contrast on video */
+  color: #112a04; /* deep olive/forest tone */
+  /* subtle lift to separate from busy video backgrounds */
+  text-shadow: 0 2px 8px rgba(0,0,0,0.55);
+  background: rgba(255,255,255,0.06); /* keep subtle frame but make it less intrusive */
+}
+
+/* Keep the white-on-olive behavior when navbar is scrolled */
+.navbar.scrolled .nav-logo {
+  color: var(--accent-white);
+  background: rgba(107,142,35,0.95);
+}
+
+/* Apply same transparent + black-text treatment to nav links over the hero video */
+.navbar:not(.scrolled) .nav-link {
+  color: #112a04; /* match logo dark color */
+  background: rgba(255,255,255,0.04); /* faint frame similar to logo */
+  text-shadow: 0 2px 6px rgba(0,0,0,0.45);
+}
+
+/* Keep nav-links white when navbar is scrolled */
+.navbar.scrolled .nav-link {
+  color: var(--accent-white);
+  background: rgba(255,255,255,0); /* remove frame on scrolled state (background is olive) */
+}
+.nav-link:focus {
+  outline: 3px solid rgba(59,130,246,0.25);
+  border-radius: 6px;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent-blue), var(--olive));
+  transition: width 0.3s ease;
+}
+
+.nav-link:hover::after,
+.nav-link.active::after {
+  width: 100%;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  /* subtle underline handled by ::after - keep hover simple */
+  color: var(--accent-white);
+}
+
+.nav-toggle {
+  display: none;
+  font-size: 1.5rem;
+  color: #fff;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .nav-toggle {
+    display: block;
+  }
+
+  /* On mobile keep a little gap between logo and toggle/menu */
+  .nav-logo {
+    margin-right: 0.5rem;
+    line-height: 1;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+  }
+
+  .nav-menu {
+    position: fixed;
+    top: 70px;
+    left: -100%;
+    width: 100%;
+    flex-direction: column;
+    line-height: 1;
+    /* Mobile menu uses a slightly transparent olive */
+    background: rgba(107,142,35,0.95);
+    backdrop-filter: blur(10px);
+    padding: 2rem;
+    text-align: center;
+    transition: 0.3s ease;
+    gap: 1rem;
+  }
+
+  .nav-menu.active {
+    left: 0;
+  }
+
+  /* ensure mobile menu items align predictably */
+  .nav-menu li,
+  .nav-menu a {
+    align-items: center;
+    display: flex;
+  }
+}

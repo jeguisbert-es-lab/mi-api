@@ -1,0 +1,1479 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Isla del Sol - Lago Titicaca</title>
+  <meta name="theme-color" content="#2563eb" />
+  
+  <!-- CSS MODULAR -->
+  <link rel="stylesheet" href="styles/utils/variables.css">
+  <link rel="stylesheet" href="styles/utils/responsive.css">
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/components/navigation.css">
+  <link rel="stylesheet" href="styles/components/hero.css">
+  <link rel="stylesheet" href="styles/components/map.css">
+  <link rel="stylesheet" href="styles/components/gallery.css">
+  <link rel="stylesheet" href="styles/components/info.css">
+  <link rel="stylesheet" href="styles/components/footer.css">
+  
+  <!-- EXTERNAL CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+  <!-- CSS DE CESIUM -->
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.95/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  
+  <!-- CSS SUPREMO PARA CESIUM -->
+  <style>
+    /* ===== VARIABLES Y RESET ===== */
+    :root {
+      --primary-cesium: #6366f1;
+      --secondary-cesium: #8b5cf6;
+      --accent-cesium: #06b6d4;
+      --success-cesium: #10b981;
+      --warning-cesium: #f59e0b;
+      --danger-cesium: #ef4444;
+      --dark-cesium: #0f172a;
+      --darker-cesium: #020617;
+      --light-cesium: #f8fafc;
+      --glass-bg: rgba(255, 255, 255, 0.08);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --glass-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+      --blur-effect: blur(25px);
+      --neon-glow: 0 0 20px rgba(99, 102, 241, 0.5);
+    }
+
+    /* ===== CONTENEDOR PRINCIPAL CESIUM ===== */
+    .cesium-container {
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--glass-shadow);
+      margin: 30px 0;
+      border: 1px solid var(--glass-border);
+      background: linear-gradient(145deg, #0f172a, #1e293b);
+    }
+
+    .cesium-frame {
+      width: 100%;
+      height: 750px;
+      position: relative;
+      background: linear-gradient(135deg, var(--darker-cesium) 0%, var(--dark-cesium) 100%);
+    }
+
+    /* ===== LOADING SCREEN ANIMADO ===== */
+    .cesium-loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: var(--light-cesium);
+      z-index: 1000;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: var(--blur-effect);
+      padding: 40px;
+      border-radius: 20px;
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      min-width: 300px;
+    }
+
+    .cesium-loading i {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      display: block;
+      background: linear-gradient(135deg, var(--accent-cesium), var(--primary-cesium));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: pulse 2s infinite;
+    }
+
+    .cesium-loading p {
+      margin: 0 0 25px 0;
+      font-size: 1.2em;
+      font-weight: 500;
+    }
+
+    .loading-spinner {
+      border: 3px solid rgba(255, 255, 255, 0.1);
+      border-top: 3px solid var(--accent-cesium);
+      border-right: 3px solid var(--primary-cesium);
+      border-bottom: 3px solid var(--secondary-cesium);
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1.5s linear infinite;
+      margin: 0 auto;
+      box-shadow: var(--neon-glow);
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.05); }
+    }
+
+    /* ===== PANEL DE CONTROL SUPREMO ===== */
+    .cesium-control-panel {
+      position: absolute;
+      top: 25px;
+      left: 25px;
+      width: 350px;
+      background: var(--glass-bg);
+      backdrop-filter: var(--blur-effect);
+      border: 1px solid var(--glass-border);
+      border-radius: 25px;
+      box-shadow: var(--glass-shadow);
+      z-index: 1000;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .cesium-control-panel:hover {
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 35px 60px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Header del Panel */
+    .control-header {
+      background: linear-gradient(135deg, var(--primary-cesium), var(--secondary-cesium));
+      padding: 25px;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .control-header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+      transform: rotate(45deg);
+      animation: shimmer 6s infinite linear;
+    }
+
+    @keyframes shimmer {
+      0% { transform: rotate(45deg) translateX(-100%); }
+      100% { transform: rotate(45deg) translateX(100%); }
+    }
+
+    .control-header h3 {
+      margin: 0;
+      font-size: 1.5em;
+      font-weight: 700;
+      text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .control-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 15px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .btn-control {
+      flex: 1;
+      padding: 12px 18px;
+      border: none;
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      font-size: 0.9em;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-control::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn-control:hover::before {
+      left: 100%;
+    }
+
+    .btn-control:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+
+    /* Lista de Capas */
+    .layers-list {
+      max-height: 65vh;
+      overflow-y: auto;
+      padding: 20px;
+      background: rgba(15, 23, 42, 0.7);
+    }
+
+    .layers-list::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .layers-list::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 4px;
+    }
+
+    .layers-list::-webkit-scrollbar-thumb {
+      background: linear-gradient(var(--primary-cesium), var(--secondary-cesium));
+      border-radius: 4px;
+    }
+
+    .layers-list::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(var(--accent-cesium), var(--primary-cesium));
+    }
+
+    /* Secciones de Categoría */
+    .category-section {
+      margin-bottom: 25px;
+    }
+
+    .category-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .category-section h4 {
+      color: var(--light-cesium);
+      margin: 0 0 15px 0;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      font-size: 0.95em;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      border-left: 4px solid var(--accent-cesium);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Items de Capa Mejorados */
+    .layer-item {
+      display: flex;
+      align-items: center;
+      padding: 14px;
+      margin: 8px 0;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 15px;
+      transition: all 0.3s ease;
+      border: 1px solid transparent;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .layer-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+      transition: left 0.6s;
+    }
+
+    .layer-item:hover::before {
+      left: 100%;
+    }
+
+    .layer-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--glass-border);
+      transform: translateX(8px) scale(1.02);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    }
+
+    .layer-item input[type="checkbox"] {
+      display: none;
+    }
+
+    .layer-label {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      cursor: pointer;
+      gap: 15px;
+      font-weight: 500;
+      color: var(--light-cesium);
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Indicador de Color Mejorado */
+    .layer-color {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      transition: all 0.4s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      position: relative;
+    }
+
+    .layer-color::after {
+      content: '';
+      position: absolute;
+      top: -4px;
+      left: -4px;
+      right: -4px;
+      bottom: -4px;
+      border-radius: 50%;
+      background: inherit;
+      opacity: 0.3;
+      filter: blur(8px);
+      z-index: -1;
+    }
+
+    .layer-item:hover .layer-color {
+      transform: scale(1.3) rotate(15deg);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+    }
+
+    /* Emoji Estilizado */
+    .layer-emoji {
+      font-size: 1.3em;
+      filter: drop-shadow(0 3px 6px rgba(0,0,0,0.3));
+      transition: transform 0.3s ease;
+    }
+
+    .layer-item:hover .layer-emoji {
+      transform: scale(1.2) rotate(-5deg);
+    }
+
+    /* Texto */
+    .layer-text {
+      flex: 1;
+      font-size: 1em;
+      transition: all 0.3s ease;
+    }
+
+    /* Contador Mejorado */
+    .layer-count {
+      background: rgba(30, 41, 59, 0.8);
+      color: var(--light-cesium);
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-size: 0.85em;
+      font-weight: 700;
+      min-width: 32px;
+      text-align: center;
+      border: 1px solid var(--glass-border);
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .layer-item:hover .layer-count {
+      background: var(--primary-cesium);
+      transform: scale(1.15);
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    }
+
+    /* Estado Checked Mejorado */
+    .layer-item input[type="checkbox"]:checked + .layer-label .layer-color {
+      border-color: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 0 0 3px currentColor, 0 6px 20px currentColor;
+      animation: pulse-glow 2s infinite;
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 0 3px currentColor, 0 6px 20px currentColor; }
+      50% { box-shadow: 0 0 0 4px currentColor, 0 8px 25px currentColor; }
+    }
+
+    .layer-item input[type="checkbox"]:checked + .layer-label .layer-text {
+      color: white;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      font-weight: 600;
+    }
+
+    .layer-item input[type="checkbox"]:checked + .layer-label .layer-count {
+      background: var(--success-cesium);
+      color: white;
+    }
+
+    /* Footer del Panel */
+    .panel-footer {
+      padding: 20px;
+      background: rgba(15, 23, 42, 0.9);
+      border-top: 1px solid var(--glass-border);
+      backdrop-filter: blur(15px);
+    }
+
+    .system-stats {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9em;
+      color: var(--light-cesium);
+      gap: 10px;
+    }
+
+    .system-stats span {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-weight: 600;
+      flex: 1;
+      text-align: center;
+      border: 1px solid var(--glass-border);
+      transition: all 0.3s ease;
+    }
+
+    .system-stats span:hover {
+      background: rgba(255, 255, 255, 0.12);
+      transform: translateY(-2px);
+    }
+
+    /* ===== PANEL DE INFORMACIÓN SUPREMO ===== */
+    .cesium-info-panel {
+      position: absolute;
+      top: 25px;
+      right: 25px;
+      width: 380px;
+      background: var(--glass-bg);
+      backdrop-filter: var(--blur-effect);
+      border: 1px solid var(--glass-border);
+      border-radius: 25px;
+      box-shadow: var(--glass-shadow);
+      z-index: 1000;
+      transform: translateX(450px);
+      opacity: 0;
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      max-height: 85vh;
+      overflow: hidden;
+    }
+
+    .cesium-info-panel.visible {
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    /* Header del Info Panel */
+    .info-header {
+      background: linear-gradient(135deg, var(--accent-cesium), var(--primary-cesium));
+      padding: 25px;
+      color: white;
+      border-radius: 25px 25px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .info-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+      animation: shine 3s infinite linear;
+    }
+
+    @keyframes shine {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .info-header h3 {
+      margin: 0;
+      font-size: 1.4em;
+      font-weight: 700;
+      flex: 1;
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-close {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.3em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      position: relative;
+      z-index: 2;
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-close:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: rotate(90deg) scale(1.1);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    /* Contenido del Info Panel */
+    .info-content {
+      padding: 25px;
+      background: rgba(15, 23, 42, 0.85);
+      max-height: calc(85vh - 100px);
+      overflow-y: auto;
+    }
+
+    .info-content::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .info-content::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 3px;
+    }
+
+    .info-content::-webkit-scrollbar-thumb {
+      background: var(--accent-cesium);
+      border-radius: 3px;
+    }
+
+    /* Estado sin selección */
+    .no-selection {
+      text-align: center;
+      color: var(--light-cesium);
+      padding: 50px 25px;
+    }
+
+    .no-selection i {
+      font-size: 4rem;
+      margin-bottom: 20px;
+      display: block;
+      opacity: 0.6;
+      background: linear-gradient(135deg, var(--accent-cesium), var(--primary-cesium));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .no-selection p {
+      margin: 0;
+      font-size: 1.1em;
+      line-height: 1.6;
+      opacity: 0.8;
+    }
+
+    /* Información de Entidad Mejorada */
+    .entity-info {
+      color: var(--light-cesium);
+    }
+
+    .info-header .info-icon {
+      font-size: 1.8em;
+      margin-right: 12px;
+      filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4));
+    }
+
+    .entity-info h3 {
+      margin: 0 0 20px 0;
+      font-size: 1.5em;
+      color: white;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      background: linear-gradient(135deg, #fff, #e2e8f0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .info-details {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 15px;
+      padding: 20px;
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(10px);
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .info-row:hover {
+      border-bottom-color: var(--accent-cesium);
+      transform: translateX(5px);
+    }
+
+    .info-row:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .info-label {
+      font-weight: 600;
+      color: var(--accent-cesium);
+      flex: 1;
+      font-size: 0.95em;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .info-value {
+      flex: 2;
+      text-align: right;
+      color: white;
+      font-weight: 500;
+      font-size: 1em;
+      line-height: 1.4;
+    }
+
+    /* ===== CONTROLES INFERIORES ===== */
+    .cesium-controls {
+      position: absolute;
+      bottom: 25px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 12px;
+      z-index: 1000;
+      background: var(--glass-bg);
+      backdrop-filter: var(--blur-effect);
+      padding: 15px;
+      border-radius: 20px;
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+    }
+
+    .btn-cesium {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1px solid var(--glass-border);
+      padding: 12px 20px;
+      border-radius: 12px;
+      cursor: pointer;
+      backdrop-filter: blur(15px);
+      transition: all 0.3s ease;
+      font-weight: 600;
+      font-size: 0.9em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 120px;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-cesium::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn-cesium:hover::before {
+      left: 100%;
+    }
+
+    .btn-cesium:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-cesium i {
+      font-size: 1.1em;
+    }
+
+    /* ===== LEYENDA MEJORADA ===== */
+    .cesium-legend {
+      position: absolute;
+      bottom: 25px;
+      right: 25px;
+      background: var(--glass-bg);
+      backdrop-filter: var(--blur-effect);
+      color: white;
+      padding: 20px;
+      border-radius: 15px;
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      min-width: 200px;
+    }
+
+    .cesium-legend h4 {
+      margin: 0 0 15px 0;
+      font-size: 1.1em;
+      font-weight: 600;
+      color: var(--light-cesium);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cesium-legend ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .cesium-legend li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      padding: 6px 0;
+      font-size: 0.9em;
+      transition: all 0.3s ease;
+    }
+
+    .cesium-legend li:hover {
+      transform: translateX(5px);
+      color: var(--accent-cesium);
+    }
+
+    .cesium-legend li:last-child {
+      margin-bottom: 0;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .cesium-control-panel {
+        width: 300px;
+        left: 15px;
+        top: 15px;
+      }
+      
+      .cesium-info-panel {
+        width: 320px;
+        right: 15px;
+      }
+      
+      .cesium-controls {
+        flex-wrap: wrap;
+        justify-content: center;
+        max-width: 90%;
+      }
+      
+      .btn-cesium {
+        min-width: 100px;
+        font-size: 0.8em;
+        padding: 10px 15px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .cesium-control-panel,
+      .cesium-info-panel {
+        width: calc(100% - 30px);
+        left: 15px;
+        right: 15px;
+      }
+      
+      .cesium-frame {
+        height: 600px;
+      }
+    }
+
+    /* ===== EFECTOS DE PARTÍCULAS ===== */
+    .cesium-particles {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .particle {
+      position: absolute;
+      background: var(--accent-cesium);
+      border-radius: 50%;
+      opacity: 0.4;
+      animation: float 8s infinite ease-in-out;
+    }
+
+    @keyframes float {
+      0%, 100% { 
+        transform: translateY(0px) rotate(0deg) scale(1); 
+        opacity: 0.3;
+      }
+      33% { 
+        transform: translateY(-20px) rotate(120deg) scale(1.1);
+        opacity: 0.6;
+      }
+      66% { 
+        transform: translateY(10px) rotate(240deg) scale(0.9);
+        opacity: 0.4;
+      }
+    }
+
+    /* ===== ANIMACIONES ESPECIALES ===== */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes glow {
+      0%, 100% { box-shadow: 0 0 5px currentColor; }
+      50% { box-shadow: 0 0 20px currentColor, 0 0 30px currentColor; }
+    }
+
+    .glow {
+      animation: glow 2s ease-in-out infinite;
+    }
+
+    /* ===== MEJORAS PARA LOS CONTROLES NATIVOS DE CESIUM ===== */
+    .cesium-viewer-toolbar {
+      background: var(--glass-bg) !important;
+      backdrop-filter: var(--blur-effect) !important;
+      border: 1px solid var(--glass-border) !important;
+      border-radius: 15px !important;
+      box-shadow: var(--glass-shadow) !important;
+    }
+
+    .cesium-button {
+      background: rgba(255, 255, 255, 0.1) !important;
+      border: 1px solid var(--glass-border) !important;
+      border-radius: 10px !important;
+      transition: all 0.3s ease !important;
+      color: white !important;
+    }
+
+    .cesium-button:hover {
+      background: rgba(255, 255, 255, 0.2) !important;
+      transform: translateY(-2px) !important;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3) !important;
+    }
+  </style>
+
+  <!-- SCRIPTS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+  <script src="scripts/modules/animations.js" defer></script>
+</head>
+<body>
+  <!-- Tu contenido existente se mantiene igual -->
+  <a class="skip-link" href="#inicio">Saltar al contenido</a>
+  
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="#" class="nav-logo">Isla del Sol</a>
+      <div class="nav-toggle" id="navToggle">
+        <i class="fas fa-bars"></i>
+      </div>
+      <ul class="nav-menu">
+        <li><a href="#inicio" class="nav-link active">Inicio</a></li>
+        <li><a href="#mapSection" class="nav-link">Mapa Turístico</a></li>
+        <li><a href="#map3dSection" class="nav-link">3D</a></li>
+        <li><a href="#gallery" class="nav-link">Galería</a></li>
+        <li><a href="gestion-ambiental.html" class="nav-link">Gestión Ambiental</a></li>
+        <li><a href="mapas-informacion.html" class="nav-link">Capas de Información</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section id="inicio" class="hero">
+    <div class="hero-video-bg">
+      <video autoplay muted loop playsinline id="heroVideo">
+        <source src="assets/videos/videoplayback.webm" type="video/webm">
+        Tu navegador no soporta videos WebM.
+      </video>
+    </div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <h1 class="hero-title" aria-label="Isla del Sol">
+        <span class="hero-title-line" aria-hidden="true"></span>
+      </h1>
+    </div>
+    <div class="hero-scroll-indicator">
+      <div class="scroll-icon">
+        <i class="fas fa-chevron-down"></i>
+      </div>
+      <span>Desplaza para explorar</span>
+    </div>
+  </section>
+
+  <button id="backToTop" title="Volver arriba">↑</button>
+
+ <!-- 2. MAPA INTERACTIVO MEJORADO -->
+<section id="mapSection" class="map-section fade-in">
+    <div class="container">
+        <h2 class="section-title">Mapa Turístico Interactivo</h2>
+        <p class="section-description">
+            Explora todos los puntos de interés, rutas y servicios de la Isla del Sol en nuestro mapa 2D interactivo
+        </p>
+        
+        <div class="map-container">
+            <div id="map" class="map-frame">
+                <div class="map-loading">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <p>Inicializando mapa interactivo...</p>
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>
+            
+            <!-- Contenedor para controles unificados -->
+            <div class="map-controls-container">
+                <!-- Los controles se generan automáticamente por JavaScript -->
+            </div>
+        </div>
+    </div>
+</section>
+
+  <!-- 3. ✅ MAPA 3D SUPREMO CON CESIUM -->
+  <section id="map3dSection" class="map3d-section" data-aos="fade-up">
+    <div class="container">
+        <h2 class="section-title">Isla del Sol - Vista 3D Suprema</h2>
+        <p class="section-description">
+            Explora la isla en una experiencia 3D inmersiva con terreno real, efectos visuales avanzados y controles intuitivos
+        </p>
+        
+        <div class="cesium-container">
+            <div id="cesiumContainer" class="cesium-frame">
+                <div class="cesium-loading">
+                    <i class="fas fa-globe-americas"></i>
+                    <p>Inicializando mundo 3D...</p>
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>
+            
+            <!-- Los controles se generan automáticamente por JavaScript -->
+        </div>
+    </div>
+  </section>
+
+ <!-- GALERÍA MEJORADA -->
+<section id="gallery" class="gallery-section">
+    <div class="section-background-overlay"></div>
+    <div class="container">
+        <h2 class="section-title" data-aos="fade-up">Galería de la Isla del Sol</h2>
+        <p class="section-description" data-aos="fade-up" data-aos-delay="200">
+            Descubre la belleza, cultura y paisajes únicos de este lugar sagrado a través de nuestra colección fotográfica
+        </p>
+        
+        <!-- Filtros de Categoría -->
+        <div class="gallery-filters" data-aos="fade-up" data-aos-delay="300">
+            <button class="filter-btn active" data-filter="all">
+                <i class="fas fa-th-large"></i> Todas
+            </button>
+            <button class="filter-btn" data-filter="paisajes">
+                <i class="fas fa-mountain"></i> Paisajes
+            </button>
+            <button class="filter-btn" data-filter="cultura">
+                <i class="fas fa-landmark"></i> Cultura
+            </button>
+            <button class="filter-btn" data-filter="arquitectura">
+                <i class="fas fa-archway"></i> Arquitectura
+            </button>
+            <button class="filter-btn" data-filter="gente">
+                <i class="fas fa-users"></i> Comunidad
+            </button>
+            <button class="filter-btn" data-filter="flora-fauna">
+                <i class="fas fa-leaf"></i> Flora & Fauna
+            </button>
+        </div>
+        
+        <!-- Contador de elementos -->
+        <div class="gallery-counter" data-aos="fade-up" data-aos-delay="350">
+            <span id="gallery-count">12</span> imágenes encontradas
+        </div>
+        
+        <!-- Grid de Galería Mejorado -->
+        <div class="gallery-grid" data-aos="fade-up" data-aos-delay="400">
+            <!-- Paisajes -->
+            <div class="gallery-item" data-category="paisajes" data-image="assets/images/paisaje1.jpg" data-caption="Amanecer en la Isla del Sol">
+                <div class="gallery-item-inner">
+                    <div class="gallery-image-container">
+                        <img src="assets/images/paisaje1.jpg" alt="Amanecer en la Isla del Sol" loading="lazy">
+                        <div class="gallery-badge">
+                            <i class="fas fa-mountain"></i>
+                        </div>
+                    </div>
+                    <div class="gallery-overlay">
+                        <div class="gallery-content">
+                            <h3>Amanecer en la Isla</h3>
+                            <p>Primeros rayos del sol iluminando el Lago Titicaca</p>
+                            <div class="gallery-actions">
+                                <button class="gallery-zoom" title="Ampliar imagen">
+                                    <i class="fas fa-search-plus"></i>
+                                </button>
+                                <button class="gallery-info" title="Más información">
+                                    <i class="fas fa-info-circle"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="gallery-item" data-category="paisajes" data-image="assets/images/paisaje2.jpg" data-caption="Atardecer desde Palla Khasa">
+                <div class="gallery-item-inner">
+                    <div class="gallery-image-container">
+                        <img src="assets/images/paisaje2.jpg" alt="Atardecer desde Palla Khasa" loading="lazy">
+                        <div class="gallery-badge">
+                            <i class="fas fa-mountain"></i>
+                        </div>
+                    </div>
+                    <div class="gallery-overlay">
+                        <div class="gallery-content">
+                            <h3>Atardecer Místico</h3>
+                            <p>Vista panorámica desde el mirador Palla Khasa</p>
+                            <div class="gallery-actions">
+                                <button class="gallery-zoom" title="Ampliar imagen">
+                                    <i class="fas fa-search-plus"></i>
+                                </button>
+                                <button class="gallery-info" title="Más información">
+                                    <i class="fas fa-info-circle"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Cultura -->
+            <div class="gallery-item" data-category="cultura" data-image="assets/images/cultura1.jpg" data-caption="Ceremonia tradicional Aymara">
+                <div class="gallery-item-inner">
+                    <div class="gallery-image-container">
+                        <img src="assets/images/cultura1.jpg" alt="Ceremonia tradicional Aymara" loading="lazy">
+                        <div class="gallery-badge">
+                            <i class="fas fa-landmark"></i>
+                        </div>
+                    </div>
+                    <div class="gallery-overlay">
+                        <div class="gallery-content">
+                            <h3>Ceremonia Aymara</h3>
+                            <p>Ritual ancestral en honor a la Pachamama</p>
+                            <div class="gallery-actions">
+                                <button class="gallery-zoom" title="Ampliar imagen">
+                                    <i class="fas fa-search-plus"></i>
+                                </button>
+                                <button class="gallery-info" title="Más información">
+                                    <i class="fas fa-info-circle"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="gallery-item" data-category="cultura" data-image="assets/images/cultura2.jpg" data-caption="Tejedora local mostrando su arte">
+                <div class="gallery-item-inner">
+                    <div class="gallery-image-container">
+                        <img src="assets/images/cultura2.jpg" alt="Tejedora local mostrando su arte" loading="lazy">
+                        <div class="gallery-badge">
+                            <i class="fas fa-landmark"></i>
+                        </div>
+                    </div>
+                    <div class="gallery-overlay">
+                        <div class="gallery-content">
+                            <h3>Arte Textil</h3>
+                            <p>Tejedora local preservando técnicas ancestrales</p>
+                            <div class="gallery-actions">
+                                <button class="gallery-zoom" title="Ampliar imagen">
+                                    <i class="fas fa-search-plus"></i>
+                                </button>
+                                <button class="gallery-info" title="Más información">
+                                    <i class="fas fa-info-circle"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Arquitectura -->
+            <div class="gallery-item" data-category="arquitectura" data-image="assets/images/arquitectura1.jpg" data-caption="Ruinas del Templo del Sol">
+                <div class="gallery-item-inner">
+                    <div class="gallery-image-container">
+                        <img src="assets/images/arquitectura1.jpg" alt="Ruinas del Templo del Sol" loading="lazy">
+                        <div class="gallery-badge">
+                            <i class="fas fa-archway"></i>
+                        </div>
+                    </div>
+                    <div class="gallery-overlay">
+                        <div class="gallery-content">
+                            <h3>Templo del Sol</h3>
+                            <p>Ruinas incaicas con vista al lago sagrado</p>
+                            <div class="gallery-actions">
+                                <button class="gallery-zoom" title="Ampliar imagen">
+                                    <i class="fas fa-search-plus"></i>
+                                </button>
+                                <button class="gallery-info" title="Más información">
+                                    <i class="fas fa-info-circle"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="gallery-item" data-category="arquitectura" data-image="assets/images/arquitectura2.jpg" data-caption="Gradas ancestrales de Yumani">
+                <div class="gallery-item-inner">
+                    <div class="gallery-image-container">
+                        <img src="assets/images/arquitectura2.jpg" alt="Gradas ancestrales de Yumani" loading="lazy">
+                        <div class="gallery-badge">
+                            <i class="fas fa-archway"></i>
+                        </div>
+                    </div>
+                    <div class="gallery-overlay">
+                        <div class="gallery-content">
+                            <h3>Gradas de Yumani</h3>
+                            <p>Escalinata precolombina hacia el puerto</p>
+                            <div class="gallery-actions">
+                                <button class="gallery-zoom" title="Ampliar imagen">
+                                    <i class="fas fa-search-plus"></i>
+                                </button>
+                                <button class="gallery-info" title="Más información">
+                                    <i class="fas fa-info-circle"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Gente -->
+            <div class="gallery-item" data-category="gente" data-image="assets/images/gente1.jpg" data-caption="Familia local en su hogar">
+                <div class="gallery-item-inner">
+                    <div class="gallery-image-container">
+                        <img src="assets/images/gente1.jpg" alt="Familia local en su hogar" loading="lazy">
+                        <div class="gallery-badge">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                    <div class="gallery-overlay">
+                        <div class="gallery-content">
+                            <h3>Familia Isleña</h3>
+                            <p>Vida cotidiana en la comunidad local</p>
+                            <div class="gallery-actions">
+                                <button class="gallery-zoom" title="Ampliar imagen">
+                                    <i class="fas fa-search-plus"></i>
+                                </button>
+                                <button class="gallery-info" title="Más información">
+                                    <i class="fas fa-info-circle"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="gallery-item" data-category="gente" data-image="assets/images/gente2.jpg" data-caption="Niños jugando en la orilla">
+                <div class="gallery-item-inner">
+                    <div class="gallery-image-container">
+                        <img src="assets/images/gente2.jpg" alt="Niños jugando en la orilla" loading="lazy">
+                        <div class="gallery-badge">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                    <div class="gallery-overlay">
+                        <div class="gallery-content">
+                            <h3>Infancia Isleña</h3>
+                            <p>Juegos tradicionales junto al lago</p>
+                            <div class="gallery-actions">
+                                <button class="gallery-zoom" title="Ampliar imagen">
+                                    <i class="fas fa-search-plus"></i>
+                                </button>
+                                <button class="gallery-info" title="Más información">
+                                    <i class="fas fa-info-circle"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Flora & Fauna -->
+            <div class="gallery-item" data-category="flora-fauna" data-image="assets/images/flora1.jpg" data-caption="Totora, planta sagrada del Titicaca">
+                <div class="gallery-item-inner">
+                    <div class="gallery-image-container">
+                        <img src="assets/images/flora1.jpg" alt="Totora, planta sagrada del Titicaca" loading="lazy">
+                        <div class="gallery-badge">
+                            <i class="fas fa-leaf"></i>
+                        </div>
+                    </div>
+                    <div class="gallery-overlay">
+                        <div class="gallery-content">
+                            <h3>Totora Sagrada</h3>
+                            <p>Planta utilizada para construir balsas tradicionales</p>
+                            <div class="gallery-actions">
+                                <button class="gallery-zoom" title="Ampliar imagen">
+                                    <i class="fas fa-search-plus"></i>
+                                </button>
+                                <button class="gallery-info" title="Más información">
+                                    <i class="fas fa-info-circle"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="gallery-item" data-category="flora-fauna" data-image="assets/images/fauna1.jpg" data-caption="Aves endémicas del Lago Titicaca">
+                <div class="gallery-item-inner">
+                    <div class="gallery-image-container">
+                        <img src="assets/images/fauna1.jpg" alt="Aves endémicas del Lago Titicaca" loading="lazy">
+                        <div class="gallery-badge">
+                            <i class="fas fa-leaf"></i>
+                        </div>
+                    </div>
+                    <div class="gallery-overlay">
+                        <div class="gallery-content">
+                            <h3>Aves del Titicaca</h3>
+                            <p>Especies únicas que habitan el lago navegable más alto</p>
+                            <div class="gallery-actions">
+                                <button class="gallery-zoom" title="Ampliar imagen">
+                                    <i class="fas fa-search-plus"></i>
+                                </button>
+                                <button class="gallery-info" title="Más información">
+                                    <i class="fas fa-info-circle"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Más imágenes de ejemplo -->
+            <div class="gallery-item" data-category="paisajes" data-image="assets/images/paisaje3.jpg" data-caption="Vista aérea de la Isla del Sol">
+                <div class="gallery-item-inner">
+                    <div class="gallery-image-container">
+                        <img src="assets/images/paisaje3.jpg" alt="Vista aérea de la Isla del Sol" loading="lazy">
+                        <div class="gallery-badge">
+                            <i class="fas fa-mountain"></i>
+                        </div>
+                    </div>
+                    <div class="gallery-overlay">
+                        <div class="gallery-content">
+                            <h3>Vista Aérea</h3>
+                            <p>Perspectiva única desde las alturas</p>
+                            <div class="gallery-actions">
+                                <button class="gallery-zoom" title="Ampliar imagen">
+                                    <i class="fas fa-search-plus"></i>
+                                </button>
+                                <button class="gallery-info" title="Más información">
+                                    <i class="fas fa-info-circle"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="gallery-item" data-category="cultura" data-image="assets/images/cultura3.jpg" data-caption="Músicos tradicionales">
+                <div class="gallery-item-inner">
+                    <div class="gallery-image-container">
+                        <img src="assets/images/cultura3.jpg" alt="Músicos tradicionales" loading="lazy">
+                        <div class="gallery-badge">
+                            <i class="fas fa-landmark"></i>
+                        </div>
+                    </div>
+                    <div class="gallery-overlay">
+                        <div class="gallery-content">
+                            <h3>Música Andina</h3>
+                            <p>Sonidos ancestrales que perduran</p>
+                            <div class="gallery-actions">
+                                <button class="gallery-zoom" title="Ampliar imagen">
+                                    <i class="fas fa-search-plus"></i>
+                                </button>
+                                <button class="gallery-info" title="Más información">
+                                    <i class="fas fa-info-circle"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Controles de Galería -->
+        <div class="gallery-controls" data-aos="fade-up" data-aos-delay="500">
+            <button class="btn btn-gallery" id="load-more">
+                <i class="fas fa-plus-circle"></i>
+                Cargar más imágenes
+            </button>
+            <button class="btn btn-gallery-outline" id="view-all">
+                <i class="fas fa-th"></i>
+                Ver galería completa
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- MODAL DE INFORMACIÓN MEJORADO -->
+<div id="gallery-modal" class="gallery-modal">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h3 id="modal-title">Título de la imagen</h3>
+            <button class="modal-close" id="modal-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-content">
+            <div class="modal-image-container">
+                <img id="modal-image" src="" alt="">
+                <div class="modal-navigation">
+                    <button class="nav-btn" id="prev-image">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="nav-btn" id="next-image">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="modal-info">
+                <div class="modal-description">
+                    <p id="modal-description">Descripción de la imagen</p>
+                </div>
+                <div class="modal-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-calendar"></i>
+                        <span>Fecha: <strong id="modal-date">DD/MM/AAAA</strong></span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Ubicación: <strong id="modal-location">Isla del Sol</strong></span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-tags"></i>
+                        <span>Categoría: <strong id="modal-category">Paisajes</strong></span>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-download">
+                        <i class="fas fa-download"></i>
+                        Descargar
+                    </button>
+                    <button class="btn btn-share">
+                        <i class="fas fa-share-alt"></i>
+                        Compartir
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+  <footer>
+    PROYECTO UNIVERSITARIO/AQUINO-UDABOL - SIG | Isla del Sol © 2025
+  </footer>
+
+  <!-- JavaScript -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <!-- SCRIPT DE CESIUM -->
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.95/Build/Cesium/Cesium.js"></script>
+  <script src="scripts/utils/helpers.js"></script>
+  <script src="scripts/modules/map.js"></script>
+  <script src="scripts/modules/lightbox.js"></script>
+  <!-- SCRIPT CESIUM 3D MEJORADO -->
+  <script src="scripts/modules/cesium-3d.js"></script>
+  <script src="scripts/main.js"></script>
+
+  <!-- Script de inicialización -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🚀 Iniciando experiencia suprema...');
+      
+      // Inicializar animaciones
+      AOS.init({
+        duration: 1000,
+        once: true,
+        offset: 100
+      });
+      
+      // Inicializar ScrollTrigger
+      gsap.registerPlugin(ScrollTrigger);
+      
+      // Animaciones del hero
+      gsap.from('.hero-title', {
+        duration: 1.5,
+        y: 100,
+        opacity: 0,
+        ease: 'power4.out'
+      });
+      
+      // Animaciones al scroll
+      gsap.utils.toArray('.section-title').forEach(title => {
+        gsap.from(title, {
+          scrollTrigger: {
+            trigger: title,
+            start: 'top 80%'
+          },
+          duration: 1,
+          y: 50,
+          opacity: 0,
+          ease: 'power3.out'
+        });
+      });
+      
+      // Inicializar componentes
+      if (typeof InteractiveMap !== 'undefined') {
+        window.interactiveMap = new InteractiveMap();
+      }
+      
+      if (typeof Lightbox !== 'undefined') {
+        window.lightbox = new Lightbox();
+      }
+      
+      // ✅ INICIALIZAR CESIUM 3D SUPREMO
+      if (typeof Cesium3DMap !== 'undefined') {
+        setTimeout(() => {
+          window.cesium3D = new Cesium3DMap();
+          console.log('🎯 Cesium 3D Supremo inicializado');
+        }, 1000);
+      }
+    });
+  </script>
+</body>
+</html>
