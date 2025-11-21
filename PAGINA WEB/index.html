@@ -25,7 +25,7 @@
   <!-- CSS DE CESIUM -->
   <link href="https://cesium.com/downloads/cesiumjs/releases/1.95/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
   
-  <!-- CSS SUPREMO PARA CESIUM -->
+  <!-- CSS SUPREMO PARA CESIUM Y RESPONSIVE -->
   <style>
     /* ===== VARIABLES Y RESET ===== */
     :root {
@@ -43,6 +43,8 @@
       --glass-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
       --blur-effect: blur(25px);
       --neon-glow: 0 0 20px rgba(99, 102, 241, 0.5);
+      --mobile-breakpoint: 768px;
+      --tablet-breakpoint: 1024px;
     }
 
     /* ===== CONTENEDOR PRINCIPAL CESIUM ===== */
@@ -773,42 +775,462 @@
       margin-bottom: 0;
     }
 
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 768px) {
+    /* ===== RESPONSIVE COMPLETO ===== */
+    
+    /* TABLET (768px - 1024px) */
+    @media (max-width: 1024px) {
+      .cesium-frame {
+        height: 600px;
+      }
+      
       .cesium-control-panel {
-        width: 300px;
-        left: 15px;
-        top: 15px;
+        width: 320px;
+        left: 20px;
+        top: 20px;
       }
       
       .cesium-info-panel {
-        width: 320px;
+        width: 340px;
+        right: 20px;
+      }
+      
+      .control-header {
+        padding: 20px;
+      }
+      
+      .layers-list {
+        padding: 15px;
+        max-height: 55vh;
+      }
+      
+      .category-section h4 {
+        font-size: 0.9em;
+        padding: 10px 14px;
+      }
+      
+      .layer-item {
+        padding: 12px;
+      }
+      
+      .layer-text {
+        font-size: 0.95em;
+      }
+    }
+
+    /* MÓVIL GRANDE (576px - 768px) */
+    @media (max-width: 768px) {
+      .cesium-frame {
+        height: 500px;
+        border-radius: 15px;
+      }
+      
+      .cesium-container {
+        margin: 20px 0;
+        border-radius: 15px;
+      }
+      
+      .cesium-control-panel {
+        width: 280px;
+        left: 15px;
+        top: 15px;
+        border-radius: 20px;
+      }
+      
+      .cesium-info-panel {
+        width: 300px;
         right: 15px;
+        border-radius: 20px;
+      }
+      
+      .control-header {
+        padding: 18px;
+      }
+      
+      .control-header h3 {
+        font-size: 1.3em;
+      }
+      
+      .control-buttons {
+        flex-direction: column;
+        gap: 8px;
+      }
+      
+      .btn-control {
+        padding: 10px 15px;
+        font-size: 0.85em;
+      }
+      
+      .layers-list {
+        padding: 12px;
+        max-height: 50vh;
+      }
+      
+      .category-section {
+        margin-bottom: 20px;
+      }
+      
+      .category-section h4 {
+        font-size: 0.85em;
+        padding: 8px 12px;
+        margin-bottom: 12px;
+      }
+      
+      .layer-item {
+        padding: 10px;
+        margin: 6px 0;
+      }
+      
+      .layer-label {
+        gap: 12px;
+      }
+      
+      .layer-color {
+        width: 16px;
+        height: 16px;
+      }
+      
+      .layer-emoji {
+        font-size: 1.2em;
+      }
+      
+      .layer-text {
+        font-size: 0.9em;
+      }
+      
+      .layer-count {
+        font-size: 0.8em;
+        padding: 5px 10px;
+        min-width: 28px;
+      }
+      
+      .panel-footer {
+        padding: 15px;
+      }
+      
+      .system-stats {
+        flex-direction: column;
+        gap: 8px;
+      }
+      
+      .system-stats span {
+        padding: 6px 10px;
+        font-size: 0.85em;
       }
       
       .cesium-controls {
         flex-wrap: wrap;
         justify-content: center;
+        padding: 12px;
+        border-radius: 15px;
+        bottom: 15px;
         max-width: 90%;
       }
       
       .btn-cesium {
         min-width: 100px;
-        font-size: 0.8em;
         padding: 10px 15px;
+        font-size: 0.8em;
+      }
+      
+      .cesium-legend {
+        bottom: 15px;
+        right: 15px;
+        padding: 15px;
+        min-width: 180px;
+      }
+      
+      .cesium-legend h4 {
+        font-size: 1em;
+        margin-bottom: 12px;
+      }
+      
+      .cesium-legend li {
+        font-size: 0.85em;
+      }
+      
+      .cesium-loading {
+        padding: 30px;
+        min-width: 250px;
+      }
+      
+      .cesium-loading i {
+        font-size: 3rem;
+      }
+      
+      .cesium-loading p {
+        font-size: 1.1em;
       }
     }
 
-    @media (max-width: 480px) {
-      .cesium-control-panel,
-      .cesium-info-panel {
-        width: calc(100% - 30px);
-        left: 15px;
-        right: 15px;
+    /* MÓVIL PEQUEÑO (hasta 576px) */
+    @media (max-width: 576px) {
+      .cesium-frame {
+        height: 400px;
+        border-radius: 12px;
       }
       
+      .cesium-container {
+        margin: 15px 0;
+        border-radius: 12px;
+      }
+      
+      .cesium-control-panel {
+        width: calc(100% - 30px);
+        left: 15px;
+        top: 15px;
+        border-radius: 18px;
+      }
+      
+      .cesium-info-panel {
+        width: calc(100% - 30px);
+        right: 15px;
+        border-radius: 18px;
+      }
+      
+      .control-header {
+        padding: 15px;
+      }
+      
+      .control-header h3 {
+        font-size: 1.2em;
+        flex-direction: column;
+        gap: 8px;
+        text-align: center;
+      }
+      
+      .control-buttons {
+        gap: 6px;
+      }
+      
+      .btn-control {
+        padding: 8px 12px;
+        font-size: 0.8em;
+      }
+      
+      .layers-list {
+        padding: 10px;
+        max-height: 45vh;
+      }
+      
+      .category-section {
+        margin-bottom: 15px;
+      }
+      
+      .category-section h4 {
+        font-size: 0.8em;
+        padding: 6px 10px;
+        margin-bottom: 10px;
+        flex-direction: column;
+        gap: 5px;
+        text-align: center;
+      }
+      
+      .layer-item {
+        padding: 8px;
+        margin: 4px 0;
+        border-radius: 12px;
+      }
+      
+      .layer-label {
+        gap: 10px;
+      }
+      
+      .layer-color {
+        width: 14px;
+        height: 14px;
+      }
+      
+      .layer-emoji {
+        font-size: 1.1em;
+      }
+      
+      .layer-text {
+        font-size: 0.85em;
+      }
+      
+      .layer-count {
+        font-size: 0.75em;
+        padding: 4px 8px;
+        min-width: 24px;
+      }
+      
+      .panel-footer {
+        padding: 12px;
+      }
+      
+      .system-stats span {
+        padding: 5px 8px;
+        font-size: 0.8em;
+      }
+      
+      .cesium-controls {
+        padding: 10px;
+        border-radius: 12px;
+        bottom: 10px;
+        gap: 8px;
+      }
+      
+      .btn-cesium {
+        min-width: 90px;
+        padding: 8px 12px;
+        font-size: 0.75em;
+        gap: 5px;
+      }
+      
+      .btn-cesium i {
+        font-size: 1em;
+      }
+      
+      .cesium-legend {
+        bottom: 10px;
+        right: 10px;
+        padding: 12px;
+        min-width: 160px;
+      }
+      
+      .cesium-legend h4 {
+        font-size: 0.9em;
+        margin-bottom: 10px;
+      }
+      
+      .cesium-legend li {
+        font-size: 0.8em;
+        gap: 8px;
+      }
+      
+      .cesium-loading {
+        padding: 25px;
+        min-width: 200px;
+        border-radius: 15px;
+      }
+      
+      .cesium-loading i {
+        font-size: 2.5rem;
+      }
+      
+      .cesium-loading p {
+        font-size: 1em;
+      }
+      
+      .loading-spinner {
+        width: 40px;
+        height: 40px;
+      }
+      
+      /* Ajustes para navegación móvil */
+      .info-header {
+        padding: 20px;
+      }
+      
+      .info-header h3 {
+        font-size: 1.2em;
+      }
+      
+      .info-content {
+        padding: 20px;
+        max-height: calc(85vh - 80px);
+      }
+      
+      .no-selection {
+        padding: 40px 20px;
+      }
+      
+      .no-selection i {
+        font-size: 3rem;
+      }
+      
+      .no-selection p {
+        font-size: 1em;
+      }
+    }
+
+    /* MÓVIL MUY PEQUEÑO (hasta 360px) */
+    @media (max-width: 360px) {
       .cesium-frame {
-        height: 600px;
+        height: 350px;
+      }
+      
+      .cesium-control-panel,
+      .cesium-info-panel {
+        width: calc(100% - 20px);
+        left: 10px;
+        right: 10px;
+      }
+      
+      .layer-label {
+        gap: 8px;
+      }
+      
+      .layer-text {
+        font-size: 0.8em;
+      }
+      
+      .layer-emoji {
+        font-size: 1em;
+      }
+      
+      .cesium-controls {
+        max-width: 95%;
+      }
+      
+      .btn-cesium {
+        min-width: 80px;
+        padding: 6px 10px;
+        font-size: 0.7em;
+      }
+    }
+
+    /* ORIENTACIÓN HORIZONTAL EN MÓVIL */
+    @media (max-height: 500px) and (orientation: landscape) {
+      .cesium-frame {
+        height: 300px;
+      }
+      
+      .cesium-control-panel {
+        max-height: 80vh;
+      }
+      
+      .layers-list {
+        max-height: 40vh;
+      }
+      
+      .cesium-info-panel {
+        max-height: 80vh;
+      }
+      
+      .info-content {
+        max-height: 60vh;
+      }
+    }
+
+    /* MEJORAS DE USABILIDAD TÁCTIL */
+    @media (hover: none) and (pointer: coarse) {
+      .layer-item:hover {
+        transform: none;
+      }
+      
+      .btn-control:hover,
+      .btn-cesium:hover {
+        transform: none;
+      }
+      
+      .cesium-control-panel:hover {
+        transform: none;
+      }
+      
+      /* Mejorar tamaño de elementos táctiles */
+      .layer-item {
+        min-height: 44px;
+      }
+      
+      .btn-control,
+      .btn-cesium {
+        min-height: 44px;
+      }
+      
+      .layer-color {
+        width: 20px;
+        height: 20px;
       }
     }
 
@@ -1473,8 +1895,49 @@
           console.log('🎯 Cesium 3D Supremo inicializado');
         }, 1000);
       }
+
+      // MEJORAS DE USABILIDAD MÓVIL
+      function setupMobileEnhancements() {
+        // Detectar dispositivo táctil
+        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        
+        if (isTouchDevice) {
+          document.body.classList.add('touch-device');
+          
+          // Mejorar navegación táctil
+          const navLinks = document.querySelectorAll('.nav-link');
+          navLinks.forEach(link => {
+            link.style.minHeight = '44px';
+            link.style.padding = '12px 16px';
+          });
+          
+          // Mejorar botones táctiles
+          const buttons = document.querySelectorAll('button, .btn, .filter-btn');
+          buttons.forEach(btn => {
+            btn.style.minHeight = '44px';
+            btn.style.padding = '12px 16px';
+          });
+        }
+        
+        // Manejar orientación del dispositivo
+        function handleOrientation() {
+          if (window.innerHeight > window.innerWidth) {
+            document.body.classList.add('portrait');
+            document.body.classList.remove('landscape');
+          } else {
+            document.body.classList.add('landscape');
+            document.body.classList.remove('portrait');
+          }
+        }
+        
+        window.addEventListener('orientationchange', handleOrientation);
+        window.addEventListener('resize', handleOrientation);
+        handleOrientation();
+      }
+      
+      setupMobileEnhancements();
     });
   </script>
 </body>
-
 </html>
+
