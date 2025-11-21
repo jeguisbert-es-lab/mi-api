@@ -1,4 +1,4 @@
-// assets/scripts/modules/cesium-3d-simple.js - VERSIÓN MEJORADA CON CACHE Y SERVICIOS CORREGIDOS
+// assets/scripts/modules/cesium-3d-simple.js - VERSIÓN COMPLETA MEJORADA CON COLORES CORREGIDOS
 class Cesium3DMap {
     constructor() {
         this.viewer = null;
@@ -7,9 +7,7 @@ class Cesium3DMap {
         this.infoPanel = null;
         this.isMobile = window.innerWidth <= 768;
         
-        // API con versionado para evitar cache
         this.API_BASE_URL = 'https://mi-api-6jmx.onrender.com/api';
-        this.API_VERSION = 'v1.0.3'; // Cambiar esta versión cuando hagas modificaciones
         
         this.init();
     }
@@ -50,12 +48,6 @@ class Cesium3DMap {
             console.error('❌ Error inicializando Cesium:', error);
             this.showError('Error inicializando mapa 3D');
         }
-    }
-
-    // NUEVO MÉTODO: Obtener URL con parámetros anti-cache
-    getApiUrl(endpoint) {
-        const timestamp = new Date().getTime();
-        return `${this.API_BASE_URL}/${endpoint}?v=${this.API_VERSION}&t=${timestamp}`;
     }
 
     handleResize() {
@@ -123,7 +115,6 @@ class Cesium3DMap {
                 <div class="control-buttons">
                     <button id="toggleAllLayers" class="btn-control">📁 Todas</button>
                     <button id="clearAllLayers" class="btn-control">🗑️ Limpiar</button>
-                    <button id="forceReload" class="btn-control" title="Forzar recarga de datos">🔄</button>
                 </div>
             </div>
             
@@ -169,9 +160,6 @@ class Cesium3DMap {
                         <span id="totalElements">Total: 0 elementos</span>
                         <span id="activeLayers">Activas: 0 capas</span>
                     </div>
-                    <div class="cache-info">
-                        <span id="cacheStatus">Versión: ${this.API_VERSION}</span>
-                    </div>
                 </div>
             </div>
         `;
@@ -188,7 +176,6 @@ class Cesium3DMap {
                     <span class="layer-emoji">${emoji}</span>
                     <span class="layer-text">${label}</span>
                     <span class="layer-count" id="count-${layerName}">0</span>
-                    <span class="layer-status" id="status-${layerName}"></span>
                 </label>
             </div>
         `;
@@ -356,7 +343,6 @@ class Cesium3DMap {
 
                 .layer-item {
                     margin-bottom: 8px;
-                    position: relative;
                 }
 
                 .layer-item input[type="checkbox"] {
@@ -419,37 +405,6 @@ class Cesium3DMap {
                     min-width: 30px;
                     text-align: center;
                     transition: all 0.3s ease;
-                    margin-right: 8px;
-                }
-
-                .layer-status {
-                    font-size: 10px;
-                    padding: 2px 6px;
-                    border-radius: 10px;
-                    background: #4a5568;
-                    color: #cbd5e0;
-                }
-
-                .layer-status.loading {
-                    background: #d69e2e;
-                    color: white;
-                    animation: pulse 1.5s infinite;
-                }
-
-                .layer-status.error {
-                    background: #e53e3e;
-                    color: white;
-                }
-
-                .layer-status.success {
-                    background: #38a169;
-                    color: white;
-                }
-
-                @keyframes pulse {
-                    0% { opacity: 1; }
-                    50% { opacity: 0.5; }
-                    100% { opacity: 1; }
                 }
 
                 input[type="checkbox"]:checked + .layer-label .layer-count {
@@ -469,14 +424,6 @@ class Cesium3DMap {
                     justify-content: space-between;
                     font-size: 12px;
                     color: #cbd5e0;
-                    margin-bottom: 8px;
-                }
-
-                .cache-info {
-                    display: flex;
-                    justify-content: center;
-                    font-size: 10px;
-                    color: #a0aec0;
                 }
 
                 /* PANEL DE INFORMACIÓN MEJORADO CON MEJOR CONTRASTE */
@@ -1007,7 +954,6 @@ class Cesium3DMap {
 
         document.getElementById('toggleAllLayers').addEventListener('click', () => this.toggleAllLayers());
         document.getElementById('clearAllLayers').addEventListener('click', () => this.clearAllLayers());
-        document.getElementById('forceReload').addEventListener('click', () => this.forceReloadData());
         document.getElementById('closeInfo').addEventListener('click', () => this.hideInfoPanel());
 
         const mobileTogglePanel = document.getElementById('mobileTogglePanel');
@@ -1027,26 +973,6 @@ class Cesium3DMap {
                 await this.showEntityInfo(pickedObject.id);
             }
         }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
-    }
-
-    // NUEVO MÉTODO: Forzar recarga de datos
-    async forceReloadData() {
-        console.log('🔄 Forzando recarga de datos...');
-        
-        // Limpiar datos existentes
-        this.dataSources.forEach((dataSource, layerName) => {
-            this.viewer.dataSources.remove(dataSource);
-        });
-        this.dataSources.clear();
-        this.capasConfig.clear();
-        
-        // Mostrar indicador de carga
-        this.showNotification('Recargando datos...', 'info');
-        
-        // Recargar todas las capas
-        await this.loadAllLayers();
-        
-        this.showNotification('Datos recargados correctamente', 'success');
     }
 
     toggleMobilePanel() {
@@ -1084,10 +1010,8 @@ class Cesium3DMap {
                 await this.loadLayer(layerName);
                 loadedCount++;
                 console.log(`✅ ${layerName} cargado (${loadedCount}/${totalLayers})`);
-                this.updateLayerStatus(layerName, 'success', '✓');
             } catch (error) {
                 console.error(`❌ Error cargando ${layerName}:`, error);
-                this.updateLayerStatus(layerName, 'error', '✗');
             }
             await new Promise(resolve => setTimeout(resolve, 200));
         }
@@ -1100,18 +1024,8 @@ class Cesium3DMap {
     async loadLayer(layerName) {
         try {
             console.log(`🔄 Cargando capa 3D: ${layerName}`);
-            this.updateLayerStatus(layerName, 'loading', '...');
             
-            // USAR URL CON PARÁMETROS ANTI-CACHE
-            const url = this.getApiUrl(`capas/${layerName}`);
-            console.log(`📡 URL de carga: ${url}`);
-            
-            const response = await fetch(url, {
-                headers: {
-                    'Cache-Control': 'no-cache',
-                    'Pragma': 'no-cache'
-                }
-            });
+            const response = await fetch(`${this.API_BASE_URL}/capas/${layerName}`);
             
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -1122,7 +1036,6 @@ class Cesium3DMap {
             if (!data.features || data.features.length === 0) {
                 console.warn(`⚠️ ${layerName}: Sin datos disponibles`);
                 this.updateLayerCount(layerName, 0);
-                this.updateLayerStatus(layerName, 'success', '0');
                 return;
             }
 
@@ -1146,17 +1059,7 @@ class Cesium3DMap {
         } catch (error) {
             console.error(`❌ Error cargando ${layerName}:`, error);
             this.updateLayerCount(layerName, 0);
-            this.updateLayerStatus(layerName, 'error', '!');
             throw error;
-        }
-    }
-
-    // NUEVO MÉTODO: Actualizar estado de capa
-    updateLayerStatus(layerName, status, text) {
-        const statusElement = document.getElementById(`status-${layerName}`);
-        if (statusElement) {
-            statusElement.textContent = text;
-            statusElement.className = `layer-status ${status}`;
         }
     }
 
@@ -1719,8 +1622,7 @@ class Cesium3DMap {
                     return null;
             }
 
-            // USAR URL CON PARÁMETROS ANTI-CACHE
-            const response = await fetch(this.getApiUrl(endpoint));
+            const response = await fetch(`${this.API_BASE_URL}/${endpoint}`);
             
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);
@@ -1809,38 +1711,12 @@ class Cesium3DMap {
 
     async checkAPIStatus() {
         try {
-            const response = await fetch(this.getApiUrl('status'));
+            const response = await fetch(`${this.API_BASE_URL}/status`);
             return response.ok;
         } catch (error) {
             console.error('❌ Error conectando con API:', error);
             return false;
         }
-    }
-
-    // NUEVO MÉTODO: Mostrar notificaciones
-    showNotification(message, type = 'info') {
-        const notification = document.createElement('div');
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: ${type === 'error' ? '#e53e3e' : type === 'success' ? '#38a169' : '#3182ce'};
-            color: white;
-            padding: 15px 20px;
-            border-radius: 8px;
-            z-index: 10000;
-            max-width: 300px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            animation: slideInRight 0.3s ease-out;
-        `;
-        notification.innerHTML = `<strong>${type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️'} ${message}</strong>`;
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.style.animation = 'slideOutRight 0.3s ease-in';
-            setTimeout(() => notification.remove(), 300);
-        }, 3000);
     }
 
     getDefaultName(layerType) {
@@ -1864,7 +1740,16 @@ class Cesium3DMap {
     }
 
     showError(message) {
-        this.showNotification(message, 'error');
+        const errorDiv = document.createElement('div');
+        errorDiv.style.cssText = `
+            position: absolute; top: 20px; left: 20px;
+            background: rgba(239,68,68,0.95); color: white;
+            padding: 15px; border-radius: 8px; z-index: 10000;
+            max-width: 400px; backdrop-filter: blur(10px);
+        `;
+        errorDiv.innerHTML = `<strong>❌ Error:</strong> ${message}`;
+        this.viewer.container.appendChild(errorDiv);
+        setTimeout(() => errorDiv.remove(), 5000);
     }
 
     showGlobalError(message) {
@@ -1883,38 +1768,9 @@ function initCesium3D() {
     }
 }
 
-// Agregar estilos de animación para notificaciones
-const notificationStyles = document.createElement('style');
-notificationStyles.textContent = `
-    @keyframes slideInRight {
-        from {
-            opacity: 0;
-            transform: translateX(100%);
-        }
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-    }
-    
-    @keyframes slideOutRight {
-        from {
-            opacity: 1;
-            transform: translateX(0);
-        }
-        to {
-            opacity: 0;
-            transform: translateX(100%);
-        }
-    }
-`;
-document.head.appendChild(notificationStyles);
-
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initCesium3D);
 } else {
     setTimeout(initCesium3D, 1000);
-}
-
-
+} 
 
